@@ -1,11 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
-  env: {
+/**   env: {
     // Replace below URL with your current Domain 
     API_PROD_URL: "http://localhost:3000/api/",
     storageURL: "http://localhost:3000/assets", 
   },
+  */
   redirects: async () => {
     return [
       {
