@@ -1,15 +1,15 @@
 "use client";
-import SearchableSelectInput from "@/components/inputFields/SearchableSelectInput";
-import AllProductTable from "@/components/product/AllProductTable";
-import {BrandAPI,Category,ProductExportAPI,ProductImportAPI,product,store,} from "@/utils/axiosUtils/API";
+import SearchableSelectInput from "../../../components/inputFields/SearchableSelectInput";
+import AllProductTable from "../../../components/product/AllProductTable";
+import {BrandAPI,Category,ProductExportAPI,ProductImportAPI,product,store,} from "../../../utils/axiosUtils/API";
 import { Form, Formik } from "formik";
 import { useEffect, useState } from "react";
 import { Col } from "reactstrap";
-import request from "@/utils/axiosUtils";
-import MultiSelectField from "@/components/inputFields/MultiSelectField";
+import request from "../../../utils/axiosUtils";
+import MultiSelectField from "../../../components/inputFields/MultiSelectField";
 
 import { useRouter } from "next/navigation";
-import useCustomQuery from "@/utils/hooks/useCustomQuery";
+import useCustomQuery from "../../../utils/hooks/useCustomQuery";
 
 const AllUsers = () => {
   const [isCheck, setIsCheck] = useState([]);

@@ -1,5 +1,5 @@
 'use client'
-import AttachmentContain from "@/components/attachment";
+import AttachmentContain from "../../../components/attachment";
 
 const Media = () => {
     return <AttachmentContain isAttachment={true} />;

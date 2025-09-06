@@ -95,10 +95,11 @@ export async function POST(request) {
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
+
     const action = searchParams.get("action");
     const otp = Number(searchParams.get("otp"));
-//    let random = Math.floor(100000 + Math.random() * 900000);
-//Requires email as query param: /api/user?action=forgotPassword&email=test@example.com
+    //    let random = Math.floor(100000 + Math.random() * 900000);
+    //Requires email as query param: /api/user?action=forgotPassword&email=test@example.com
     let random = 123456;
     if (action === "forgotPassword") {
       const email = searchParams.get("email");
@@ -122,9 +123,10 @@ export async function GET(request) {
         email: user.email,
       });
     }
-//Requires userId as query param: /api/user?action=activateUser&email=test@test.com&otp=134d
+    //Requires userId as query param: /api/user?action=activateUser&email=test@test.com&otp=134d
     if (action === "activateUser") {
       const email = searchParams.get("email");
+      console.log('............',email, action, otp)
       if (!email) {
         return NextResponse.json({ error: "Email is required" }, { status: 400 });
       }
@@ -139,20 +141,20 @@ export async function GET(request) {
       }
 
       // Activate user
-      if(otp > 0 && user.otp == otp)
-      {
+      if (otp > 0 && user.otp == otp) {
         await prisma.user.update({
-        where: { id: parseInt(user.id) },
-        data: { status: 1 },
-      });
-      return NextResponse.json({ message: MESSAGES.USER_ACTIVATED });
-    } 
-    return NextResponse.json({ message: MESSAGES.USER_ACTIVATION_FAILED });
+          where: { id: parseInt(user.id) },
+          data: { status: 1 },
+        });
+        return NextResponse.json({ message: MESSAGES.USER_ACTIVATED }, {status:200});
+      }
+      return NextResponse.json({ message: MESSAGES.USER_ACTIVATION_FAILED });
     }
 
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   } catch (error) {
     console.error("[USER_GET_ERROR]", error);
+    console.log('............', error);
     return NextResponse.json({ error: MESSAGES.SERVER_ERROR }, { status: 500 });
   }
 }

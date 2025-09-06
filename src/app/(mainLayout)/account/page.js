@@ -1,6 +1,6 @@
 "use client"
-import AccountForm from "@/components/account"
-import FormWrapper from "@/utils/hoc/FormWrapper"
+import AccountForm from "../../../components/account"
+import FormWrapper from "../../../utils/hoc/FormWrapper"
 
 const Account = () => {
     return (

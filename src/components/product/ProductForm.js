@@ -1,6 +1,6 @@
-import TabForProduct from "@/components/product/widgets/TabForProduct";
-import Btn from "@/elements/buttons/Btn";
-import AccountContext from "@/helper/accountContext";
+import TabForProduct from "../../components/product/widgets/TabForProduct";
+import Btn from "../../elements/buttons/Btn";
+import AccountContext from "../../helper/accountContext";
 import { Form, Formik } from "formik";
 import { useRouter } from "next/navigation";
 import { useCallback, useContext, useEffect, useState } from "react";
@@ -14,7 +14,7 @@ import Loader from "../commonComponent/Loader";
 import AllProductTabs from "./widgets/AllProductTabs";
 import { ProductInitValues, ProductValidationSchema } from "./widgets/ProductObjects";
 import ProductSubmitFunction from "./widgets/ProductSubmitFunction";
-import useCustomQuery from "@/utils/hooks/useCustomQuery";
+import useCustomQuery from "../../utils/hooks/useCustomQuery";
 
 const ProductForm = ({ updateId, title, buttonName, saveButton, setSaveButton }) => {
   const router = useRouter();

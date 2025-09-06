@@ -1,4 +1,4 @@
-import Pluralize from "@/utils/customFunctions/Pluralize";
+import Pluralize from "../../utils/customFunctions/Pluralize";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";

@@ -3,8 +3,8 @@ import FileUploadField from "../inputFields/FileUploadField";
 import { getHelperText } from "../../utils/customFunctions/getHelperText";
 import CheckBoxField from "../inputFields/CheckBoxField";
 import SearchableSelectInput from "../inputFields/SearchableSelectInput";
-import {waterMarkPosition} from "@/data/TabTitleList"
-import { mediaConfig } from "@/data/MediaConfig";
+import {waterMarkPosition} from "../../data/TabTitleList"
+import { mediaConfig } from "../../data/MediaConfig";
 
 const ImagesTab = ({ values, setFieldValue, errors, updateId }) => {
   return (

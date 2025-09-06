@@ -1,4 +1,4 @@
-import { mimeImageMapping } from "@/data/MimeImageType";
+import { mimeImageMapping } from "../../data/MimeImageType";
 import { ErrorMessage } from "formik";
 import Image from "next/image";
 import { useEffect, useState } from "react";

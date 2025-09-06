@@ -11,10 +11,10 @@ import FileUploadField from "../inputFields/FileUploadField";
 import MultiSelectField from "../inputFields/MultiSelectField";
 import SimpleInputField from "../inputFields/SimpleInputField";
 
-import { mediaConfig } from "@/data/MediaConfig";
+import { mediaConfig } from "../../data/MediaConfig";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import useCustomQuery from "@/utils/hooks/useCustomQuery";
+import useCustomQuery from "../../utils/hooks/useCustomQuery";
 
 const CategoryForm = ({ setResetData, updateId, loading, type, buttonName }) => {
   const { t } = useTranslation("common");

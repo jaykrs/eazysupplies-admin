@@ -1,4 +1,4 @@
-import useOutsideDropdown from "@/utils/hooks/customHooks/useOutsideDropdown";
+import useOutsideDropdown from "../../utils/hooks/customHooks/useOutsideDropdown";
 import Cookies from "js-cookie";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -10,6 +10,7 @@ import Avatar from "../../components/commonComponent/Avatar";
 import ShowModal from "../../elements/alerts&Modals/Modal";
 import Btn from "../../elements/buttons/Btn";
 import AccountContext from "../../helper/accountContext";
+import axios from "axios";
 
 const ProfileNav = () => {
   const { ref, isComponentVisible, setIsComponentVisible } = useOutsideDropdown(false);
@@ -20,13 +21,17 @@ const ProfileNav = () => {
   const { accountData, accountContextData } = useContext(AccountContext);
   const isStateData = (accountContextData.image && Object?.keys(accountContextData.image).length > 0) || accountContextData.image == "";
 
-  const handleLogout = () => {
-    Cookies.remove("uat");
-    Cookies.remove("ue");
-    Cookies.remove("account");
-    localStorage.removeItem("account");
-    localStorage.removeItem("role");
-    router.push(`/auth/login`);
+  const handleLogout = async () => {
+
+    let res = await axios.post('/api/auth/logout', { withCredentials: true });
+    if (res.status === 200) {
+      router.push(`/auth/login`);
+    }
+    // Cookies.remove("uat");
+    // Cookies.remove("ue");
+    // Cookies.remove("account");
+    // localStorage.removeItem("account");
+    // localStorage.removeItem("role");
   };
   return (
     <>

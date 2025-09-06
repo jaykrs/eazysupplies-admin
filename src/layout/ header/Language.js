@@ -1,4 +1,4 @@
-import useOutsideDropdown from "@/utils/hooks/customHooks/useOutsideDropdown";
+import useOutsideDropdown from "../../utils/hooks/customHooks/useOutsideDropdown";
 import i18next from "i18next";
 import { useRouter } from "next/navigation";
 import { useState } from "react";

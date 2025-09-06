@@ -1,11 +1,11 @@
-import TanstackWrapper from "@/layout/TanstackWrapper";
+import TanstackWrapper from "../layout/TanstackWrapper";
 import { dir } from "i18next";
 import NextTopLoader from "nextjs-toploader";
 import { ToastContainer } from "react-toastify";
 import "../../public/assets/scss/app.scss";
 import { I18nProvider } from "./i18n/i18n-context";
 import { detectLanguage } from "./i18n/server";
-import ErrorBoundary from "@/layout/ErrorBoundary";
+import ErrorBoundary from "../layout/ErrorBoundary";
 
 export async function generateMetadata() {
   const settingData = await fetch(`${process.env.API_PROD_URL}/settings`)

@@ -56,6 +56,8 @@ export async function POST(request) {
       phone,
     } = body;
 
+    console.log('body', body);
+
     // Validate required fields
     if (!name || !email || !password || !phone ||!countryCode) {
       return NextResponse.json(
@@ -90,7 +92,7 @@ export async function POST(request) {
         email,
         password: hashedPassword,
         countryCode,
-        phone,
+        phone: `${phone}`,
         status: 0,
         roleId: userRole.id,
         otp: random

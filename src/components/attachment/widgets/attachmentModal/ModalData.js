@@ -1,5 +1,5 @@
-import NoDataFound from "@/components/commonComponent/NoDataFound";
-import { mimeImageMapping } from "@/data/MimeImageType";
+import NoDataFound from "../../../../components/commonComponent/NoDataFound";
+import { mimeImageMapping } from "../../../../data/MimeImageType";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Input, Label } from "reactstrap";

@@ -7,9 +7,9 @@ import SearchableSelectInput from "../inputFields/SearchableSelectInput";
 import DescriptionInput from "../widgets/DescriptionInput";
 import SettingContext from "../../helper/settingContext";
 import { useTranslation } from "react-i18next";
-import AccountContext from "@/helper/accountContext";
+import AccountContext from "../../helper/accountContext";
 import { useRouter } from "next/navigation";
-import useCustomQuery from "@/utils/hooks/useCustomQuery";
+import useCustomQuery from "../../utils/hooks/useCustomQuery";
 
 const GeneralTab = ({ values, setFieldValue, updateId }) => {
   const { t } = useTranslation("common");

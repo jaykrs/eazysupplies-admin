@@ -1,8 +1,8 @@
 "use client"
 import React, { useState } from "react";
 import { Col } from "reactstrap";
-import { UserExportAPI, UserImportAPI, user } from "@/utils/axiosUtils/API";
-import AllUsersTable from "@/components/user/AllUsersTable";
+import { UserExportAPI, UserImportAPI, user } from "../../../utils/axiosUtils/API";
+import AllUsersTable from "../../../components/user/AllUsersTable";
 
 const AllUsers = () => {
   const [isCheck, setIsCheck] = useState([]);

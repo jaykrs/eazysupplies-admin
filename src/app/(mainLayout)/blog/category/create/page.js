@@ -1,11 +1,11 @@
 'use client'
-import TitleWithDropDown from '@/components/common/TitleWithDropDown';
-import CategoryForm from '@/components/category/CategoryForm';
-import TreeForm from '@/components/category/TreeForm';
-import request from '@/utils/axiosUtils';
-import { Category } from '@/utils/axiosUtils/API';
-import SuccessHandle from '@/utils/customFunctions/SuccessHandle';
-import useCustomMutation from '@/utils/hooks/useCustomMutation';
+import TitleWithDropDown from '../../../../../components/common/TitleWithDropDown';
+import CategoryForm from '../../../../../components/category/CategoryForm';
+import TreeForm from '../../../../../components/category/TreeForm';
+import request from '../../../../../utils/axiosUtils';
+import { Category } from '../../../../../utils/axiosUtils/API';
+import SuccessHandle from '../../../../../utils/customFunctions/SuccessHandle';
+import useCustomMutation from '../../../../../utils/hooks/useCustomMutation';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from "react-i18next";

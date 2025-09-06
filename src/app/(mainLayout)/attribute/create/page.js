@@ -1,8 +1,8 @@
 "use client";
-import AttributeForm from "@/components/attribute/AttributeForm";
-import { attribute } from "@/utils/axiosUtils/API";
-import FormWrapper from "@/utils/hoc/FormWrapper";
-import useCreate from "@/utils/hooks/useCreate";
+import AttributeForm from "../../../../components/attribute/AttributeForm";
+import { attribute } from "../../../../utils/axiosUtils/API";
+import FormWrapper from "../../../../utils/hoc/FormWrapper";
+import useCreate from "../../../../utils/hooks/useCreate";
 
 const AttributeCreate = () => {
   const { mutate, isLoading } = useCreate(attribute, false, `/attribute`);

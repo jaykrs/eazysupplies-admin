@@ -1,6 +1,6 @@
-import TableWrapper from "@/utils/hoc/TableWrapper";
+import TableWrapper from "../../utils/hoc/TableWrapper";
 import ShowTable from "../table/ShowTable";
-import usePermissionCheck from "@/utils/hooks/usePermissionCheck";
+import usePermissionCheck from "../../utils/hooks/usePermissionCheck";
 
 const AllRoles = ({ data, ...props }) => {
   const [edit, destroy] = usePermissionCheck(["edit", "destroy"]);

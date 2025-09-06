@@ -6,7 +6,7 @@ import Loader from "../commonComponent/Loader";
 import usePermissionCheck from "../../utils/hooks/usePermissionCheck";
 import AccountContext from "../../helper/accountContext";
 import { useTranslation } from "react-i18next";
-import { placeHolderImage } from "@/data/CommonPath";
+import { placeHolderImage } from "../../data/CommonPath";
 
 const AllProductTable = ({ data, ...props }) => {
   

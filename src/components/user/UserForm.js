@@ -8,7 +8,7 @@ import Loader from "../commonComponent/Loader";
 import UserAddress from "./widgets/UserAddress";
 import CreateUser from "./widgets/CreateUser";
 import { useRouter } from "next/navigation";
-import useCustomQuery from "@/utils/hooks/useCustomQuery";
+import useCustomQuery from "../../utils/hooks/useCustomQuery";
 
 const UserForm = ({ mutate, loading, updateId, fixedRole, noRoleField, addAddress, type, buttonName }) => {
   const router = useRouter();

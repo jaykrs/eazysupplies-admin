@@ -1,10 +1,10 @@
 "use client";
-import TitleWithDropDown from "@/components/common/TitleWithDropDown";
-import CategoryForm from "@/components/category/CategoryForm";
-import TreeForm from "@/components/category/TreeForm";
-import { Category, CategoryExportAPI, CategoryImportAPI } from "@/utils/axiosUtils/API";
-import useCreate from "@/utils/hooks/useCreate";
-import usePermissionCheck from "@/utils/hooks/usePermissionCheck";
+import TitleWithDropDown from "../../../components/common/TitleWithDropDown";
+import CategoryForm from "../../../components/category/CategoryForm";
+import TreeForm from "../../../components/category/TreeForm";
+import { Category, CategoryExportAPI, CategoryImportAPI } from "../../../utils/axiosUtils/API";
+import useCreate from "../../../utils/hooks/useCreate";
+import usePermissionCheck from "../../../utils/hooks/usePermissionCheck";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { RiLockLine } from "react-icons/ri";

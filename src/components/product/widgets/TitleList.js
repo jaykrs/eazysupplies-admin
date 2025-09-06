@@ -1,4 +1,4 @@
-import { ProductTabTitleListData } from "@/data/TabTitleList";
+import { ProductTabTitleListData } from "../../../data/TabTitleList";
 
 export const generateTitleList = (values) => {
   const filteredTabs = ProductTabTitleListData.filter((tab) => {

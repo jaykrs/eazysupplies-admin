@@ -1,4 +1,4 @@
-import useOutsideDropdown from "@/utils/hooks/customHooks/useOutsideDropdown";
+import useOutsideDropdown from "../../utils/hooks/customHooks/useOutsideDropdown";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { FaChevronDown } from "react-icons/fa";

@@ -18,7 +18,7 @@ import ModalButton from "./ModalButton";
 import ModalData from "./ModalData";
 import ModalNav from "./ModalNav";
 import { useRouter } from "next/navigation";
-import useCustomQuery from "@/utils/hooks/useCustomQuery";
+import useCustomQuery from "../../../../utils/hooks/useCustomQuery";
 
 const AttachmentModal = (props) => {
     const { modal, setModal, setFieldValue, name, setSelectedImage, isAttachment, multiple, values, showImage, redirectToTabs, noAPICall ,selectedImage ,paramsProps } = props

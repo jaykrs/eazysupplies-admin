@@ -1,4 +1,4 @@
-import useOutsideDropdown from "@/utils/hooks/customHooks/useOutsideDropdown";
+import useOutsideDropdown from "../../utils/hooks/customHooks/useOutsideDropdown";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useContext, useEffect } from "react";
@@ -7,7 +7,7 @@ import { RiNotificationLine, RiRecordCircleLine } from "react-icons/ri";
 import BadgeContext from "../../helper/badgeContext";
 import request from "../../utils/axiosUtils";
 import { NotificationsAPI } from "../../utils/axiosUtils/API";
-import useCustomQuery from "@/utils/hooks/useCustomQuery";
+import useCustomQuery from "../../utils/hooks/useCustomQuery";
 
 const NotificationBox = () => {
   const { ref, isComponentVisible, setIsComponentVisible } = useOutsideDropdown(false);

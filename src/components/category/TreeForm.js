@@ -6,7 +6,7 @@ import SearchCategory from "./widgets/SearchCategory";
 import Loader from "../commonComponent/Loader";
 import CategoryContext from "../../helper/categoryContext";
 import { useRouter } from "next/navigation";
-import useCustomQuery from "@/utils/hooks/useCustomQuery";
+import useCustomQuery from "../../utils/hooks/useCustomQuery";
 
 const TreeForm = forwardRef(({ type, isLoading: loading }, ref) => {
   const [search, setSearch] = useState("")

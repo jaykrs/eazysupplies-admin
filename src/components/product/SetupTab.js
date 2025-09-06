@@ -8,7 +8,7 @@ import MultiSelectField from "../inputFields/MultiSelectField.js";
 import SearchableSelectInput from "../inputFields/SearchableSelectInput.js";
 import SimpleInputField from "../inputFields/SimpleInputField.js";
 import ProductDateRangePicker from "./widgets/DateRangePicker.js";
-import useCustomQuery from "@/utils/hooks/useCustomQuery.js";
+import useCustomQuery from "../../utils/hooks/useCustomQuery.js";
 
 const SetupTab = ({ values, setFieldValue, errors, updateId }) => {
   const { t } = useTranslation("common");

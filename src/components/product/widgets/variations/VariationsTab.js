@@ -1,4 +1,4 @@
-import { attribute } from "@/utils/axiosUtils/API";
+import { attribute } from "../../../../utils/axiosUtils/API";
 import { useEffect } from "react";
 import Btn from "../../../../elements/buttons/Btn";
 import request from "../../../../utils/axiosUtils";
@@ -7,7 +7,7 @@ import getStringId from "../../../../utils/customFunctions/getStringId";
 import VariationsForm from "./VariationsForm"
 import VariationTop from "./VariationTop"
 import { useRouter } from "next/navigation";
-import useCustomQuery from "@/utils/hooks/useCustomQuery";
+import useCustomQuery from "../../../../utils/hooks/useCustomQuery";
 
 const VariationsTab = ({ values, setFieldValue, errors, updateId }) => {
   const router = useRouter();

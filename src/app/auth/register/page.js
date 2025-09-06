@@ -1,11 +1,11 @@
 "use client";
-import { RegistrationInitialValues, RegistrationValidationSchema } from "@/components/auth/RegistrationFormObjects";
-import UserAddress from "@/components/auth/UserAddress";
-import UserContact from "@/components/auth/UserContact";
-import UserPersonalInfo from "@/components/auth/UserPersonalInfo";
-import Btn from "@/elements/buttons/Btn";
-import SettingContext from "@/helper/settingContext";
-import { YupObject } from "@/utils/validation/ValidationSchemas";
+import { RegistrationInitialValues, RegistrationValidationSchema } from "../../../components/auth/RegistrationFormObjects";
+import UserAddress from "../../../components/auth/UserAddress";
+import UserContact from "../../../components/auth/UserContact";
+import UserPersonalInfo from "../../../components/auth/UserPersonalInfo";
+import Btn from "../../../elements/buttons/Btn";
+import SettingContext from "../../../helper/settingContext";
+import { YupObject } from "../../../utils/validation/ValidationSchemas";
 import { Form, Formik } from "formik";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,11 +13,39 @@ import { useRouter } from "next/navigation";
 import { useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { Col, Container, Row } from "reactstrap";
+import axios from "axios";
 
 const VendorRegister = () => {
   const router = useRouter();
   const { state } = useContext(SettingContext);
   const { t } = useTranslation("common");
+
+  const handleSignUp = async (values) => {
+    try {
+      if (values.email === "" || values.password === "") {
+        return alert("email or password is missing!");
+      }
+      const res = await axios.post('/api/auth/user', {
+        name: values.name,
+        email: values.email,
+        password: values.password,
+        countryCode: 'IN',
+        phone: values.phone
+      }, { withCredentials: true });
+      if (res.status == 201) {
+        alert('your account registration success!');
+        router.push('/auth/login');
+      } else {
+        alert("login failed!");
+      }
+    } catch (err) {
+      console.log('err...', err);
+      if(err.status == 409){
+        return alert(err.response.data.error);
+      }
+      alert(err);
+    }
+  }
   return (
     <section className="log-in-section section-b-space">
       <Container className="w-100">
@@ -35,14 +63,16 @@ const VendorRegister = () => {
                     ...RegistrationValidationSchema,
                   })}
                   onSubmit={(values) => {
-                    values["status"] = 1;
-                    router.push(`/auth/login`);
+                    // values["status"] = 1;
+                    // router.push(`/auth/login`);
+                    console.log('button clicked!')
+                    handleSignUp(values);
                   }}
                 >
                   {({ values, errors }) => (
                     <Form className="row g-4">
                       <UserPersonalInfo />
-                      <UserAddress values={values} />
+                      {/* <UserAddress values={values} /> */}
                       <UserContact />
                       <Col xs={12}>
                         <Btn title="Submit" className="btn-lg btn-theme justify-content-center w-100" type="submit" color="false" />

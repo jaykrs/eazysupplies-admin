@@ -5,7 +5,7 @@ import SimpleInputField from "./SimpleInputField";
 import Loader from "../commonComponent/Loader";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
-import useCustomQuery from "@/utils/hooks/useCustomQuery";
+import useCustomQuery from "../../utils/hooks/useCustomQuery";
 
 const AddressComponent = ({ values, noAddress }) => {
   const router = useRouter()

@@ -3,7 +3,7 @@ import SimpleInputField from "../inputFields/SimpleInputField";
 import { useTranslation } from "react-i18next";
 import CheckBoxField from "../inputFields/CheckBoxField";
 import SearchableSelectInput from "../inputFields/SearchableSelectInput";
-import { mediaConfig } from "@/data/MediaConfig";
+import { mediaConfig } from "../../data/MediaConfig";
 
 const ImagesTab = ({ values, setFieldValue, errors, updateId }) => {
   

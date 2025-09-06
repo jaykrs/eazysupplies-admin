@@ -5,7 +5,7 @@ import SearchableSelectInput from '../../inputFields/SearchableSelectInput'
 import SimpleInputField from '../../inputFields/SimpleInputField'
 import { useTranslation } from "react-i18next"
 import { useRouter } from 'next/navigation'
-import useCustomQuery from '@/utils/hooks/useCustomQuery'
+import useCustomQuery from '../../../utils/hooks/useCustomQuery'
 
 const UserAddress = ({ addAddress, type }) => {
     const router = useRouter();

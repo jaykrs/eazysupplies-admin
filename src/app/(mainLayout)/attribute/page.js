@@ -1,8 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import { Col } from "reactstrap";
-import { AttributeExportAPI, AttributeImportAPI, attribute } from "@/utils/axiosUtils/API";
-import AllAttributesTable from "@/components/attribute/AllAttributesTable";
+import { AttributeExportAPI, AttributeImportAPI, attribute } from "../../../utils/axiosUtils/API";
+import AllAttributesTable from "../../../components/attribute/AllAttributesTable";
 
 const AllAttributes = () => {
   const [isCheck, setIsCheck] = useState([]);

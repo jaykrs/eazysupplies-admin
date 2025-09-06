@@ -1,7 +1,7 @@
 "use client";
-import ProductForm from "@/components/product/ProductForm";
-import { product } from "@/utils/axiosUtils/API";
-import useCreate from "@/utils/hooks/useCreate";
+import ProductForm from "../../../../components/product/ProductForm";
+import { product } from "../../../../utils/axiosUtils/API";
+import useCreate from "../../../../utils/hooks/useCreate";
 import { useState } from "react";
 
 const ProductCreate = () => {
