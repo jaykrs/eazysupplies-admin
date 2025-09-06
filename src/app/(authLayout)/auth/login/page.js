@@ -61,7 +61,7 @@ const Login = () => {
       <ShowBox showBoxMessage={showBoxMessage} />
       <LoginBoxWrapper>
         <div className="log-in-title text-center">
-          <Image className="for-white" src={state?.setDarkLogo?.original_url ? state?.setDarkLogo?.original_url : "/assets/images/logo.png"} alt="Light Logo" width={140} height={28} priority />
+          <Image className="for-white" src={state?.setDarkLogo?.original_url ? state?.setDarkLogo?.original_url : "/assets/images/logo.png"} alt="Earthling Logo" width={140} height={58} priority />
           <h4>{t("LogInYourAccount")}</h4>
         </div>
         <div className="input-box">

@@ -2,12 +2,12 @@
   "id": 1,
   "options": {
       "seo": {
-          "og_title": "MultiKart Marketplace: Uniting Vendors for Shopping Excellence",
-          "meta_tags": "Multikart Marketplace: Where Vendors Shine Together",
+          "og_title": "Earthling Marketplace: Uniting Vendors for Shopping Excellence",
+          "meta_tags": "Earthling Marketplace: Where Vendors Shine Together",
           "meta_title": "Online Marketplace, Vendor Collaboration, E-commerce Platform",
           "og_image_id": 107,
-          "og_description": "Experience a unique shopping journey at MultiKart Marketplace, where vendors collaborate to provide a vast array of products. Explore, shop, and connection in one convenient destination.",
-          "meta_description": "Discover MultiKart Marketplace – a vibrant online platform where vendors unite to showcase their products, creating a diverse shopping experience. Explore a wide range of offerings and connect with sellers on a single platform.",
+          "og_description": "Experience a unique shopping journey at Earthling Marketplace, where vendors collaborate to provide a vast array of products. Explore, shop, and connection in one convenient destination.",
+          "meta_description": "Discover Earthling Marketplace – a vibrant online platform where vendors unite to showcase their products, creating a diverse shopping experience. Explore a wide range of offerings and connect with sellers on a single platform.",
           "og_image": {
               "id": 107,
               "name": "fashion_two_1",
@@ -96,7 +96,7 @@
           "instagram": "https://instagram.com/",
           "pinterest": "https://pinterest.com/",
           "sub_title": "Never Miss Anything From Store By Signing Up To Our Newsletter.",
-          "about_email": "Support@Multikart.com",
+          "about_email": "Support@Earthling.com",
           "help_center": [
               {
                   "id": 1,
@@ -163,7 +163,7 @@
           ],
           "footer_about": "Discover the latest trends and enjoy seamless shopping with our exclusive collections.",
           "footer_style": "footer_three",
-          "about_address": "Multikart Demo Store, Demo Store India 345-659",
+          "about_address": "Earthling Demo Store, Demo Store India 345-659",
           "app_store_url": "https://www.apple.com/in/app-store/",
           "support_email": "support@gmail.com",
           "play_store_url": "https://play.google.com/store/apps",
@@ -207,13 +207,13 @@
       },
       "seller": {
           "about": {
-              "title": "Start Your Business With Multikart & Reach Customers Across The World...",
+              "title": "Start Your Business With Earthling & Reach Customers Across The World...",
               "status": true,
               "image_url": "/assets/images/placeholder/seller/seller_banner.png",
               "description": "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium,\n\nOn the other hand, we denounce with righteous indignation and dislike men who are so beguiled and demoralized by the charms of pleasure of the moment, so blinded by desire, that they cannot foresee the pain and trouble that are bound to ensue; and equal blame belongs to those who fail in their duty through weakness of will, which is the same as saying through shrinking from toil and pain. These cases are perfectly simple and easy to distinguish. In a free hour, when our power of choice is untrammelled and when nothing prevents our being able to do what we like best, every pleasure is to be welcomed and every pain avoided. But in certain circumstances and owing to the claims of duty or the obligations of business it will frequently occur that pleasures have to be repudiated and annoyances accepted. The wise man therefore always holds in these matters to this principle of selection: he rejects pleasures to secure other greater pleasures, or else he endures pains to avoid worse pains."
           },
           "steps": {
-              "title": "Doing Business On Multikart Is Really Easy",
+              "title": "Doing Business On Earthling Is Really Easy",
               "status": true,
               "step_1": {
                   "title": "List your products & Get support service provider",
@@ -229,7 +229,7 @@
               }
           },
           "services": {
-              "title": "WHY SELL ON MULTIKART?",
+              "title": "WHY SELL ON Earthling?",
               "status": true,
               "service_1": {
                   "title": "lowest cost",
@@ -255,7 +255,7 @@
           "start_selling": {
               "title": "Start Selling",
               "status": true,
-              "description": "Multikart marketplace is India’s leading platform for selling online. Be it a manufacturer, vendor or supplier, simply sell your products online on Multikart and become a top ecommerce player with minimum investment. Through a team of experts offering exclusive seller workshops, training, seller support and convenient seller portal, Multikart focuses on educating and empowering sellers across India. Selling on Multikart.com is easy and absolutely free. All you need is to register, list your catalogue and start selling your products."
+              "description": "Earthling marketplace is India’s leading platform for selling online. Be it a manufacturer, vendor or supplier, simply sell your products online on Earthling and become a top ecommerce player with minimum investment. Through a team of experts offering exclusive seller workshops, training, seller support and convenient seller portal, Earthling focuses on educating and empowering sellers across India. Selling on Earthling.com is easy and absolutely free. All you need is to register, list your catalogue and start selling your products."
           }
       },
       "general": {
@@ -265,15 +265,15 @@
               "🎉 Offers for you..."
           ],
           "cart_style": "cart_sidebar",
-          "site_title": "Multikart Marketplace: Where Vendors Shine Together",
-          "site_tagline": "Shop Unique, Sell Exceptional – Multikart Multi-Vendor Universe.",
+          "site_title": "Earthling Marketplace: Where Vendors Shine Together",
+          "site_tagline": "Shop Unique, Sell Exceptional – Earthling Multi-Vendor Universe.",
           "primary_color": "#ec8951",
           "secondary_color": null,
           "back_to_top_enable": true,
           "celebration_effect": true,
           "language_direction": "ltr",
           "exit_tagline_enable": true,
-          "seller_register_url": "https://multikart-frontend-next-json.vercel.app"
+          "seller_register_url": "https://Earthling-frontend-next-json.vercel.app"
       },
       "product": {
           "services": {
@@ -318,7 +318,7 @@
       },
       "about_us": {
           "team": {
-              "title": "Multikart Team Member",
+              "title": "Earthling Team Member",
               "status": true,
               "members": [
                   {
@@ -358,7 +358,7 @@
                       "profile_image_url": "/assets/images/placeholder/about-us/member.png"
                   }
               ],
-              "sub_title": "Our Creative Team Multikart"
+              "sub_title": "Our Creative Team Earthling"
           },
           "about": {
               "title": "Sed Ut Perspiciatis Unde Omnis Iste Natus Error Sit Voluptatem Accusantium Doloremque Laudantium",
@@ -446,12 +446,12 @@
           },
           "detail_3": {
               "icon": "ri-mail-fill",
-              "text": "support@multikart.com",
+              "text": "support@Earthling.com",
               "label": "Email"
           },
           "detail_4": {
               "icon": "ri-cellphone-fill",
-              "text": "support@multikart.com",
+              "text": "support@Earthling.com",
               "label": "Fax"
           },
           "imageUrl": null,
