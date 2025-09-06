@@ -1,5 +1,32 @@
+import { NextResponse } from "next/server";
+
+
+const PUBLIC_ROUTES = [
+  '/auth/login',
+  '/auth/forgot-password',
+  '/auth/reset-password',
+  '/auth/register',
+  '/auth/otp-verification'
+];
+
 export async function middleware(request) {
-  // Put Your Logic Here
+  const token = request.cookies.get('authToken')?.value;
+  const { pathname } = request.nextUrl;
+
+  const isPublicRoute = PUBLIC_ROUTES.some((route) =>
+    pathname === route || pathname.startsWith(`${route}/`)
+  );
+  if (isPublicRoute) {
+    // If user is already logged in and tries to visit a public/auth page ? redirect to dashboard
+    if (token) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+    return NextResponse.next();
+  }
+  if (!token) {
+    return NextResponse.redirect(new URL('/auth/login', request.url));
+  }
+  return NextResponse.next();
 }
 
 export const config = {

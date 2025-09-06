@@ -3,7 +3,7 @@ import { useCookies } from 'react-cookie';
 import AccountContext from '.'
 import request from '../../utils/axiosUtils';
 import { selfData } from '../../utils/axiosUtils/API';
-import useCustomQuery from '@/utils/hooks/useCustomQuery';
+import useCustomQuery from '../../utils/hooks/useCustomQuery';
 
 const AccountProvider = (props) => {
     const [cookies] = useCookies(["uat"]);

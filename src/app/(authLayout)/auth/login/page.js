@@ -26,7 +26,7 @@ const Login = () => {
       <ShowBox showBoxMessage={showBoxMessage} />
       <LoginBoxWrapper>
         <div className="log-in-title text-center">
-          <Image className="for-white" src={state?.setDarkLogo?.original_url ? state?.setDarkLogo?.original_url : "/assets/images/logo.png"} alt="Light Logo" width={140} height={28} priority />
+          <Image className="for-white" src={state?.setDarkLogo?.original_url ? state?.setDarkLogo?.original_url : "/assets/images/logo.png"} alt="Light Logo" width={140} height={48} priority />
           <h4>{t("LogInYourAccount")}</h4>
         </div>
         <div className="input-box">
@@ -72,8 +72,8 @@ const Login = () => {
                 <Col sm="12">
                   <Btn title="Login" className="btn btn-animation w-100 justify-content-center" type="submit" color="false" />
                   <div className="sign-up-box">
-                    <h4>{"Don't Have Seller Account?"}</h4>
-                    <Link href={`/auth/register`}>{"Sign Up"}</Link>
+                    <h4>{"Looking for Support?"}</h4>
+                    <Link href={`/auth/register`}>{"Connect Us"}</Link>
                   </div>
                 </Col>
               </Form>

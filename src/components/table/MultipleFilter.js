@@ -1,5 +1,5 @@
-import AccountContext from "@/helper/accountContext";
-import SettingContext from "@/helper/settingContext";
+import AccountContext from "../../helper/accountContext";
+import SettingContext from "../../helper/settingContext";
 import { useContext } from "react";
 import { Col, Row } from "reactstrap";
 

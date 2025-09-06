@@ -1,4 +1,4 @@
-import { forgotPassword } from "@/utils/axiosUtils/API";
+import { forgotPassword } from "../../axiosUtils/API";
 import { emailSchema, YupObject } from "../../validation/ValidationSchemas";
 import { useMutation } from "@tanstack/react-query";
 

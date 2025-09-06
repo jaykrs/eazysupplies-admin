@@ -8,7 +8,7 @@ import SettingContext from "../../helper/settingContext";
 import request from "../../utils/axiosUtils";
 import { StatisticsCountAPI } from "../../utils/axiosUtils/API";
 import OrderStatus from "./OrderStatus";
-import useCustomQuery from "@/utils/hooks/useCustomQuery";
+import useCustomQuery from "../../utils/hooks/useCustomQuery";
 
 const TopDashSection = ({ role }) => {
   const { t } = useTranslation("common");

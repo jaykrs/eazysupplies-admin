@@ -4,7 +4,7 @@ import { updateSetting } from '../../utils/axiosUtils/API';
 import request from '../../utils/axiosUtils';
 import { settingReducer } from '../../utils/allReducers';
 import { useRouter } from 'next/navigation';
-import useCustomQuery from '@/utils/hooks/useCustomQuery';
+import useCustomQuery from '../../utils/hooks/useCustomQuery';
 
 const SettingProvider = (props) => {
     const [currencySymbol, setCurrencySymbol] = useState('')

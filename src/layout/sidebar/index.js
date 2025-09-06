@@ -1,6 +1,6 @@
-import LogoWrapper from "@/components/commonComponent/logoWrapper";
-import AccountContext from "@/helper/accountContext";
-import SettingContext from "@/helper/settingContext";
+import LogoWrapper from "../../components/commonComponent/logoWrapper";
+import AccountContext from "../../helper/accountContext";
+import SettingContext from "../../helper/settingContext";
 import dynamic from "next/dynamic";
 import { useContext, useEffect, useState } from "react";
 import MENUITEMS from "./MenuData";

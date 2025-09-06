@@ -1,4 +1,4 @@
-import Btn from "@/elements/buttons/Btn";
+import Btn from "../../elements/buttons/Btn";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { RiFilter3Line } from "react-icons/ri";

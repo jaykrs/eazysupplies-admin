@@ -1,19 +1,19 @@
-import { topStoreOption } from "@/data/TabTitleList";
-import SettingContext from "@/helper/settingContext";
-import request from "@/utils/axiosUtils";
-import { product } from "@/utils/axiosUtils/API";
+import { topStoreOption } from "../../../data/TabTitleList";
+import SettingContext from "../../../helper/settingContext";
+import request from "../../../utils/axiosUtils";
+import { product } from "../../../utils/axiosUtils/API";
 import Link from "next/link";
 import { useContext, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Table } from "reactstrap";
-import { dateWithOnlyMonth } from "@/utils/customFunctions/DateFormat";
+import { dateWithOnlyMonth } from "../../../utils/customFunctions/DateFormat";
 import Avatar from "../../commonComponent/Avatar";
 import NoDataFound from "../../commonComponent/NoDataFound";
 import SearchableSelectInput from "../../inputFields/SearchableSelectInput";
 import DashboardWrapper from "../DashboardWrapper";
 import { useRouter } from "next/navigation";
-import { placeHolderImage } from "@/data/CommonPath";
-import useCustomQuery from "@/utils/hooks/useCustomQuery";
+import { placeHolderImage } from "../../../data/CommonPath";
+import useCustomQuery from "../../../utils/hooks/useCustomQuery";
 
 const TopSellingProduct = ({ setFieldValue, values }) => {
   const { convertCurrency } = useContext(SettingContext);

@@ -1,4 +1,4 @@
-import SettingContext from "../../helper/settingContext";
+import SettingContext from "@/helper/settingContext";
 import Link from "next/link";
 import { useContext, useState } from "react";
 import { useTranslation } from "react-i18next";

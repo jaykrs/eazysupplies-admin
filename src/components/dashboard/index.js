@@ -1,12 +1,12 @@
-import request from "@/utils/axiosUtils";
-import { NoticeRecent } from "@/utils/axiosUtils/API";
+import request from "../../utils/axiosUtils";
+import { NoticeRecent } from "../../utils/axiosUtils/API";
 import NoticeDashBoard from "./NoticeDashBoard";
 import ProductStockReportTable from "./productStockReport/ProductStockReportTable";
 import RecentOrderTable from "./recentOrders/RecentOrderTable";
 import RevenueAndTopVendor from "./Revenue&TopVendor";
 import TopDashSection from "./TopDashSection";
 import { useRouter } from "next/navigation";
-import useCustomQuery from "@/utils/hooks/useCustomQuery";
+import useCustomQuery from "../../utils/hooks/useCustomQuery";
 
 const MainDashboard = () => {
   const router = useRouter()   

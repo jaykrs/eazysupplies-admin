@@ -1,4 +1,4 @@
-import SettingContext from "../../helper/settingContext";
+import SettingContext from "@/helper/settingContext";
 import Image from "next/image";
 import { useContext, useEffect, useState } from "react";
 import Logo from "../../components/commonComponent/logoWrapper/Logo";

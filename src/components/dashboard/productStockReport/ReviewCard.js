@@ -7,7 +7,7 @@ import { ReviewAPI } from "../../../utils/axiosUtils/API";
 import Avatar from "../../commonComponent/Avatar";
 import NoDataFound from "../../commonComponent/NoDataFound";
 import DashboardWrapper from "../DashboardWrapper";
-import useCustomQuery from "@/utils/hooks/useCustomQuery";
+import useCustomQuery from "../../../utils/hooks/useCustomQuery";
 
 const ReviewCard = () => {
   const router = useRouter();

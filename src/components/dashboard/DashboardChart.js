@@ -5,7 +5,7 @@ import { useContext, useEffect } from 'react';
 import SettingContext from '../../helper/settingContext';
 import { DashboardChartOptions } from "./ChartData";
 import { useRouter } from "next/navigation";
-import useCustomQuery from "@/utils/hooks/useCustomQuery";
+import useCustomQuery from "../../utils/hooks/useCustomQuery";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
     ssr: false,

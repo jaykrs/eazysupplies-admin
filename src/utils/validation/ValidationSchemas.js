@@ -4,9 +4,13 @@ export const YupObject = (schemaObject) => Yup.object().shape(schemaObject);
 
 export const emailSchema = Yup.string().email("Enter Valid Email").required();
 export const passwordSchema = Yup.string()
-  .min(8, "Too Short!")
-  .max(20, "Too Long!")
-  .required();
+  .min(8, "Password must be at least 8 characters")
+  .max(20, "Password can't be longer than 20 characters")
+  .matches(/[a-z]/, "Must include at least one lowercase letter")
+  .matches(/[A-Z]/, "Must include at least one uppercase letter")
+  .matches(/[^a-zA-Z0-9]/, "Must include at least one special character")
+  .required("Password is required");
+
 export const recaptchaSchema = Yup.string().required();
 export const nameSchema = Yup.string().required();
 export const descriptionSchema = Yup.string()

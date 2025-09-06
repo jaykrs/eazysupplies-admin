@@ -55,9 +55,11 @@
   },
   "devDependencies": {
     "@types/node": "24.3.0",
+    "@types/react": "19.1.12",
     "eslint": "^8",
     "eslint-config-next": "^14.2.1",
     "prisma": "^6.15.0",
-    "sass": "1.77.6"
+    "sass": "1.77.6",
+    "typescript": "5.9.2"
   }
 }

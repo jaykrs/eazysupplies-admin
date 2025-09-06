@@ -1,4 +1,4 @@
-import useOutsideDropdown from "../../utils/hooks/customHooks/useOutsideDropdown";
+import useOutsideDropdown from "@/utils/hooks/customHooks/useOutsideDropdown";
 import Cookies from "js-cookie";
 import Link from "next/link";
 import { useRouter } from "next/navigation";

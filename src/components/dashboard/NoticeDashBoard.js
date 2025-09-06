@@ -1,5 +1,5 @@
-import { markAsReadNotice } from "@/utils/axiosUtils/API";
-import useUpdate from "@/utils/hooks/useUpdate";
+import { markAsReadNotice } from "../../utils/axiosUtils/API";
+import useUpdate from "../../utils/hooks/useUpdate";
 import Link from "next/link";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";

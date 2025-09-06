@@ -5,7 +5,7 @@ import { country } from "../../utils/axiosUtils/API";
 import SearchableSelectInput from "../inputFields/SearchableSelectInput";
 import { ReactstrapInput } from "../reactstrapFormik";
 import { useRouter } from "next/navigation";
-import useCustomQuery from "@/utils/hooks/useCustomQuery";
+import useCustomQuery from "../../utils/hooks/useCustomQuery";
 
 const UserAddress = ({ values }) => {
   const router =useRouter()
@@ -33,7 +33,7 @@ const UserAddress = ({ values }) => {
           ]}
         />
       </Col>
-      <Col sm="4">
+      {/* <Col sm="4">
         <div className="form-floating theme-form-floating log-in-form">
           <SearchableSelectInput
             nameList={[
@@ -54,16 +54,16 @@ const UserAddress = ({ values }) => {
             ]}
           />
         </div>
-      </Col>
-      <Col sm="4" xs="6">
+      </Col> */}
+      {/* <Col sm="4" xs="6">
         <Field name="city" inputprops={{noExtraSpace:true}}  component={ReactstrapInput} type="text" className="form-control" id="city" placeholder="City" label="City" />
-      </Col>
-      <Col xs="12">
+      </Col> */}
+      {/* <Col xs="12">
         <Field name="address" inputprops={{noExtraSpace:true}} component={ReactstrapInput} type="textarea" className="form-control" id="address" placeholder="Address" label="Address" />
       </Col>
       <Col sm="6">
         <Field name="pincode" inputprops={{noExtraSpace:true}} component={ReactstrapInput} type="text" className="form-control" id="pincode" placeholder="Pincode" label="Pincode" />
-      </Col>
+      </Col> */}
     </>
   );
 };

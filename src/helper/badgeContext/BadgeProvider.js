@@ -6,7 +6,7 @@ import request from "../../utils/axiosUtils";
 import { BadgeApi } from "../../utils/axiosUtils/API";
 import BadgeContext from ".";
 import { useRouter } from "next/navigation";
-import useCustomQuery from "@/utils/hooks/useCustomQuery";
+import useCustomQuery from "../../utils/hooks/useCustomQuery";
 
 const BadgeProvider = (props) => {
     const [cookies] = useCookies(["uat"]);

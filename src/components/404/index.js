@@ -1,5 +1,5 @@
 "use client";
-import Btn from "@/elements/buttons/Btn";
+import Btn from "../../elements/buttons/Btn";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Col, Container, Row } from "reactstrap";

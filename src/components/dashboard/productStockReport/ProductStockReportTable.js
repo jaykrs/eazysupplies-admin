@@ -7,7 +7,7 @@ import request from "../../../utils/axiosUtils";
 import ReviewCard from "./ReviewCard";
 import { useRouter } from "next/navigation";
 import TopSellingProducts from "../recentOrders/TopSellingProducts";
-import useCustomQuery from "@/utils/hooks/useCustomQuery";
+import useCustomQuery from "../../../utils/hooks/useCustomQuery";
 
 const ProductStockReportTable = () => {
   const router = useRouter();
