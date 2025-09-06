@@ -76,7 +76,8 @@ export async function POST(request) {
     // Set JWT cookie
     response.cookies.set("authToken", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+  //    secure: process.env.NODE_ENV === "production",
+      secure: false,
       sameSite: "lax",
       maxAge: parseInt(process.env.JWT_EXPIRES_IN_SEC || "86400"), // fallback: 1 day
       path: "/",
