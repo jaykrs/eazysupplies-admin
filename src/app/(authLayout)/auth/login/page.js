@@ -109,8 +109,8 @@ const Login = () => {
                 <Col sm="12">
                   <Btn title="Login" className="btn btn-animation w-100 justify-content-center" type="submit" color="false" />
                   <div className="sign-up-box">
-                    <h4>{"Don't Have Seller Account?"}</h4>
-                    <Link href={`/auth/register`}>{"Sign Up"}</Link>
+                    <h4>{"Need Support for Account?"}</h4>
+                    <Link href={`/auth/register`}>{"Support"}</Link>
                   </div>
                 </Col>
               </Form>
