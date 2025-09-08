@@ -25,7 +25,7 @@ model User {
   status          Int       @default(0)
   createdById     Int?
   updatedById     Int?
-  emailVerifiedAt DateTime?
+  lastLoginDt DateTime?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   roleId         Int
@@ -34,6 +34,8 @@ model User {
   wallet          Wallet?
   point           Point?
   otp             Int       @default(0)
+  wishlist        String?
+  favorite        String?
 }
 
 model Role {
@@ -77,66 +79,72 @@ model Point {
 }
 
 model Product {
-  id                        Int      @id @default(autoincrement())
-  name                      String?
-  short_description         String
-  type                      String
-  unit                      String
-  brand                     String?
-  packing                   String?
-  HsnHac                    String?
-  weight                    Int      @default(0)
-  quality                   Int      @default(0)
-  price                     Int      @default(0)
-  sale_price                Int      @default(0)
-  discount                  Int?
-  is_featured               Int
-  shipping_days             Int?
-  is_cod                    Int      @default(0)
-  is_free_shipping          Int      @default(0)
-  is_sale_enable            Int      @default(0)
-  is_return                 Int      @default(0)
-  is_trending               Int      @default(0)
-  is_approved               Int      @default(0)
-  is_external               Int      @default(0)
-  external_url              String?  // changed from Int to String?
-  external_button_text      String?
-  sale_starts_at            DateTime?
-  sale_expired_at           DateTime?
-  sku                       String
-  is_random_related_products Int     @default(0)
-  stock_status              String
-  meta_title                String
-  meta_description          String
-  product_thumbnail_id      Int
-  product_meta_image_id     String
-  size_chart_image_id       String
-  self_life                 String
-  reviewRatings           ReviewRating[]
-  relatedProducts         RelatedProduct[] @relation("RelatedProducts")
-  relatedToProducts       RelatedProduct[] @relation("RelatedToProducts")
+  id             Int      @id @default(autoincrement())
+  name           String?
+  description    String
+  type           String
+  unit           String
+  packing        String?
+  HsnHac         String?
+
+  weight         Float    @default(0.0)
+  quality        Int      @default(0)
+  price          Float
+  salePrice      Float
+  discount       Float?   @default(0.0)
+  buyPrice       Float?   @default(0.0)
+
+  isFeatured     Boolean  @default(false)
+  isFreeShipping Boolean  @default(false)
+  isAvailable    Boolean? @default(false)
+  isReturn       Boolean? @default(false)
+  approved       Boolean? @default(false)
+
+  url            String?
+  sku            String?
+  stockCount     Int?
+  title          String?
+  thumbnailPath  String?
+  imagePath      String?
+  sizeChart      String?
+
+  maxDt          DateTime?
+  expDt          DateTime?
+
+  category       String?
+  tag            String?
+  brand          String?
+  rating         String?
+  license        String?  @default("")
 }
 
-model ReviewRating {
-  id         Int      @id @default(autoincrement())
-  rating     Int      // The rating (e.g., 1 to 5)
-  comment    String?  // Optional review text
-  createdAt  DateTime @default(now())
-  
-  // Foreign key relation
-  product    Product  @relation(fields: [productId], references: [id])
-  productId  Int
+
+model Brand {
+  id               Int       @id @default(autoincrement())
+  name             String
+  ImagePath     String?
+  BannerPath         String?
+  Description      String? 
 }
 
-model RelatedProduct {
-  id                Int     @id @default(autoincrement())
-  
-  product           Product @relation("RelatedProducts", fields: [productId], references: [id])
-  productId         Int
-
-  relatedProduct    Product @relation("RelatedToProducts", fields: [relatedProductId], references: [id])
-  relatedProductId  Int
+model Category {
+  id               Int       @id @default(autoincrement())
+  name             String
+  ImagePath     String?
+  BannerPath         String?
+  Description      String? 
 }
+
+model Tag {
+  id               Int       @id @default(autoincrement())
+  name             String
+  ImagePath     String?
+  BannerPath         String?
+  Description      String?
+}
+
+
+
 
 
 

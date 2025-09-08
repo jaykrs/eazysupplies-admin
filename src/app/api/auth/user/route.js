@@ -104,6 +104,7 @@ export async function POST(request) {
       { status: 201 }
     );
   } catch (error) {
+    console.log('........', error)
     console.error("[USER_POST_ERROR]", error);
     return NextResponse.json(
       { error: MESSAGES.SERVER_ERROR },

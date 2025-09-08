@@ -1,71 +1,105 @@
+
 import { NextResponse } from "next/server";
-import brand from "./brand.json";
+import { NextApiRequest, NextApiResponse } from 'next'
+import { PrismaClient } from '@prisma/client'
+import { parseAuthCookie, verifyJwt, verifyRole } from "../utils/jwt";
+const prisma = new PrismaClient()
 
-export async function GET(request) {
-  const searchParams = request?.nextUrl?.searchParams;
-  const queryCategory = searchParams.get("category");
-  const querySortBy = searchParams.get("sortBy");
-  const querySearch = searchParams.get("search");
-  const queryTag = searchParams.get("tag");
-  const queryIds = searchParams.get("ids");
+const MESSAGES = {
+  REQUIRED_FIELDS: "Email and password are required",
+  USER_NOT_FOUND: "User does not exist",
+  USER_INACTIVE: "User is not active",
+  INVALID_PASSWORD: "Incorrect password",
+  LOGIN_SUCCESS: "Login successful",
+  SERVER_ERROR: "Internal server error",
+  USER_ACTIVATED: "User Activated",
+  USER_ACTIVATION_FAILED: "Email or Otp is not correct",
+  USER_ROLE_NOT_ADMIN: "Unauthorized to login, please contact admin!"
+};
 
-  const queryPage = parseInt(searchParams.get("page")) || 1; // default to page 1
-  const queryLimit = parseInt(searchParams.get("paginate")) || 10; // default to 10 items per page
+export async function GET() {
+  let res = await prisma.brand.findMany({});
+  return NextResponse.json({ data: res }, { status: 200 });
+}
 
-  let brands = brand?.data || [];
+export async function POST(request) {
 
-  // Filtering logic
-  if (querySortBy || queryCategory || querySearch || queryTag || queryIds) {
-    // Filter by category
-    if (queryCategory) {
-      brands = brands.filter((post) => post?.categories?.some((category) => queryCategory.split(",").includes(category.slug)));
+  try {
+    const body = await request.json();
+    const token = parseAuthCookie(request.headers.get('cookie'));
+    const payload = token ? verifyJwt(token) : null;
+    if (!payload || (await verifyRole(payload.userId)).toLowerCase() !== 'admin') {
+      return NextResponse.json(
+        { error: 'Unauthorized: Admin role required' },
+        { status: 403 }
+      );
     }
+    const {
+      name,
+      ImagePath,
+      BannerPath,
+      Description
+    } = body
 
-    // Filter by tag
-    if (queryTag) {
-      brands = brands.filter((post) => post?.tags?.some((tag) => queryTag.split(",").includes(tag.slug)));
-    }
+    const brand = await prisma.brand.create({
+      data: {
+        name,
+        ImagePath,
+        BannerPath,
+        Description
+      }
+    })
 
-    if (queryIds) {
-      brands = brands.filter((product) => queryIds.split(",").includes(product?.id?.toString()));
-    }
-
-    // Search filter by title
-    if (querySearch) {
-      brands = brands.filter((post) => post.title.toLowerCase().includes(querySearch.toLowerCase()));
-    }
-
-    // Sort logic
-    if (querySortBy === "asc") {
-      brands = brands.sort((a, b) => a.id - b.id);
-    } else if (querySortBy === "desc") {
-      brands = brands.sort((a, b) => b.id - a.id);
-    } else if (querySortBy === "a-z") {
-      brands = brands.sort((a, b) => a.title.localeCompare(b.title));
-    } else if (querySortBy === "z-a") {
-      brands = brands.sort((a, b) => b.title.localeCompare(a.title));
-    } else if (querySortBy === "newest") {
-      brands = brands.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    } else if (querySortBy === "oldest") {
-      brands = brands.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-    }
+    return NextResponse.json({ message: 'Brand created successfully', brand }, { status: 500 })
+  } catch (error) {
+    console.error('Error creating brand:', error)
+    return NextResponse.json({ message: 'Internal server error', error }, { status: 500 })
   }
+}
 
-  brands = brands?.length ? brands : brand?.data;
+export async function PUT(request) {
 
-  // Implementing pagination
-  const totalBrands = brands.length;
-  const startIndex = (queryPage - 1) * queryLimit;
-  const endIndex = startIndex + queryLimit;
-  const paginatedBrands = brands.slice(startIndex, endIndex);
+  try {
+    const body = await request.json();
+    const { searchParams } = new URL(request.url);
+    const id = Number(searchParams.get('brandId'));
+    const token = parseAuthCookie(request.headers.get('cookie'));
+    const payload = token ? verifyJwt(token) : null;
+    if (!payload || (await verifyRole(payload.userId)).toLowerCase() !== 'admin') {
+      return NextResponse.json(
+        { error: 'Unauthorized: Admin role required' },
+        { status: 403 }
+      );
+    }
+    const {
+      name,
+      ImagePath,
+      BannerPath,
+      Description
+    } = body
 
-  const response = {
-    current_page: queryPage,
-    last_page: Math.ceil(totalBrands / queryLimit),
-    total: totalBrands,
-    per_page: queryLimit,
-    data: paginatedBrands, // the brands for the current page
-  };
-
-  return NextResponse.json(response);
+    const brand = await prisma.brand.findUnique({
+      where: {
+        id: id
+      }
+    })
+    if (!brand) {
+      return NextResponse.json({ error: 'Brand does not exist' }, { status: 404 });
+    }
+    const newBrand = await prisma.brand.update({
+      data: {
+        name,
+        ImagePath,
+        BannerPath,
+        Description
+      },
+      where: {
+        id: id
+      }
+    });
+    return NextResponse.json({ message: 'Brand updated', newBrand }, { status: 200 });
+  } catch (error) {
+    console.error('Error creating brand:', error)
+    return NextResponse.json({ message: 'Internal server error', error }, { status: 500 })
+  }
 }

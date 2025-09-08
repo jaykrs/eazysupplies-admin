@@ -24,7 +24,6 @@ export function verifyJwt(token: string) {
 
 export async function verifyRole(userId: number): Promise<string> {
   const user = await findUserById(userId);
-  console.log('..............................', user);
   if (!user) return "";
   if(user.status != 1) return "";
   const roles = await prisma.role.findUnique({where: {id : user.roleId}});

@@ -30,7 +30,7 @@ const Login = () => {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         return alert('enter valid email');
       }
-      const res = await axios.post('/api/auth/login', {
+      const res = await axios.post('/api/auth/login_auth', {
         email: email,
         password: password
       }, { withCredentials: true });

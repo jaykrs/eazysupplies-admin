@@ -31,7 +31,7 @@ const prisma = new PrismaClient();
 //     }
 
 //     if (queryIds) {
-//       products = products.filter((product) => queryIds.split(",").includes(product?.id?.toString()));
+//       products = products.filter((product) => queryIds.split(",").includes(product?.id?,()));
 //     }
 
 //     // Search filter by title
@@ -117,7 +117,6 @@ export async function POST(request) {
     const requestBody = await request.json();
 
     const token = parseAuthCookie(request.headers.get('cookie'));
-    const isValidToken = jwt.verify(token, process.env.JWT_SECRET);
     const payload = token ? verifyJwt(token) : null;
     if (!payload || (await verifyRole(payload.userId)).toLowerCase() !== 'admin') {
       return NextResponse.json(
@@ -129,72 +128,72 @@ export async function POST(request) {
     // Destructure only allowed fields from request body to avoid mass-assignment
     const {
       name,
-      short_description,
+      description,
       type,
       unit,
-      weight = 0,
-      quality = 0,
-      price = 0,
-      sale_price = 0,
-      discount = 0,
-      is_featured = 0,
-      shipping_days,
-      is_cod = 0,
-      is_free_shipping = 0,
-      is_sale_enable = 0,
-      is_return = 0,
-      is_trending = 0,
-      is_approved = 0,
-      is_external = 0,
-      external_url,
-      external_button_text,
-      sale_starts_at,
-      sale_expired_at,
+      packing,
+      HsnHac,
+      weight,
+      quality,
+      price,
+      salePrice,
+      discount,
+      buyPrice,
+      isFeatured,
+      isFreeShipping,
+      isAvailable,
+      isReturn,
+      approved,
+      url,
       sku,
-      is_random_related_products = 0,
-      stock_status,
-      meta_title,
-      meta_description,
-      product_thumbnail_id,
-      product_meta_image_id,
-      size_chart_image_id,
-      self_life
+      stockCount,
+      title,
+      thumbnailPath,
+      imagePath,
+      sizeChart,
+      maxDt,
+      expDt,
+      category,
+      tag,
+      brand,
+      rating,
+      license
     } = requestBody;
 
     // Create the product
     const newProduct = await prisma.product.create({
       data: {
         name,
-        short_description,
+        description,
         type,
         unit,
+        packing,
+        HsnHac,
         weight,
         quality,
         price,
-        sale_price,
+        salePrice,
         discount,
-        is_featured,
-        shipping_days,
-        is_cod,
-        is_free_shipping,
-        is_sale_enable,
-        is_return,
-        is_trending,
-        is_approved,
-        is_external,
-        external_url,
-        external_button_text,
-        sale_starts_at: sale_starts_at ? new Date(sale_starts_at) : undefined,
-        sale_expired_at: sale_expired_at ? new Date(sale_expired_at) : undefined,
+        buyPrice,
+        isFeatured,
+        isFreeShipping,
+        isAvailable,
+        isReturn,
+        approved,
+        url,
         sku,
-        is_random_related_products,
-        stock_status,
-        meta_title,
-        meta_description,
-        product_thumbnail_id,
-        product_meta_image_id,
-        size_chart_image_id,
-        self_life
+        stockCount,
+        title,
+        thumbnailPath,
+        imagePath,
+        sizeChart,
+        maxDt,
+        expDt,
+        category,
+        tag,
+        brand,
+        rating,
+        license
       },
     });
 

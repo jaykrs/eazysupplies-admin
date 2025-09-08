@@ -64,7 +64,8 @@ const ProductForm = ({ updateId, title, buttonName, saveButton, setSaveButton })
       "product_thumbnail_id": 1, //values.product_thumbnail_id,
       "product_meta_image_id": values.product_meta_image_id,
       "size_chart_image_id": values.size_chart_image_id,
-      "self_life": "9 month"
+      "self_life": values.self_life,
+      "brand": values.brand_id
     },{withCredentials: true});
 
     if(res.status == 200){
