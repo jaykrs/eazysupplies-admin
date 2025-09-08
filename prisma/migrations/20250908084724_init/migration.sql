@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE `product` ADD COLUMN `HsnHac` VARCHAR(191) NULL,
+    ADD COLUMN `brand` VARCHAR(191) NULL,
+    ADD COLUMN `packing` VARCHAR(191) NULL;

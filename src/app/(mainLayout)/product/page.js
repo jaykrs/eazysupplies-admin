@@ -1,149 +1,253 @@
 "use client";
-import SearchableSelectInput from "../../../components/inputFields/SearchableSelectInput";
-import AllProductTable from "../../../components/product/AllProductTable";
-import {BrandAPI,Category,ProductExportAPI,ProductImportAPI,product,store,} from "../../../utils/axiosUtils/API";
-import { Form, Formik } from "formik";
+import axios from "axios";
 import { useEffect, useState } from "react";
-import { Col } from "reactstrap";
-import request from "../../../utils/axiosUtils";
-import MultiSelectField from "../../../components/inputFields/MultiSelectField";
-
-import { useRouter } from "next/navigation";
-import useCustomQuery from "../../../utils/hooks/useCustomQuery";
+import Select from "react-select";
 
 const AllUsers = () => {
-  const [isCheck, setIsCheck] = useState([]);
-  const router =useRouter()
-  const {data: brandData,isLoading: brandLoading,refetch: brandRefetch,} = useCustomQuery([BrandAPI],() => request({url: BrandAPI, params: {status: 1},},router),{ enabled: false,refetchOnWindowFocus: false,select: (res) =>res?.data?.data?.map((elem) => { return { id: elem.id, name: elem?.name, slug: elem?.slug };}),}
-  );
-  useEffect(() => {
-    brandLoading && brandRefetch();
-  }, [brandLoading]);
 
-  const {data: storeData,isLoading,refetch: storeRefetch,} = useCustomQuery([store],() => request({url: store,params: {status: 1,},},router),
-    { enabled: false,refetchOnWindowFocus: false,select: (res) => res?.data?.data?.map((elem) => { return { id: elem.id, name: elem?.store_name, slug: elem?.slug };}),}
-  );
-  useEffect(() => {
-    isLoading && storeRefetch();
-  }, [isLoading]);
+    const [products, setProducts] = useState([]);
+    const [state, setState] = useState({
+        name: "all",
+        type: "all",
+        tag: "all"
+    });
+    const [isDarkMode, setIsDarkMode] = useState(false);
 
-  const { data: categoryData, isLoading: categoryLoader } = useCustomQuery([Category],() => request({ url: Category, params: { status: 1, type: "product" } },router),{ refetchOnWindowFocus: false,select: (res) =>res?.data?.data.map((elem) => { return {id: elem.id,name: elem.name,image: elem?.category_icon?.original_url || "/assets/images/placeholder.png",slug: elem?.slug,subcategories: elem?.subcategories,};}),});
-const productTypes =[
-  {
-    id: "physical",
-    name: "Physical Product",
-    slug: "slug",
-  },
-  {
-    id: "digital",
-    name: "Digital Product",
-    slug: "slug",
-  },
-  {
-    id: "external",
-    name: "External/Affiliate  Product",
-    slug: "slug",
-  },
-]
-  return (
-    <Col sm="12">
-      <Formik
-        initialValues={{category_ids: [],brand_ids: [],store_ids: [],product_type: ""}}
-      >
-        {({ values, setFieldValue }) => (
-          <Form>
-            <AllProductTable
-              url={product}
-              moduleName="Product"
-              isCheck={isCheck}
-              setIsCheck={setIsCheck}
-              isReplicate={{ title: "Duplicate", replicateAPI: "replicate" }}
-              exportButton={true}
-              importExport={{
-                importUrl: ProductImportAPI,
-                exportUrl: ProductExportAPI,
-                sampleFile:"product.csv",
-                instructionsAndSampleFile:true ,instructions:"product-bulk-upload-instructions.txt",
-                paramsProps : {
-                  category_ids:values["category_ids"].length > 0? values.category_ids.join(","): null,
-                  brand_ids:values["brand_ids"].length > 0? values.brand_ids.join(","): null,
-                  store_ids:values["store_ids"].length > 0? values["store_ids"].join(","): null,
-                  product_type: values["product_type"]? values["product_type"]: null,}
-              }}
-              paramsProps={{
-                category_ids:values["category_ids"].length > 0? values.category_ids.join(","): null,
-                brand_ids:values["brand_ids"].length > 0? values.brand_ids.join(","): null,
-                store_ids:values["store_ids"].length > 0? values["store_ids"].join(","): null,
-                product_type: values["product_type"]? values["product_type"]: null,}}
-              showFilterDifferentPlace
-              advanceFilter={{
-                category_ids: (
-                  <MultiSelectField  
-                    notitle="true"
-                    values={values}
-                    setFieldValue={setFieldValue}
-                    name="category_ids"
-                    title="Category"
-                    data={categoryData}
-                    initialTittle = "SelectCategories"
-                  />
-                ),
-                brand: (
-                  <SearchableSelectInput
-                    nameList={[
-                      {
-                        name: "brand_ids",
-                        notitle: "true",
-                        inputprops: {
-                          name: "brand_ids",
-                          id: "brand_ids",
-                          initialTittle: "SelectBrand",
-                          options: brandData || [],
-                        },
-                      },
-                    ]}
-                  />
-                ),
-                store_ids: (
-                  <SearchableSelectInput
-                    nameList={[
-                      {
-                        name: "store_ids",
-                        notitle: "true",
-                        inputprops: {
-                          name: "store_ids",
-                          id: "store_ids",
-                          options: storeData || [],
-                          initialTittle: "SelectStore",
-                        },
-                      },
-                    ]}
-                  />
-                ),
-                productType: (
-                  <SearchableSelectInput
-                    nameList={[
-                      {
-                        name: "product_type",
-                        notitle: "true",
-                        inputprops: {
-                          name: "product_type",
-                          id: "product_type",
-                          options:productTypes, 
-                          close: values["product_type"] ? true :false,
-                          initialTittle: "SelectProductType",
-                        },
-                      },
-                    ]}
-                  />
-                ),
-              }}
-            />
-          </Form>
-        )}
-      </Formik>
-    </Col>
-  );
-};
+    const handleStateChange = (name, value) => {
+        console.log('........e', name, value);
+        setState(prev => {
+            return { ...prev, [name]: value }
+        })
+    }
+
+    useEffect(() => {
+        const initial = document.body.classList.contains("dark-only");
+        setIsDarkMode(initial);
+        fetchProduct();
+    }, [])
+
+    const fetchProduct = async () => {
+        let res = await axios.get('/api/product?products=all', { withCredentials: true });
+        if (res.status == 200) {
+            setProducts(res.data.products);
+        }
+    }
+
+    const nameOptions = [
+        { value: 'all', label: 'All' },
+        { value: 'CORN FLAKES', label: 'CORN FLAKES' },
+        { value: 'MOJITO MINT', label: 'MOJITO MINT' },
+        { value: 'BLUE CURACAO', label: 'BLUE CURACAO' },
+    ];
+
+    const typeOptions = [
+        { value: 'all', label: 'All' },
+        { value: 'physical', label: 'Physical Product' },
+        { value: 'digital', label: 'Digital Product' },
+        { value: 'external', label: 'External/Affiliate Product' },
+    ];
+
+    const tagOptions = [
+        { value: 'all', label: 'All' },
+        { value: 'BAR SYRUP & CORNFLAKES', label: 'BAR SYRUP & CORNFLAKES' },
+        { value: 'CRUSHES', label: 'CRUSHES' },
+        { value: 'TOMATO PRODUCTS', label: 'TOMATO PRODUCTS' },
+    ];
+
+    console.log('.........', state);
+
+    return (
+        <>
+            <div className="w-100 d-flex flex-wrap justify-content-start m-4 fs-6" style={{ gap: "50px" }}>
+
+                <div className="d-flex" style={{ gap: "20px" }} >
+                    <label htmlFor="productType">Product Type</label>
+
+                    <Select
+                        id="productType"
+                        options={typeOptions}
+                        onChange={(e) => handleStateChange('type', e.value)}
+                        defaultValue={typeOptions[0]}
+                        isSearchable={true}
+                        styles={{
+                            control: (base) => ({
+                                ...base,
+                                paddingLeft: "1rem",
+                                paddingRight: "1rem",
+                                backgroundColor: isDarkMode ? "#1e1e1e" : "#fff",
+                                color: isDarkMode ? "#f1f1f1" : "#000",
+                            }),
+                            menu: (base) => ({
+                                ...base,
+                                backgroundColor: isDarkMode ? "#2c2c2c" : "#fff",
+                                color: isDarkMode ? "#f1f1f1" : "#000",
+                            }),
+                            option: (base, state) => ({
+                                ...base,
+                                backgroundColor: state.isFocused
+                                    ? isDarkMode ? "#3a3a3a" : "#f0f0f0"
+                                    : isDarkMode ? "#2c2c2c" : "#fff",
+                                color: isDarkMode ? "#fff" : "#000",
+                            }),
+                            singleValue: (base) => ({
+                                ...base,
+                                color: isDarkMode ? "#fff" : "#000",
+                            }),
+                        }}
+                    />
+                </div>
+                <div className="d-flex" style={{ gap: "20px" }}>
+                    <label htmlFor="productName">Product Name</label>
+                    {/* <select id="productName" style={{ padding: "0 1rem" }}>
+                        <option value={'all'}>All</option>
+                    </select> */}
+                    <Select
+                        id="productName"
+                        options={nameOptions}
+                        onChange={(e) => handleStateChange("name", e.value)}
+                        defaultValue={nameOptions[0]}
+                        isSearchable={true}
+                        styles={{
+                            control: (base) => ({
+                                ...base,
+                                paddingLeft: "1rem",
+                                paddingRight: "1rem",
+                                backgroundColor: isDarkMode ? "#6B6565" : "#fff",
+                                color: isDarkMode ? "#f1f1f1" : "#000",
+                                borderColor: isDarkMode ? "#444" : base.borderColor,
+                            }),
+                            menu: (base) => ({
+                                ...base,
+                                backgroundColor: isDarkMode ? "#6B6565" : "#fff",
+                                color: isDarkMode ? "#f1f1f1" : "#000",
+                            }),
+                            option: (base, state) => ({
+                                ...base,
+                                backgroundColor: state.isFocused
+                                    ? isDarkMode
+                                        ? "#6B6565"
+                                        : "#f0f0f0"
+                                    : isDarkMode
+                                        ? "#6B6565"
+                                        : "#fff",
+                                color: isDarkMode ? "#fff" : "#000",
+                            }),
+                            singleValue: (base) => ({
+                                ...base,
+                                color: isDarkMode ? "#fff" : "#000",
+                            }),
+                            input: (base) => ({
+                                ...base,
+                                color: isDarkMode ? "#fff" : "#000",
+                            }),
+                            placeholder: (base) => ({
+                                ...base,
+                                color: isDarkMode ? "#aaa" : "#888",
+                            }),
+                        }}
+                    />
+                </div>
+
+                <div className="d-flex" style={{ gap: "20px" }} >
+                    <label htmlFor="tag">Tag</label>
+                    <Select
+                        id="tag"
+                        options={tagOptions}
+                        onChange={(e) => handleStateChange("tag", e.value)}
+                        defaultValue={tagOptions[0]}
+                        isSearchable={true}
+                        styles={{
+                            control: (base) => ({
+                                ...base,
+                                paddingLeft: "1rem",
+                                paddingRight: "1rem",
+                                backgroundColor: isDarkMode ? "#6B6565" : "#fff",
+                                color: isDarkMode ? "#f1f1f1" : "#000",
+                                borderColor: isDarkMode ? "#555" : base.borderColor,
+                            }),
+                            menu: (base) => ({
+                                ...base,
+                                backgroundColor: isDarkMode ? "#6B6565" : "#fff",
+                                color: isDarkMode ? "#f1f1f1" : "#000",
+                            }),
+                            option: (base, state) => ({
+                                ...base,
+                                backgroundColor: state.isFocused
+                                    ? isDarkMode ? "#6B6565" : "#f0f0f0"
+                                    : isDarkMode ? "#6B6565" : "#fff",
+                                color: isDarkMode ? "#fff" : "#000",
+                            }),
+                            singleValue: (base) => ({
+                                ...base,
+                                color: isDarkMode ? "#fff" : "#000",
+                            }),
+                            input: (base) => ({
+                                ...base,
+                                color: isDarkMode ? "#fff" : "#000",
+                            }),
+                            placeholder: (base) => ({
+                                ...base,
+                                color: isDarkMode ? "#aaa" : "#888",
+                            }),
+                        }}
+                    />
+                </div>
+            </div>
+            <div className="w-100 d-flex justify-content-end fs-5">
+                <div className="w-50 d-flex justify-content-end gap-4">
+                    <button className="px-4 py-2 btn btn-primary fs-5">Search</button>
+                    <button className="px-4 py-2 btn btn-secondary fs-5">Clear</button>
+                </div>
+            </div>
+
+            <div>
+                Product list
+            </div>
+            <div style={{ maxHeight: "400px", overflowY: "auto", overflowX: "auto" }}>
+                <table className="min-w-full border border-gray-300">
+                    <thead className="bg-gray-100">
+                        <tr>
+                            <th className="border px-4 py-2">Type</th>
+                            <th className="border px-4 py-2">Name</th>
+                            <th className="border px-4 py-2">SKU</th>
+                            <th className="border px-4 py-2">Unit</th>
+                            <th className="border px-4 py-2">Price</th>
+                            <th className="border px-4 py-2">Stock Status</th>
+                            <th className="border px-4 py-2">Self Life</th>
+                            <th className="border px-4 py-2">MRP price</th>
+                            <th className="border px-4 py-2">Discount(%)</th>
+                            <th className="border px-4 py-2">Sale Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {products?.length ? (
+                            products.map((product) => (
+                                <tr key={product.id}>
+                                    <td className="border px-4 py-2">{product.type}</td>
+                                    <td className="border px-4 py-2">{product.name}</td>
+                                    <td className="border px-4 py-2">{product.sku}</td>
+                                    <td className="border px-4 py-2">{product.unit}</td>
+                                    <td className="border px-4 py-2">${product.price}</td>
+                                    <td className="border px-4 py-2">{product.stock_status}</td>
+                                    <td className="border px-4 py-2">{product.self_life}</td>
+                                    <td className="border px-4 py-2">{product.price}</td>
+                                    <td className="border px-4 py-2">{product.discount}</td>
+                                    <td className="border px-4 py-2">{product.sale_price}</td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="6" className="text-center py-4">
+                                    No products found.
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
+
+        </>
+    )
+}
 
 export default AllUsers;

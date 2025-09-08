@@ -56,7 +56,7 @@ export async function POST(request) {
     const token = jwt.sign(
       { userId: user.id, email: user.email },
       process.env.JWT_SECRET || "default_secret", // fallback in dev
-      { expiresIn: process.env.JWT_EXPIRES_IN || "1d" }
+      { expiresIn: parseInt(process.env.JWT_EXPIRES_IN || "86400", 10) }
     );
 
     // Fetch role name
@@ -127,7 +127,6 @@ export async function GET(request) {
     //Requires userId as query param: /api/user?action=activateUser&email=test@test.com&otp=134d
     if (action === "activateUser") {
       const email = searchParams.get("email");
-      console.log('............',email, action, otp)
       if (!email) {
         return NextResponse.json({ error: "Email is required" }, { status: 400 });
       }

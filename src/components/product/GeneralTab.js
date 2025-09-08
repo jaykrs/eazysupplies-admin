@@ -80,7 +80,12 @@ const GeneralTab = ({ values, setFieldValue, updateId }) => {
             inputprops: {
               name: "tax_id",
               id: "tax_id",
-              options: taxData || [],
+              options: [
+                  { id: "gst18", name: "GST 18%" },
+                  { id: "gst12", name: "GST 12%" },
+                  { id: "gst5", name: "GST 5%" },
+                  { id: "gst0", name: "gst 0%" },
+                ],
             },
           },
         ]}

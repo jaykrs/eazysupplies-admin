@@ -91,9 +91,20 @@ const SetupTab = ({ values, setFieldValue, errors, updateId }) => {
 
       <SimpleInputField nameList={[{ name: "unit", title: "Unit", placeholder: t("Enter Unit"), helpertext: "*Specify the measurement unit, such as 10 Pieces, 1 KG, 1 Ltr, etc." }]} />
 
-      <MultiSelectField errors={errors} values={values} setFieldValue={setFieldValue} name="tags" data={tagData || []} />
+      <SimpleInputField nameList={[{ name: "self_life", title: "Self Life", placeholder: t("Enter self life "), helpertext: "*Specify the measurement self life, such as 10 month, 1 year, 20 days, etc." }]} />
 
-      <MultiSelectField errors={errors} values={values} setFieldValue={setFieldValue} name="categories" require="true" data={categoryData || []} />
+      <MultiSelectField errors={errors} values={values} setFieldValue={setFieldValue} name="tags" data={
+        [
+          { id: "tag1", name: "Electronic" },
+          { id: "tag2", name: "Grocery" },
+          { id: "tag3", name: "Dress" },
+        ]
+      } />
+
+      <MultiSelectField errors={errors} values={values} setFieldValue={setFieldValue} name="categories" require="true" data={[
+        { id: 'BAR_SYRUP_CORNFLAKES', name: 'BAR SYRUP & CORNFLAKES' },
+        { id: 'ColdStore', name: 'BAR SYRUP & SAUCES, JAMS, CONDIMENTS, VINEGAR, PICKLE, MURABBA & JAM' },
+      ]} />
 
       <SearchableSelectInput
         nameList={[
@@ -103,7 +114,10 @@ const SetupTab = ({ values, setFieldValue, errors, updateId }) => {
             inputprops: {
               name: "brand_id",
               id: "brand_id",
-              options: BrandsData || [],
+              options: [
+                { id: 'WONDERFILLS', name: 'WONDERFILLS' },
+                { id: 'ROYAL_GROVE', name: 'ROYAL GROVE' }
+              ],
               close: true,
             },
           },
@@ -120,7 +134,10 @@ const SetupTab = ({ values, setFieldValue, errors, updateId }) => {
               inputprops: {
                 name: "related_products",
                 id: "related_products",
-                options: productData || [],
+                options: [
+                  { id: 'WONDERFILLS', name: 'WONDERFILLS' },
+                  { id: 'ROYAL_GROVE', name: 'ROYAL GROVE' }
+                ],
                 setsearch: setSearch,
                 helpertext: "*Choose a maximum of 6 products for effective related products display.",
               },
@@ -137,9 +154,13 @@ const SetupTab = ({ values, setFieldValue, errors, updateId }) => {
               inputprops: {
                 name: "cross_sell_products",
                 id: "cross_sell_products",
-                options: customCrossSellProduct(productData)?.map((elem) => {
-                  return { id: elem.id, name: elem.name, image: elem?.image || "/assets/images/placeholder.png" };
-                }),
+                options: [
+                  { id: 'WONDERFILLS', name: 'WONDERFILLS', image: "/assets/images/placeholder.png"},
+                  { id: 'ROYAL_GROVE', name: 'ROYAL GROVE',image: "/assets/images/placeholder.png" }
+                ],
+                // customCrossSellProduct(productData)?.map((elem) => {
+                //   return { id: elem.id, name: elem.name, image: elem?.image || "/assets/images/placeholder.png" };
+                // }),
                 setsearch: setSearch,
                 helpertext: "*Choose a maximum of 3 products for effective cross-selling display.",
               },

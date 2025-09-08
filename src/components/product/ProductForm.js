@@ -15,6 +15,7 @@ import AllProductTabs from "./widgets/AllProductTabs";
 import { ProductInitValues, ProductValidationSchema } from "./widgets/ProductObjects";
 import ProductSubmitFunction from "./widgets/ProductSubmitFunction";
 import useCustomQuery from "../../utils/hooks/useCustomQuery";
+  const axios = require('axios');
 
 const ProductForm = ({ updateId, title, buttonName, saveButton, setSaveButton }) => {
   const router = useRouter();
@@ -36,27 +37,72 @@ const ProductForm = ({ updateId, title, buttonName, saveButton, setSaveButton })
   const { role, accountData } = useContext(AccountContext);
 
   if (updateId && oldDataLoading) return <Loader />;
+
+  const handleProductCreate = async(values) => {
+ try{
+  console.log('................', values);
+   const res = await axios.post('/api/product',{
+      "name": values.name,
+      "short_description": values.short_description,
+      "type": values.product_type,
+      "unit": values.unit,
+      "weight": 10,
+      "quality": values.quantity,
+      "price": values.price,
+      "sale_price": values.sale_price,
+      "discount": values.discount,
+      "is_featured": 0,
+      "shipping_days": values.is_featured? 1: 0,
+      "external_url": values.external_url,
+      "external_button_text": values.external_button_text,
+      "sale_starts_at": values.sale_starts_at,
+      "sale_expired_at": values.sale_expired_at,
+      "sku": values.sku,
+      "stock_status": values.stock_status,
+      "meta_title": values.meta_title,
+      "meta_description": values.meta_description,
+      "product_thumbnail_id": 1, //values.product_thumbnail_id,
+      "product_meta_image_id": values.product_meta_image_id,
+      "size_chart_image_id": values.size_chart_image_id,
+      "self_life": "9 month"
+    },{withCredentials: true});
+
+    if(res.status == 200){
+      alert('product: ' + values.name + " added successfully!");
+      router.push("/product");
+    }
+
+  }catch(err){
+    console.log('.........',err)
+    alert(err.response.data.error);
+  }
+
+  }
+
   return (
     <Formik
       initialValues={{ ...watchEvent(oldData, updateId) }}
       validationSchema={YupObject({
         ...ProductValidationSchema,
         store_id: state?.isMultiVendor && role === "admin" && nameSchema,
-      })}
+      })
+      }
       onSubmit={(values) => {
         if (updateId) {
           values["_method"] = "put";
         }
-        ProductSubmitFunction(null, values, updateId);
+        // ProductSubmitFunction(null, values, updateId);
         // setResetKey(true);
-        router.push(`/product`);
-        
+        //router.push(`/product`);
+
+        handleProductCreate(values);
+
       }}
     >
       {({ values, setFieldValue, errors, touched, isSubmitting, setErrors, setTouched }) => (
         <Form className="theme-form theme-form-2 mega-form vertical-tabs">
           <Row>
-            <Col> 
+            <Col>
               <Card>
                 <div className="title-header option-title">
                   <h5>{t(title)}</h5>
@@ -68,10 +114,10 @@ const ProductForm = ({ updateId, title, buttonName, saveButton, setSaveButton })
                   <AllProductTabs setErrors={setErrors} setTouched={setTouched} touched={touched} values={values} activeTab={activeTab} isSubmitting={isSubmitting} setFieldValue={setFieldValue} errors={errors} updateId={updateId} setActiveTab={setActiveTab} />
                   <div className="ms-auto justify-content-end dflex-wgap mt-sm-4 mt-2 save-back-button">
                     <Btn className="btn-outline" title="Back" onClick={() => router.back()} />
-                    {updateId && <Btn className="btn-outline" type="submit" title={`save&Continue`} onClick={() => setSaveButton(true)} />}
-                    <Btn className="btn-primary" type="submit" title={buttonName}  />
+                    {/* {updateId && <Btn className="btn-outline" type="submit" title={`save&Continue`} onClick={() => setSaveButton(true)} />} */}
+                    <Btn className="btn-primary" type="submit" title={buttonName} />
                   </div>
-                </Row>  
+                </Row>
               </Card>
             </Col>
           </Row>

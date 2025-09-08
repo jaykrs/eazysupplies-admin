@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import product from "./product.json";
-import { parseAuthCookie, verifyJwt,verifyRole } from '../utils/jwt';
+import { parseAuthCookie, verifyJwt, verifyRole } from '../utils/jwt';
 import jwt from 'jsonwebtoken';
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
 
 // export async function GET(request) {
 //   const searchParams = request?.nextUrl?.searchParams;
@@ -74,79 +76,164 @@ import jwt from 'jsonwebtoken';
 
 
 export async function GET(request) {
-    const { searchParams } = new URL(request.url);
-    if(searchParams.get('productid') && !searchParams.get('tag')) {
+  const { searchParams } = new URL(request.url);
+  if (searchParams.get('productid') && !searchParams.get('type')) {
     const numValue = Number(searchParams.get('productid'));
     const product = await prisma.product.findUnique({
-        where: {
-            id: numValue
-        }
+      where: {
+        id: numValue
+      }
     })
     if (!product) {
-        return NextResponse.json({ error: 'product  does not exist' }, { status: 404 });
+      return NextResponse.json({ error: 'product  does not exist' }, { status: 404 });
     }
     return NextResponse.json({ message: 'product details', product });
-} else if(searchParams.get('tag') && !searchParams.get('productid')) {
+  } else if (searchParams.get('tag') && !searchParams.get('productid')) {
     const tag = searchParams.get('tag');
     if (!tag) {
-        return NextResponse.json({ error: 'Tag parameter is missing' }, { status: 400 });
+      return NextResponse.json({ error: 'Tag parameter is missing' }, { status: 400 });
     }
     const products = await prisma.product.findMany({
-        where: {
-            tag: {
-                contains: tag,
-            }
+      where: {
+        tag: {
+          contains: tag,
         }
+      }
     });
     if (!products || products.length === 0) {
-        return NextResponse.json({ error: 'No products found with that tag' }, { status: 404 });
+      return NextResponse.json({ error: 'No products found with that tag' }, { status: 404 });
     }
     return NextResponse.json({ message: 'product details', products });
-} else if(searchParams.get('products') && searchParams.get('products') === "all") {
+  } else if (searchParams.get('products') && searchParams.get('products') === "all") {
     const products = await prisma.product.findMany({});
     return NextResponse.json({ message: 'product list', products });
-}
-    // Return a default response or error if no conditions are met
-    return NextResponse.json({ error: 'Invalid request parameters' }, { status: 400 });
+  }
+  // Return a default response or error if no conditions are met
+  return NextResponse.json({ error: 'Invalid request parameters' }, { status: 400 });
 }
 
 export async function POST(request) {
+  try {
     const requestBody = await request.json();
+
     const token = parseAuthCookie(request.headers.get('cookie'));
+    const isValidToken = jwt.verify(token, process.env.JWT_SECRET);
     const payload = token ? verifyJwt(token) : null;
-     
-    if (!payload || (await verifyRole(payload.userId)) !== "admin") {
-        return NextResponse.json({ error: 'Unauthorized: Admin role required' }, { status: 403 });
+    if (!payload || (await verifyRole(payload.userId)).toLowerCase() !== 'admin') {
+      return NextResponse.json(
+        { error: 'Unauthorized: Admin role required' },
+        { status: 403 }
+      );
     }
+
+    // Destructure only allowed fields from request body to avoid mass-assignment
+    const {
+      name,
+      short_description,
+      type,
+      unit,
+      weight = 0,
+      quality = 0,
+      price = 0,
+      sale_price = 0,
+      discount = 0,
+      is_featured = 0,
+      shipping_days,
+      is_cod = 0,
+      is_free_shipping = 0,
+      is_sale_enable = 0,
+      is_return = 0,
+      is_trending = 0,
+      is_approved = 0,
+      is_external = 0,
+      external_url,
+      external_button_text,
+      sale_starts_at,
+      sale_expired_at,
+      sku,
+      is_random_related_products = 0,
+      stock_status,
+      meta_title,
+      meta_description,
+      product_thumbnail_id,
+      product_meta_image_id,
+      size_chart_image_id,
+      self_life
+    } = requestBody;
+
+    // Create the product
     const newProduct = await prisma.product.create({
-        data: requestBody,
+      data: {
+        name,
+        short_description,
+        type,
+        unit,
+        weight,
+        quality,
+        price,
+        sale_price,
+        discount,
+        is_featured,
+        shipping_days,
+        is_cod,
+        is_free_shipping,
+        is_sale_enable,
+        is_return,
+        is_trending,
+        is_approved,
+        is_external,
+        external_url,
+        external_button_text,
+        sale_starts_at: sale_starts_at ? new Date(sale_starts_at) : undefined,
+        sale_expired_at: sale_expired_at ? new Date(sale_expired_at) : undefined,
+        sku,
+        is_random_related_products,
+        stock_status,
+        meta_title,
+        meta_description,
+        product_thumbnail_id,
+        product_meta_image_id,
+        size_chart_image_id,
+        self_life
+      },
     });
-    return NextResponse.json({ message: 'product added', newProduct }, { status: 200 });
+
+    return NextResponse.json(
+      { message: 'Product created successfully', product: newProduct },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('[PRODUCT_CREATE_ERROR]', error);
+    return NextResponse.json(
+      { error: 'Failed to create product', detail: error?.message },
+      { status: 500 }
+    );
+  }
 }
 
 export async function PUT(request) {
-    const { searchParams } = new URL(request.url);
-    const numValue = Number(searchParams.get('productid'));
-    const requestBody = await request.json();
-    const token = parseAuthCookie(request.headers.get('cookie'));
-    const payload = token ? verifyJwt(token) : null;
+  const { searchParams } = new URL(request.url);
+  const numValue = Number(searchParams.get('productid'));
+  const requestBody = await request.json();
+  const token = parseAuthCookie(request.headers.get('cookie'));
+  const payload = token ? verifyJwt(token) : null;
 
-    if (!payload || (await verifyRole(payload.userId)) !== "admin") {
-        return NextResponse.json({ error: 'Unauthorized: Admin role required' }, { status: 403 });
+  if (!payload || (await verifyRole(payload.userId)) !== "admin") {
+    return NextResponse.json({ error: 'Unauthorized: Admin role required' }, { status: 403 });
+  }
+  const product = await prisma.product.findUnique({
+    where: {
+      id: numValue
     }
-    const product = await prisma.product.findUnique({
-        where: {
-            id: numValue
-        }
-    })
-    if (!product) {
-        return NextResponse.json({ error: 'Product does not exist' }, { status: 404 });
+  })
+  if (!product) {
+    return NextResponse.json({ error: 'Product does not exist' }, { status: 404 });
+  }
+  const newProduct = await prisma.product.update({
+    data: requestBody,
+    where: {
+      id: numValue
     }
-    const newProduct = await prisma.product.update({
-        data: requestBody,
-        where: {
-            id: numValue
-        }
-    });
-    return NextResponse.json({ message: 'product updated', newProduct }, { status: 200 });
+  });
+  return NextResponse.json({ message: 'product updated', newProduct }, { status: 200 });
 }
