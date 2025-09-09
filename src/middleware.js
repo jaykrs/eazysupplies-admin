@@ -12,21 +12,29 @@ const PUBLIC_ROUTES = [
 export async function middleware(request) {
   const token = request.cookies.get('authToken')?.value;
   const { pathname } = request.nextUrl;
-
+  const res = NextResponse.next();
+  // add the CORS headers to the response
+    res.headers.append('Access-Control-Allow-Credentials', "true")
+    res.headers.append('Access-Control-Allow-Origin', '*') // replace this your actual origin
+    res.headers.append('Access-Control-Allow-Methods', 'GET,DELETE,PATCH,POST,PUT,OPTIONS')
+    res.headers.append(
+        'Access-Control-Allow-Headers',
+        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    )
   const isPublicRoute = PUBLIC_ROUTES.some((route) =>
     pathname === route || pathname.startsWith(`${route}/`)
   );
   if (isPublicRoute) {
     // If user is already logged in and tries to visit a public/auth page ? redirect to dashboard
     if (token) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
+      return res(new URL('/dashboard', request.url));
     }
-    return NextResponse.next();
+    return res;
   }
   if (!token) {
-    return NextResponse.redirect(new URL('/auth/login', request.url));
+    return res(new URL('/auth/login', request.url));
   }
-  return NextResponse.next();
+  return res;
 }
 
 export const config = {
