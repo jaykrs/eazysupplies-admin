@@ -23,6 +23,14 @@ export async function middleware(request) {
     }
     return NextResponse.next();
   }
+  if (request.nextUrl.pathname.startsWith('/api')) {
+    const response = NextResponse.next();
+    response.headers.set('Access-Control-Allow-Origin', '*');
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    response.headers.set('Access-Control-Allow-Credentials', 'true'); // If you need to send cookies/credentials
+    return response;
+  }
   if (!token) {
     return NextResponse.redirect(new URL('/auth/login', request.url));
   }
@@ -32,6 +40,7 @@ export async function middleware(request) {
 export const config = {
   matcher: [
     "/",
+    '/api/:path*',
     "/account",
     "/attachment/:path*",
     "/attribute/:path*",
