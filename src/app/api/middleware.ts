@@ -5,25 +5,16 @@ import { parseAuthCookie, verifyJwt } from './utils/jwt';
 export async function middleware(request: NextRequest) {
   const token = parseAuthCookie(request.headers.get('cookie'));
   const isProtectedRoute = !request.nextUrl.pathname.startsWith('/login');
-
-  if (isProtectedRoute) {
-    if (!token) {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-
-    const payload = verifyJwt(token);
-    if (!payload) {
-      const response = NextResponse.redirect(new URL('/login', request.url));
-      response.cookies.delete('authToken');
-      return response;
-    }
-  } else {
-    if (token && verifyJwt(token)) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
-  }
-
-  return NextResponse.next();
+  const res = NextResponse.next();
+  // add the CORS headers to the response
+    res.headers.append('Access-Control-Allow-Credentials', "true")
+    res.headers.append('Access-Control-Allow-Origin', '*') // replace this your actual origin
+    res.headers.append('Access-Control-Allow-Methods', 'GET,DELETE,PATCH,POST,PUT')
+    res.headers.append(
+        'Access-Control-Allow-Headers',
+        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    )
+  return res;
 }
 
 export const config = {
