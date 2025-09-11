@@ -2,7 +2,7 @@ import { descriptionSchema, discountSchema, dropDownScheme, ifTypeSimpleSchema, 
 
 export const ProductValidationSchema = {
   name: nameSchema,
-  short_description: nameSchema,
+   short_description: nameSchema,
   description: descriptionSchema,
   stock_status: nameSchema,
   external_url: externalUrlSchema,

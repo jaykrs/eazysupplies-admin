@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `brand` MODIFY `status` INTEGER NOT NULL DEFAULT 0;

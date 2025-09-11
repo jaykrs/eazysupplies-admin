@@ -40,7 +40,6 @@ const ProductForm = ({ updateId, title, buttonName, saveButton, setSaveButton })
 
   const handleProductCreate = async(values) => {
  try{
-  console.log('................', values);
    const res = await axios.post('/api/product',{
       "name": values.name,
       "short_description": values.short_description,
