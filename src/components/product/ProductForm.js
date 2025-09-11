@@ -61,13 +61,13 @@ const ProductForm = ({ updateId, title, buttonName, saveButton, setSaveButton })
       "meta_title": values.meta_title,
       "meta_description": values.meta_description,
       "product_thumbnail_id": 1, //values.product_thumbnail_id,
-      "product_meta_image_id": values.product_meta_image_id,
-      "size_chart_image_id": values.size_chart_image_id,
+     // "product_meta_image_id": values.product_meta_image_id,
+      //"size_chart_image_id": values.size_chart_image_id,
       "self_life": values.self_life,
       "brand": values.brand_id
     },{withCredentials: true});
 
-    if(res.status == 200){
+    if(res.status == 201){
       alert('product: ' + values.name + " added successfully!");
       router.push("/product");
     }

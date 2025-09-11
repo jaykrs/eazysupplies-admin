@@ -61,7 +61,7 @@ const GeneralTab = ({ values, setFieldValue, updateId }) => {
       <SimpleInputField
         nameList={[
           { name: "name", require: "true", placeholder: t("EnterName") },
-          // { name: "short_description", require: "true", title: "Description", type: "textarea", rows: 3, placeholder: t("EnterShortDescription"), helpertext: "*Maximum length should be 300 characters." },
+           { name: "short_description", require: "true", title: "Short Description", type: "textarea", rows: 3, placeholder: t("EnterShortDescription"), helpertext: "*Maximum length should be 300 characters." },
         ]}
       />
       <DescriptionInput
