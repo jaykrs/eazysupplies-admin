@@ -20,7 +20,7 @@ const MESSAGES = {
 
 export async function GET() {
   let res = await prisma.tag.findMany({});
-  return NextResponse.json({data: res}, {status: 200});
+  return NextResponse.json({ data: res }, { status: 200 });
 }
 
 export async function POST(request) {
@@ -37,16 +37,18 @@ export async function POST(request) {
     }
     const {
       name,
-      ImagePath,
-      BannerPath,
-      Description
+      slug,
+      type,
+      description,
+      status
     } = body;
     const tag = await prisma.tag.create({
       data: {
         name,
-        ImagePath,
-        BannerPath,
-        Description
+        slug,
+        type,
+        description,
+        status
       }
     })
 
@@ -73,9 +75,9 @@ export async function PUT(request) {
     }
     const {
       name,
-      ImagePath,
-      BannerPath,
-      Description
+      type,
+      description,
+      status
     } = body
 
     const tag = await prisma.tag.findUnique({
@@ -89,9 +91,9 @@ export async function PUT(request) {
     const newTag = await prisma.tag.update({
       data: {
         name,
-        ImagePath,
-        BannerPath,
-        Description
+        type,
+        description,
+        status
       },
       where: {
         id: id

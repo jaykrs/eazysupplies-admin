@@ -19,41 +19,65 @@ const MESSAGES = {
 
 export async function GET() {
   let res = await prisma.category.findMany({});
-    return NextResponse.json({data: res}, {status: 200});
+  return NextResponse.json({ data: res }, { status: 200 });
 }
 
 export async function POST(request) {
-
   try {
     const body = await request.json();
     const token = parseAuthCookie(request.headers.get('cookie'));
     const payload = token ? verifyJwt(token) : null;
+
     if (!payload || (await verifyRole(payload.userId)).toLowerCase() !== 'admin') {
       return NextResponse.json(
         { error: 'Unauthorized: Admin role required' },
         { status: 403 }
       );
     }
+
     const {
       name,
-      ImagePath,
-      BannerPath,
-      Description
-    } = body
+      slug,
+      type,
+      description,
+      status = 1,
+      metaTitle,
+      metaDescription,
+      commissionRate,
+      parentId,
+      categoryImageId,
+      categoryMetaImageId,
+      categoryIconId,
+      blogId,
+      productId
+    } = body;
 
     const category = await prisma.category.create({
       data: {
         name,
-        ImagePath,
-        BannerPath,
-        Description
+        slug,
+        type,
+        description: description || undefined,
+        status: Number(status),
+        metaTitle: metaTitle || undefined,
+        metaDescription: metaDescription || undefined,
+        commissionRate: commissionRate || undefined,
+        parentId: parentId || undefined,
+        categoryImageId: categoryImageId || undefined,
+        categoryMetaImageId: categoryMetaImageId || undefined,
+        categoryIconId: categoryIconId || undefined,
+        createdById: Number(payload.userId),
+        createdAt: new Date(), // Required field unless you add default in schema
+        blogId: blogId || undefined,
+        productId: productId || undefined
       }
-    })
+    });
 
-    return NextResponse.json({ message: 'Category created successfully', category }, {status:201})
+    return NextResponse.json({ message: 'Category created successfully', category }, { status: 201 });
+
   } catch (error) {
-    console.error('Error creating category:', error)
-    return NextResponse.json({ message: 'Internal server error', error }, {status: 500})
+    console.error('Error creating category:', JSON.stringify(error, null, 2));
+    return NextResponse.json({ message: 'Internal server error', error }, { status: 500 });
   }
 }
 
@@ -73,9 +97,18 @@ export async function PUT(request) {
     }
     const {
       name,
-      ImagePath,
-      BannerPath,
-      Description
+      type,
+      description,
+      status ,
+      metaTitle,
+      metaDescription,
+      commissionRate,
+      parentId,
+      categoryImageId,
+      categoryMetaImageId,
+      categoryIconId,
+      blogId,
+      productId
     } = body
 
     const category = await prisma.category.findUnique({
@@ -89,9 +122,18 @@ export async function PUT(request) {
     const newCategory = await prisma.category.update({
       data: {
         name,
-        ImagePath,
-        BannerPath,
-        Description
+        type,
+        description,
+        metaTitle,
+        metaDescription,
+        status,
+        commissionRate,
+        parentId,
+        categoryImageId,
+        categoryMetaImageId,
+        categoryIconId,
+        blogId,
+        productId
       },
       where: {
         id: id
@@ -100,6 +142,6 @@ export async function PUT(request) {
     return NextResponse.json({ message: 'Category updated', newCategory }, { status: 200 });
   } catch (error) {
     console.error('Error creating category:', error)
-    return NextResponse.json({ message: 'Internal server error', error }, {status: 500})
+    return NextResponse.json({ message: 'Internal server error', error }, { status: 500 })
   }
 }

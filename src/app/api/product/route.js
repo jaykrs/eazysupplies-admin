@@ -118,6 +118,7 @@ export async function POST(request) {
 
     const token = parseAuthCookie(request.headers.get('cookie'));
     const payload = token ? verifyJwt(token) : null;
+
     if (!payload || (await verifyRole(payload.userId)).toLowerCase() !== 'admin') {
       return NextResponse.json(
         { error: 'Unauthorized: Admin role required' },
@@ -125,81 +126,130 @@ export async function POST(request) {
       );
     }
 
-    // Destructure only allowed fields from request body to avoid mass-assignment
     const {
       name,
+      short_description,
       description,
       type,
       unit,
-      packing,
-      HsnHac,
       weight,
-      quality,
-      price,
-      salePrice,
-      discount,
-      buyPrice,
-      isFeatured,
-      isFreeShipping,
-      isAvailable,
-      isReturn,
-      approved,
-      url,
+      quantity,
+      price = 0,
+      sale_price = 0,
+      discount = 0,
+      is_featured = 0,
+      shipping_days = 0,
+      is_cod = 0,
+      is_free_shipping = 0,
+      is_sale_enable = 0,
+      is_return = 0,
+      is_trending = 0,
+      is_approved = 0,
+      is_external = 0,
+      external_url,
+      external_button_text,
+      sale_starts_at,
+      sale_expired_at,
       sku,
-      stockCount,
-      title,
-      thumbnailPath,
-      imagePath,
-      sizeChart,
-      maxDt,
-      expDt,
-      category,
-      tag,
-      brand,
-      rating,
-      license
+      is_random_related_products = 0,
+      stock_status,
+      meta_title,
+      meta_description,
+      product_thumbnail_id,
+      product_meta_image_id,
+      size_chart_image_id,
+      estimated_delivery_text,
+      return_policy_text,
+      safe_checkout = 0,
+      secure_checkout = 0,
+      social_share = 0,
+      encourage_order,
+      encourage_view,
+      slug,
+      status = 0,
+      store_id,
+      tax_id,
+      preview_type,
+      product_type,
+      separator,
+      is_licensable = false,
+      license_type,
+      preview_url,
+      watermark = false,
+      watermark_position,
+      brand_id,
+      watermark_image_id,
+      wholesale_price_type,
+      is_licensekey_auto = false,
+      preview_audio_file_id,
+      preview_video_file_id
     } = requestBody;
 
-    // Create the product
     const newProduct = await prisma.product.create({
       data: {
         name,
+        short_description,
         description,
         type,
         unit,
-        packing,
-        HsnHac,
         weight,
-        quality,
+        quantity,
         price,
-        salePrice,
+        sale_price,
         discount,
-        buyPrice,
-        isFeatured,
-        isFreeShipping,
-        isAvailable,
-        isReturn,
-        approved,
-        url,
+        is_featured,
+        shipping_days,
+        is_cod,
+        is_free_shipping,
+        is_sale_enable,
+        is_return,
+        is_trending,
+        is_approved,
+        is_external,
+        external_url,
+        external_button_text,
+        sale_starts_at,
+        sale_expired_at,
         sku,
-        stockCount,
-        title,
-        thumbnailPath,
-        imagePath,
-        sizeChart,
-        maxDt,
-        expDt,
-        category,
-        tag,
-        brand,
-        rating,
-        license
-      },
+        is_random_related_products,
+        stock_status,
+        meta_title,
+        meta_description,
+        product_thumbnail_id,
+        product_meta_image_id,
+        size_chart_image_id,
+        estimated_delivery_text,
+        return_policy_text,
+        safe_checkout,
+        secure_checkout,
+        social_share,
+        encourage_order,
+        encourage_view,
+        slug,
+        status,
+        store_id,
+        tax_id,
+        preview_type,
+        product_type,
+        separator,
+        is_licensable,
+        license_type,
+        preview_url,
+        watermark,
+        watermark_position,
+        brand_id,
+        watermark_image_id,
+        wholesale_price_type,
+        is_licensekey_auto,
+        preview_audio_file_id,
+        preview_video_file_id,
+        created_by_id: String(payload.userId),
+      }
     });
 
     return NextResponse.json(
       { message: 'Product created successfully', product: newProduct },
-      { status: 200 }
+      { status: 201 }
     );
   } catch (error) {
     console.error('[PRODUCT_CREATE_ERROR]', error);
@@ -211,28 +261,155 @@ export async function POST(request) {
 }
 
 export async function PUT(request) {
-  const { searchParams } = new URL(request.url);
-  const numValue = Number(searchParams.get('productid'));
-  const requestBody = await request.json();
-  const token = parseAuthCookie(request.headers.get('cookie'));
-  const payload = token ? verifyJwt(token) : null;
+  try {
+    const { searchParams } = new URL(request.url);
+    const productId = Number(searchParams.get("productid"));
 
-  if (!payload || (await verifyRole(payload.userId)) !== "admin") {
-    return NextResponse.json({ error: 'Unauthorized: Admin role required' }, { status: 403 });
-  }
-  const product = await prisma.product.findUnique({
-    where: {
-      id: numValue
+    if (isNaN(productId)) {
+      return NextResponse.json({ error: "Invalid product ID" }, { status: 400 });
     }
-  })
-  if (!product) {
-    return NextResponse.json({ error: 'Product does not exist' }, { status: 404 });
-  }
-  const newProduct = await prisma.product.update({
-    data: requestBody,
-    where: {
-      id: numValue
+
+    const body = await request.json();
+    const token = parseAuthCookie(request.headers.get("cookie"));
+    const payload = token ? verifyJwt(token) : null;
+
+    if (!payload || (await verifyRole(payload.userId)).toLowerCase() !== "admin") {
+      return NextResponse.json({ error: "Unauthorized: Admin role required" }, { status: 403 });
     }
-  });
-  return NextResponse.json({ message: 'product updated', newProduct }, { status: 200 });
+
+    const existingProduct = await prisma.product.findUnique({
+      where: { id: productId }
+    });
+
+    if (!existingProduct) {
+      return NextResponse.json({ error: "Product does not exist" }, { status: 404 });
+    }
+
+    const {
+      name,
+      short_description,
+      description,
+      type,
+      unit,
+      weight,
+      quantity,
+      price,
+      sale_price,
+      discount,
+      is_featured,
+      shipping_days,
+      is_cod,
+      is_free_shipping,
+      is_sale_enable,
+      is_return,
+      is_trending,
+      is_approved,
+      is_external,
+      external_url,
+      external_button_text,
+      sale_starts_at,
+      sale_expired_at,
+      sku,
+      is_random_related_products,
+      stock_status,
+      meta_title,
+      meta_description,
+      product_thumbnail_id,
+      product_meta_image_id,
+      size_chart_image_id,
+      estimated_delivery_text,
+      return_policy_text,
+      safe_checkout,
+      secure_checkout,
+      social_share,
+      encourage_order,
+      encourage_view,
+      slug,
+      status,
+      store_id,
+      tax_id,
+      preview_type,
+      product_type,
+      separator,
+      is_licensable,
+      license_type,
+      preview_url,
+      watermark,
+      watermark_position,
+      brand_id,
+      watermark_image_id,
+      wholesale_price_type,
+      is_licensekey_auto,
+      preview_audio_file_id,
+      preview_video_file_id
+    } = body;
+
+    const updatedProduct = await prisma.product.update({
+      where: { id: productId },
+      data: {
+        name,
+        short_description,
+        description,
+        type,
+        unit,
+        weight,
+        quantity,
+        price,
+        sale_price,
+        discount,
+        is_featured,
+        shipping_days,
+        is_cod,
+        is_free_shipping,
+        is_sale_enable,
+        is_return,
+        is_trending,
+        is_approved,
+        is_external,
+        external_url,
+        external_button_text,
+        sale_starts_at: sale_starts_at ? new Date(sale_starts_at) : undefined,
+        sale_expired_at: sale_expired_at ? new Date(sale_expired_at) : undefined,
+        sku,
+        is_random_related_products,
+        stock_status,
+        meta_title,
+        meta_description,
+        product_thumbnail_id,
+        product_meta_image_id,
+        size_chart_image_id,
+        estimated_delivery_text,
+        return_policy_text,
+        safe_checkout,
+        secure_checkout,
+        social_share,
+        encourage_order,
+        encourage_view,
+        slug,
+        status,
+        store_id,
+        tax_id,
+        preview_type,
+        product_type,
+        separator,
+        is_licensable,
+        license_type,
+        preview_url,
+        watermark,
+        watermark_position,
+        brand_id,
+        watermark_image_id,
+        wholesale_price_type,
+        is_licensekey_auto,
+        preview_audio_file_id,
+        preview_video_file_id
+      }
+    });
+
+    return NextResponse.json({ message: "Product updated", product: updatedProduct }, { status: 200 });
+  } catch (error) {
+    console.error("[PRODUCT_UPDATE_ERROR]", error);
+    return NextResponse.json({ error: "Failed to update product", detail: error?.message }, { status: 500 });
+  }
 }
+
