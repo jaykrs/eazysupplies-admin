@@ -40,7 +40,7 @@ export async function verifyAdmin(request) {
 export async function verifyRole(userId: number): Promise<string> {
   const user = await findUserById(userId);
   if (!user) return "";
-  if(user.status != 1) return "";
+  if(!user.status) return "";
   const roles = await prisma.role.findUnique({where: {id : user.roleId}});
 
   return roles.name; 
