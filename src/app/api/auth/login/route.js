@@ -42,7 +42,7 @@ export async function POST(request) {
     }
 
     // Check user status
-    if (user.status !== 1) {
+    if (!user.status) {
       return NextResponse.json({ error: MESSAGES.USER_INACTIVE }, { status: 401 });
     }
 
@@ -144,7 +144,7 @@ export async function GET(request) {
       if (otp > 0 && user.otp == otp) {
         await prisma.user.update({
           where: { id: parseInt(user.id) },
-          data: { status: 1 },
+          data: { status: true },
         });
         return NextResponse.json({ message: MESSAGES.USER_ACTIVATED }, {status:200});
       }

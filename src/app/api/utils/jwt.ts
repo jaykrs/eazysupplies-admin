@@ -22,6 +22,21 @@ export function verifyJwt(token: string) {
   }
 }
 
+function authenticate(request) {
+    const token = parseAuthCookie(request.headers.get("cookie"));
+    return token ? verifyJwt(token) : null;
+}
+
+export async function verifyAdmin(request) {
+  try {
+    const payload = authenticate(request);
+    const userRole = await verifyRole(payload.userId);
+    return userRole == 'admin';
+  } catch (error) {
+    return null;
+  }
+}
+
 export async function verifyRole(userId: number): Promise<string> {
   const user = await findUserById(userId);
   if (!user) return "";
