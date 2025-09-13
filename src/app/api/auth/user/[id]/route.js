@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { parseAuthCookie, verifyJwt, verifyAdmin } from "../utils/jwt";
+import { parseAuthCookie, verifyJwt, verifyAdmin } from "../../../utils/jwt";
 import { hashSync } from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
 
