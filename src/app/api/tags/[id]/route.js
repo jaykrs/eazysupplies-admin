@@ -6,7 +6,7 @@ export async function GET(request, { params }) {
 try {
     const id = (await params).id;
 const tag = await prisma.tag.findUnique({ where: { id: Number(id) } });
-return NextResponse.json(shipping);
+return NextResponse.json(tag);
 } catch (Error) {
     console.log(Error);
 }

@@ -115,7 +115,7 @@ export async function GET(request) {
       // Generate a temporary token (simulate)
       await prisma.user.update({
         where: { id: parseInt(user.id) },
-        data: { otp: random },
+        data: { password: random },
       });
       // Here you would normally send email with token otp
       // For now, just return token in response
