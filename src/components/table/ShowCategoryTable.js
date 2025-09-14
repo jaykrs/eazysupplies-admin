@@ -13,7 +13,7 @@ import Options from "./Options";
 import Status from "./Status";
 import TableLoader from "./TableLoader";
 
-const ShowTable = ({ current_page, per_page, mutate, isCheck, setIsCheck, url, sortBy, setSortBy, headerData, fetchStatus, moduleName, type, redirectLink, refetch, keyInPermission, link }) => {
+const ShowTableCategory = ({ current_page, per_page, mutate, isCheck, setIsCheck, url, sortBy, setSortBy, headerData, fetchStatus, moduleName, type, redirectLink, refetch, keyInPermission, link }) => {
   const { t } = useTranslation("common");
   const { convertCurrency } = useContext(SettingContext);
   const [edit] = usePermissionCheck(["edit", "destroy"]);
@@ -67,10 +67,8 @@ const ShowTable = ({ current_page, per_page, mutate, isCheck, setIsCheck, url, s
   };
 
   const handleEdit = (tableData) => {
-     localStorage.setItem('tagUpdateDetails', tableData)
-     console.log('tableData',tableData);
      if(isCheck.length> 0){
-      router.push('/tag/edit/' + tableData?.id);
+      router.push('/category/edit/' + tableData?.id);
      }
   }
   return (
@@ -119,9 +117,7 @@ const ShowTable = ({ current_page, per_page, mutate, isCheck, setIsCheck, url, s
                 </td>
               )}
               <>
-              
                 <td>{tableData?.name}</td>
-                <td>{tableData?.description}</td>
                 <td>
                   <div className="d-flex gap-2">
                     <button onClick={() => handleEdit(tableData)}  style={{padding:"4px 6px", fontSize:"12px"}} className="btn btn-warning">Edit</button>
@@ -144,4 +140,4 @@ const ShowTable = ({ current_page, per_page, mutate, isCheck, setIsCheck, url, s
   );
 };
 
-export default ShowTable;
+export default ShowTableCategory;

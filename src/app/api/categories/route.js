@@ -2,8 +2,24 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-export async function GET() {
-  return NextResponse.json(await prisma.category.findMany());
+export async function GET(request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = Number(searchParams.get('categoryId'));
+    let res;
+    if (id) {
+      const res = await prisma.category.findUnique({
+        where: {
+          id: id
+        }
+      })
+      return NextResponse.json({ data: res ? res : [] }, { status: 200 });
+    }
+    res = await prisma.category.findMany();
+    return NextResponse.json({ data: res }, { status: 200 });
+  } catch (err) {
+    return NextResponse.json({ error: MESSAGES.SERVER_ERROR }, { status: 500 });
+  }
 }
 
 export async function POST(request) {

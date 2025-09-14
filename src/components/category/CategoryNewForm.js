@@ -13,7 +13,7 @@ import FileUploadField from "../inputFields/FileUploadField";
 import SimpleInputField from "../inputFields/SimpleInputField";
 import useCustomQuery from "@/utils/hooks/useCustomQuery";
 import axios from "axios";
-const BrandForm = ({ updateId, buttonName }) => {
+const CategoryNewForm = ({ updateId, buttonName }) => {
   const { t } = useTranslation("common");
   const router = useRouter();
   const [data, setData] = useState({});
@@ -25,7 +25,7 @@ const BrandForm = ({ updateId, buttonName }) => {
   const fetchDetails = async () => {
     try {
       setIsLoading(true);
-      let res = await axios.get('/api/brands?brandId=' + updateId);
+      let res = await axios.get('/api/categories?categoryId=' + updateId);
       if (res.status == 200) {
         setData(res.data.data);
       }
@@ -40,24 +40,24 @@ const BrandForm = ({ updateId, buttonName }) => {
     try {
       setIsLoading(true);
       if (buttonName == "Update") {
-        const res = await axios.put('/api/brands?brandId=' + updateId, {
+        const res = await axios.put('/api/categories?categoryId=' + updateId, {
           "name": values.name,
         }, { withCredentials: true });
 
         if (res.status == 200) {
-          alert('Brand: ' + values.name + " updated successfully!");
-          router.push("/brand");
+          alert('Category: ' + values.name + " updated successfully!");
+          router.push("/category");
         }
 
       } else {
-        const res = await axios.post('/api/brands', {
+        const res = await axios.post('/api/categories', {
           "name": values.name,
           // "description": values.description,
         }, { withCredentials: true });
 
         if (res.status == 201) {
-          alert('Brand: ' + values.name + " added successfully!");
-          router.push("/brand");
+          alert('Category: ' + values.name + " added successfully!");
+          router.push("/category");
         }
       }
       setIsLoading(false);
@@ -112,4 +112,4 @@ const BrandForm = ({ updateId, buttonName }) => {
   );
 };
 
-export default BrandForm;
+export default CategoryNewForm;
