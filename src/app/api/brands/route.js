@@ -38,6 +38,7 @@ export async function POST(request) {
       return NextResponse.json(await prisma.brand.create({ data: body }), { status: 201 });
     }
   } catch (Error) {
+	  console.log(Error);
     return NextResponse.json(
       { error: MESSAGES.SERVER_ERROR },
       { status: 500 }
@@ -53,6 +54,7 @@ export async function PUT(request) {
       return NextResponse.json(await prisma.brand.update({ where: { id }, data: rest }));
     }
   } catch (Error) {
+	  console.log(Error);
     return NextResponse.json(
       { error: MESSAGES.SERVER_ERROR },
       { status: 500 }
