@@ -12,8 +12,7 @@ const AllTagsTable = ({ data, ...props }) => {
     optionHead: { title: "Action" },
     column: [
       { title: "Name", apiKey: "name", sorting: true, sortBy: "desc" },
-      { title: "CreateAt", apiKey: "created_at", sorting: true, sortBy: "desc", type: "date" },
-      { title: "Status", apiKey: "status", type: "switch" }
+      { title: "Description", apiKey: "description", sorting: true }
     ],
     data: data || []
   };

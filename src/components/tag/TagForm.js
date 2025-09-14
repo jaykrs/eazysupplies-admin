@@ -1,6 +1,6 @@
 import { Form, Formik } from "formik";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Row } from "reactstrap";
 import FormBtn from "../../elements/buttons/FormBtn";
@@ -10,29 +10,77 @@ import Loader from "../commonComponent/Loader";
 import CheckBoxField from "../inputFields/CheckBoxField";
 import SimpleInputField from "../inputFields/SimpleInputField";
 import useCustomQuery from "@/utils/hooks/useCustomQuery";
+import axios from "axios";
 
-const TagForm = ({  updateId, type, buttonName }) => {
+const TagForm = ({ updateId, type, buttonName }) => {
   const { t } = useTranslation("common");
   const router = useRouter();
-  const { data: oldData, isLoading, refetch } = useCustomQuery(["role/id"], () => request({ url: `tag/${updateId}` }, router), { refetchOnMount: false, enabled: false });
+  const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
-    updateId && refetch();
+    fetchDetails();
   }, [updateId]);
+
+  const fetchDetails = async () => {
+    try {
+      setIsLoading(true);
+      let res = await axios.get('/api/tag?tagId=' + updateId);
+      if (res.status == 200) {
+        console.log('........res', res);
+        setData(res.data.data);
+
+      }
+      setIsLoading(false);
+    } catch (err) {
+      console.log('........err', err);
+      alert('something went wrong');
+    }
+  }
   if (updateId && isLoading) return <Loader />;
 
+  const handleSubmit = async (values) => {
+    try {
+      setIsLoading(true);
+      console.log('update started...', buttonName);
+      if (buttonName == "Update") {
+        console.log('update started...');
+        const res = await axios.put('/api/tag?tagId=' + updateId, {
+          "description": values.description,
+        }, { withCredentials: true });
+
+        if (res.status == 200) {
+          alert('product: ' + values.name + " updated successfully!");
+          router.push("/tag");
+        }
+
+      } else {
+        const res = await axios.post('/api/tag', {
+          "name": values.name,
+          "description": values.description,
+        }, { withCredentials: true });
+
+        if (res.status == 201) {
+          alert('product: ' + values.name + " added successfully!");
+          router.push("/tag");
+        }
+      }
+      setIsLoading(false);
+    } catch (err) {
+      console.log('.........', err)
+      alert(err.response.data.error);
+    }
+  }
+
   return (
-    <Formik 
+    <Formik
       enableReinitialize
       initialValues={{
-        name: updateId ? oldData?.data?.name || "" : "",
-        type: type,
-        description: updateId ? oldData?.data?.description : "",
-        status: updateId ? Boolean(Number(oldData?.data?.status)) : true,
+        name: data.length > 1? data[0]?.name: "",
+        description: data.length > 1? data[0]?.description: ""
       }}
       validationSchema={YupObject({ name: nameSchema })}
       onSubmit={(values) => {
-        router.push("/tag");
-        // Put Add Or Update Logic Here
+        handleSubmit(values)
       }}
     >
       {() => (
@@ -40,12 +88,11 @@ const TagForm = ({  updateId, type, buttonName }) => {
           <Row>
             <SimpleInputField
               nameList={[
-                { name: "name", placeholder: t("EnterTagName"), require: "true" },
-                { name: "description", type: "textarea", title: "Description", placeholder: t("EnterDescription") },
+                ...(updateId ? [] : [{ name: "name", placeholder: t("EnterTagName"), require: "true" }]),
+                { name: "description", type: "textarea", title: "Description", placeholder: t("EnterDescription") }
               ]}
             />
-            <CheckBoxField name="status" />
-            <FormBtn  buttonName={buttonName} />
+            <FormBtn buttonName={buttonName} />
           </Row>
         </Form>
       )}

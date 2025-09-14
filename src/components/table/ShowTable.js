@@ -19,7 +19,8 @@ const ShowTable = ({ current_page, per_page, mutate, isCheck, setIsCheck, url, s
   const [edit] = usePermissionCheck(["edit", "destroy"]);
   const [colSpan, setColSpan] = useState();
   const router = useRouter();
-  const originalDataLength = headerData?.data?.filter((elem) => elem.system_reserve == "1").length;
+  //  const originalDataLength = headerData?.data?.data?.filter((elem) => elem.system_reserve == "1").length;
+  const originalDataLength = headerData?.data?.data?.length;
   /* Select All Data */
   const handleChange = (result) => {
     if (isCheck?.includes(result.id)) {
@@ -64,6 +65,14 @@ const ShowTable = ({ current_page, per_page, mutate, isCheck, setIsCheck, url, s
       return mainData;
     }
   };
+
+  const handleEdit = (tableData) => {
+     localStorage.setItem('tagUpdateDetails', tableData)
+     console.log('tableData',tableData);
+     if(isCheck.length> 0){
+      router.push('/tag/edit/' + tableData?.id);
+     }
+  }
   return (
     <Table id="table_id" className={`role-table ${headerData?.noCustomClass ? "" : "refund-table"} all-package theme-table datatable-wrapper`}>
       <TableLoader fetchStatus={fetchStatus} />
@@ -75,10 +84,10 @@ const ShowTable = ({ current_page, per_page, mutate, isCheck, setIsCheck, url, s
                 <Input
                   className="custom-control-input checkbox_animated"
                   type={"checkbox"}
-                  checked={headerData?.data?.length > 0 && isCheck?.length == headerData?.data?.length}
-                  disabled={originalDataLength == headerData?.data?.length ? true : false}
+                  checked={headerData?.data?.data?.length > 0 && isCheck?.length == headerData?.data?.data?.length}
+                  disabled={originalDataLength == headerData?.data?.data?.length ? true : false}
                   onChange={(e) => {
-                    e.target.checked ? setIsCheck([...headerData?.data?.map((item) => item.id)]) : setIsCheck([]);
+                    e.target.checked ? setIsCheck([...headerData?.data?.data?.map((item) => item.id)]) : setIsCheck([]);
                   }}
                 />
               </th>
@@ -96,12 +105,12 @@ const ShowTable = ({ current_page, per_page, mutate, isCheck, setIsCheck, url, s
         </tr>
       </thead>
       <tbody>
-        {headerData?.data.length > 0 ? (
-          headerData?.data?.map((tableData, index) => (
+        {headerData?.data?.data?.length > 0 ? (
+          headerData?.data?.data?.map((tableData, index) => (
             <tr key={index}>
               {headerData?.checkBox && (
                 <td className="sm-width">
-                  <Input className="custom-control-input checkbox_animated" checked={headerData?.data?.[index]?.system_reserve !== "1" && isCheck?.includes(tableData?.id)} disabled={headerData?.data?.[index]?.system_reserve == "1" ? true : false} onChange={(e) => handleChange(tableData)} type={"checkbox"} />
+                  <Input className="custom-control-input checkbox_animated" checked={headerData?.data?.data?.[index]?.system_reserve !== "1" && isCheck?.includes(tableData?.id)} disabled={headerData?.data?.data?.[index]?.system_reserve == "1" ? true : false} onChange={(e) => handleChange(tableData)} type={"checkbox"} />
                 </td>
               )}
               {headerData.isSerialNo !== false && (
@@ -110,35 +119,17 @@ const ShowTable = ({ current_page, per_page, mutate, isCheck, setIsCheck, url, s
                 </td>
               )}
               <>
-                {headerData?.column.map((item, i) => (
-                  <td className={item.type == "image" ? "sm-width" : ""} key={i} onClick={(e) => item.type !== "switch" && !headerData?.data?.[index]?.system_reserve == "1" && isHandelEdit(e, tableData, headerData)}>
-                    {item.type == "dateWithOnlyMonth" ? (
-                      dateWithOnlyMonth(tableData[item?.apiKey])
-                    ) : item.type == "date" ? (
-                      <>{dateFormat(tableData[item?.apiKey])}</>
-                    ) : item.type == "image" ? (
-                      <Avatar imageClass="tbl-image" data={tableData[item?.apiKey]} placeHolder={item.placeHolderImage} name={tableData} NameWithRound={item.NameWithRound ? true : false} />
-                    ) : item.type == "price" ? (
-                      <>{convertCurrency(tableData[item?.apiKey])}</>
-                    ) : item.type == "rating" ? (
-                      <Rating initialValue={tableData.rating} readonly={true} size={20} fillColor="#0da487" />
-                    ) : item.type == "switch" ? (
-                      <>{!edit || headerData?.data?.[index].system_reserve == "1" ? <Status data={tableData} url={url} disabled={true} /> : <Status data={tableData} url={item.url ? item.url : url} apiKey={item.url && item.apiKey} />}</>
-                    ) : item.type == "stock_status" ? (
-                      <>
-                        <div className={`status-${tableData[item?.apiKey]}`}>
-                          <span>{tableData[item?.apiKey]?.toString().includes("_") ? tableData[item?.apiKey]?.replace(/_/g, " ") : " "}</span>
-                        </div>
-                      </>
-                    ) : item?.subKey ? (
-                      <>{getSubKeysData(tableData[item?.apiKey], item?.subKey)}</>
-                    ) : (
-                      <>{tableData[item?.apiKey]}</>
-                    )}
-                  </td>
-                ))}
+              
+                <td>{tableData?.name}</td>
+                <td>{tableData?.description}</td>
+                <td>
+                  <div className="d-flex gap-2">
+                    <button onClick={() => handleEdit(tableData)}  style={{padding:"4px 6px", fontSize:"12px"}} className="btn btn-warning">Edit</button>
+                    <button onClick={() => handleDelete(tableData)} style={{padding:"4px 6px", fontSize:"12px"}} className="btn btn-danger">Delete</button>
+                  </div>
+                </td>
               </>
-              {headerData?.isOption && <td>{headerData?.data?.[index]?.system_reserve == "1" ? <RiLock2Line /> : <Options fullObj={tableData} mutate={mutate} moduleName={moduleName} type={type} optionPermission={headerData} refetch={refetch} keyInPermission={keyInPermission} />}</td>}
+              {headerData?.isOption && <td>{headerData?.data?.data?.[index]?.system_reserve == "1" ? <RiLock2Line /> : <Options fullObj={tableData} mutate={mutate} moduleName={moduleName} type={type} optionPermission={headerData} refetch={refetch} keyInPermission={keyInPermission} />}</td>}
             </tr>
           ))
         ) : (

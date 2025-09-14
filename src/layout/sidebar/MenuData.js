@@ -20,6 +20,36 @@ const MENUITEMS = [
     ],
   },
   {
+    title: "Tags",
+    displayTitle: "Tags",
+    icon: <RiContactsLine />,
+    type: "sub",
+    children: [
+      { title: "AddTag", path: "/tag/create", displayTitle: "Add Tag", permission: ["tag.create"] },
+      { title: "AllTag", path: "/tag", displayTitle: "Tag List", permission: ["tag.index"] }
+    ],
+  },
+  {
+    title: "Brands",
+    displayTitle: "Brands",
+    icon: <RiContactsLine />,
+    type: "sub",
+    children: [
+      { title: "AddBrand", path: "/brand/create", displayTitle: "Add Brand", permission: ["brand.create"] },
+      { title: "AllBrand", path: "/brand", displayTitle: "Brand List", permission: ["brand.index"] }
+    ],
+  },
+   {
+    title: "Categories",
+    displayTitle: "Categories",
+    icon: <RiContactsLine />,
+    type: "sub",
+    children: [
+      { title: "AddCategory", path: "/category/create", displayTitle: "Add Category", permission: ["category.create"] },
+      { title: "AllCategory", path: "/category", displayTitle: "Category List", permission: ["category.index"] }
+    ],
+  },
+  {
     title: "Products",
     displayTitle: "Products",
     icon: <RiStore3Line />,
@@ -28,9 +58,9 @@ const MENUITEMS = [
       { title: "AddProduct", path: "/product/create", displayTitle: "Add Product", permission: ["product.create"] },
       { title: "AllProducts", path: "/product", displayTitle: "All Product", badgeType: "badge bg-warning text-dark ml-3", badgeValue: 0, permission: ["product.create"] },
       { title: "Attributes", path: "/attribute", displayTitle: "All Attributes", permission: ["attribute.index", "attribute.create"] },
-      { title: "Categories", path: "/category", displayTitle: "Categories", permission: ["category.index"] },
-      { title: "Tags", path: "/tag", displayTitle: "All Tag", permission: ["tag.index", "tag.create"] },
-      { title: "Brands", path: "/brand", displayTitle: "Brand", permission: ["brand.index", "brand.create"] },
+      // { title: "Categories", path: "/category", displayTitle: "Categories", permission: ["category.index"] },
+      // { title: "Tags", path: "/tag", displayTitle: "All Tag", permission: ["tag.index", "tag.create"] },
+      // { title: "Brands", path: "/brand", displayTitle: "Brand", permission: ["brand.index", "brand.create"] },
       { title: "Q&A", path: "/qna", displayTitle: "Q&A", permission: ["question_and_answer.index", "question_and_answer.create"] },
       { title: "License Key", path: "/license_key", displayTitle: "License Key", permission: ["license_key.index"] },
     ],

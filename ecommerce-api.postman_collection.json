@@ -1,0 +1,294 @@
+{
+  "info": {
+    "name": "Ecommerce API",
+    "_postman_id": "ecommerce-api-collection-001",
+    "description": "Postman collection for Ecommerce API built with Prisma + Next.js",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": { "method": "GET", "url": "http://localhost:3000/api/users" }
+        },
+        {
+          "name": "Get User by ID",
+          "request": { "method": "GET", "url": "http://localhost:3000/api/users/1" }
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Doe\",\n  \"email\": \"jane@example.com\",\n  \"password\": \"secret123\",\n  \"roleId\": 2\n}"
+            },
+            "url": "http://localhost:3000/api/users"
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"name\": \"Jane Updated\"\n}"
+            },
+            "url": "http://localhost:3000/api/users"
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": { "method": "DELETE", "url": "http://localhost:3000/api/users/1" }
+        }
+      ]
+    },
+    {
+      "name": "Roles",
+      "item": [
+        { "name": "Get All Roles", "request": { "method": "GET", "url": "http://localhost:3000/api/roles" } },
+        { "name": "Get Role by ID", "request": { "method": "GET", "url": "http://localhost:3000/api/roles/1" } },
+        {
+          "name": "Create Role",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"SELLER\"\n}" },
+            "url": "http://localhost:3000/api/roles"
+          }
+        },
+        {
+          "name": "Update Role",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": 1,\n  \"name\": \"ADMIN\"\n}" },
+            "url": "http://localhost:3000/api/roles"
+          }
+        },
+        { "name": "Delete Role", "request": { "method": "DELETE", "url": "http://localhost:3000/api/roles/1" } }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        { "name": "Get All Products", "request": { "method": "GET", "url": "http://localhost:3000/api/products" } },
+        { "name": "Get Product by ID", "request": { "method": "GET", "url": "http://localhost:3000/api/products/1" } },
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Adidas Shoes\",\n  \"description\": \"Running shoes\",\n  \"price\": 89.99,\n  \"stock\": 50,\n  \"categoryId\": 1,\n  \"brandId\": 1\n}"
+            },
+            "url": "http://localhost:3000/api/products"
+          }
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": 1,\n  \"price\": 79.99,\n  \"stock\": 40\n}" },
+            "url": "http://localhost:3000/api/products"
+          }
+        },
+        { "name": "Delete Product", "request": { "method": "DELETE", "url": "http://localhost:3000/api/products/1" } }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        { "name": "Get All Categories", "request": { "method": "GET", "url": "http://localhost:3000/api/categories" } },
+        { "name": "Get Category by ID", "request": { "method": "GET", "url": "http://localhost:3000/api/categories/1" } },
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Electronics\"\n}" },
+            "url": "http://localhost:3000/api/categories"
+          }
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": 1,\n  \"name\": \"Updated Category\"\n}" },
+            "url": "http://localhost:3000/api/categories"
+          }
+        },
+        { "name": "Delete Category", "request": { "method": "DELETE", "url": "http://localhost:3000/api/categories/1" } }
+      ]
+    },
+    {
+      "name": "Brands",
+      "item": [
+        { "name": "Get All Brands", "request": { "method": "GET", "url": "http://localhost:3000/api/brands" } },
+        { "name": "Get Brand by ID", "request": { "method": "GET", "url": "http://localhost:3000/api/brands/1" } },
+        {
+          "name": "Create Brand",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Apple\"\n}" },
+            "url": "http://localhost:3000/api/brands"
+          }
+        },
+        {
+          "name": "Update Brand",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": 1,\n  \"name\": \"Samsung\"\n}" },
+            "url": "http://localhost:3000/api/brands"
+          }
+        },
+        { "name": "Delete Brand", "request": { "method": "DELETE", "url": "http://localhost:3000/api/brands/1" } }
+      ]
+    },
+    {
+      "name": "Tags",
+      "item": [
+        { "name": "Get All Tags", "request": { "method": "GET", "url": "http://localhost:3000/api/tags" } },
+        { "name": "Get Tag by ID", "request": { "method": "GET", "url": "http://localhost:3000/api/tags/1" } },
+        {
+          "name": "Create Tag",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"NewArrival\"\n}" },
+            "url": "http://localhost:3000/api/tags"
+          }
+        },
+        {
+          "name": "Update Tag",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": 1,\n  \"name\": \"UpdatedTag\"\n}" },
+            "url": "http://localhost:3000/api/tags"
+          }
+        },
+        { "name": "Delete Tag", "request": { "method": "DELETE", "url": "http://localhost:3000/api/tags/1" } }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        { "name": "Get All Orders", "request": { "method": "GET", "url": "http://localhost:3000/api/orders" } },
+        { "name": "Get Order by ID", "request": { "method": "GET", "url": "http://localhost:3000/api/orders/1" } },
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"userId\": 2,\n  \"status\": \"PENDING\"\n}" },
+            "url": "http://localhost:3000/api/orders"
+          }
+        },
+        {
+          "name": "Update Order",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": 1,\n  \"status\": \"PAID\"\n}" },
+            "url": "http://localhost:3000/api/orders"
+          }
+        },
+        { "name": "Delete Order", "request": { "method": "DELETE", "url": "http://localhost:3000/api/orders/1" } }
+      ]
+    },
+    {
+      "name": "Carts",
+      "item": [
+        { "name": "Get All Carts", "request": { "method": "GET", "url": "http://localhost:3000/api/carts" } },
+        { "name": "Get Cart by ID", "request": { "method": "GET", "url": "http://localhost:3000/api/carts/1" } },
+        {
+          "name": "Create Cart",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"userId\": 2\n}" },
+            "url": "http://localhost:3000/api/carts"
+          }
+        },
+        {
+          "name": "Update Cart",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": 1,\n  \"userId\": 2\n}" },
+            "url": "http://localhost:3000/api/carts"
+          }
+        },
+        { "name": "Delete Cart", "request": { "method": "DELETE", "url": "http://localhost:3000/api/carts/1" } }
+      ]
+    },
+    {
+      "name": "Shippings",
+      "item": [
+        { "name": "Get All Shippings", "request": { "method": "GET", "url": "http://localhost:3000/api/shippings" } },
+        { "name": "Get Shipping by ID", "request": { "method": "GET", "url": "http://localhost:3000/api/shippings/1" } },
+        {
+          "name": "Create Shipping",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": 1,\n  \"address\": \"221B Baker Street\",\n  \"city\": \"London\",\n  \"state\": \"UK\",\n  \"postalCode\": \"NW16XE\",\n  \"country\": \"UK\"\n}"
+            },
+            "url": "http://localhost:3000/api/shippings"
+          }
+        },
+        {
+          "name": "Update Shipping",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": 1,\n  \"status\": \"DELIVERED\"\n}" },
+            "url": "http://localhost:3000/api/shippings"
+          }
+        },
+        { "name": "Delete Shipping", "request": { "method": "DELETE", "url": "http://localhost:3000/api/shippings/1" } }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        { "name": "Get All Payments", "request": { "method": "GET", "url": "http://localhost:3000/api/payments" } },
+        { "name": "Get Payment by ID", "request": { "method": "GET", "url": "http://localhost:3000/api/payments/1" } },
+        {
+          "name": "Create Payment",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 2,\n  \"orderId\": 1,\n  \"amount\": 100.0,\n  \"method\": \"CARD\",\n  \"status\": \"PENDING\"\n}"
+            },
+            "url": "http://localhost:3000/api/payments"
+          }
+        },
+        {
+          "name": "Update Payment",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": 1,\n  \"status\": \"SUCCESS\"\n}" },
+            "url": "http://localhost:3000/api/payments"
+          }
+        },
+        { "name": "Delete Payment", "request": { "method": "DELETE", "url": "http://localhost:3000/api/payments/1" } }
+      ]
+    }
+  ]
+}

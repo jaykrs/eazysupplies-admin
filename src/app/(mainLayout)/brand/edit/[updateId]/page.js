@@ -10,7 +10,7 @@ const TaxUpdate = () => {
   const params = useParams();
   const updateId = params?.updateId;
   const { t } = useTranslation("common");
-  const { mutate, isLoading } = useUpdate(BrandAPI, updateId, "/brand");
+  const { mutate, isLoading } = useUpdate(BrandAPI, updateId, "/category");
   return (
     updateId && (
       <Row>
