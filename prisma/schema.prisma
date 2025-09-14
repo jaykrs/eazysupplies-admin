@@ -207,3 +207,13 @@ model Payment {
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime     @updatedAt @map("updated_at")
 }
+
+model template {
+  id      Int     @id @default(autoincrement())
+  name   String  @unique
+  jsonData Json?   // This field can store arbitrary JSON data
+  settings Json    @default("{}") // Example with a default empty JSON object
+  htmlData  String?   @db.Text // Use @db.Text for potentially large HTML content in SQL databases
+  createdAt DateTime @default(now())
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+}

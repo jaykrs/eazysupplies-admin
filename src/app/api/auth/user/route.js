@@ -79,9 +79,9 @@ export async function POST(request) {
     const hashedPassword = hashSync(password, 10);
 
     // Ensure role exists, fallback to 'user'
-    let userRole = await prisma.role.findUnique({ where: { name: 'Guest' } });
+    let userRole = await prisma.role.findUnique({ where: { name: 'customer' } });
     if (!userRole) {
-        userRole = await prisma.role.create({ data: { name: "Guest" } });
+        userRole = await prisma.role.create({ data: { name: "customer" } });
       }
     //let random = Math.floor(100000 + Math.random() * 900000);
     // Create user
