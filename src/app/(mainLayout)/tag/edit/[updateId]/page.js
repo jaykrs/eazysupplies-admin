@@ -8,14 +8,14 @@ import { useParams } from "next/navigation";
 
 const RoleUpdate = () => {
   const params = useParams()
-  const { mutate, isLoading } = useUpdate(tag, params?.updateId, `/tag`);
+//  const { mutate, isLoading } = useUpdate(tag, params?.updateId, `/tag`);
   return (
     params?.updateId && (
       <FormWrapper title="EditTag">
         <TagForm
-          mutate={mutate}
+         // mutate={mutate}
           updateId={params?.updateId}
-          loading={isLoading}
+          //loading={isLoading}
           type={"product"}
           buttonName="Update"
         />

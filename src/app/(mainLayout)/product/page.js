@@ -1,11 +1,13 @@
 "use client";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Select from "react-select";
 
 const AllUsers = () => {
-
+   const route = useRouter();
     const [products, setProducts] = useState([]);
+    const [refreshState, setRefeshState] = useState(false);
     const [state, setState] = useState({
         name: "all",
         type: "all",
@@ -14,7 +16,6 @@ const AllUsers = () => {
     const [isDarkMode, setIsDarkMode] = useState(false);
 
     const handleStateChange = (name, value) => {
-        console.log('........e', name, value);
         setState(prev => {
             return { ...prev, [name]: value }
         })
@@ -26,10 +27,17 @@ const AllUsers = () => {
         fetchProduct();
     }, [])
 
+     useEffect(() => {
+        const initial = document.body.classList.contains("dark-only");
+        setIsDarkMode(initial);
+        fetchProduct();
+        setRefeshState(false);
+    }, [refreshState])
+
     const fetchProduct = async () => {
-        let res = await axios.get('/api/product?products=all', { withCredentials: true });
+        let res = await axios.get('/api/products?products=all', { withCredentials: true });
         if (res.status == 200) {
-            setProducts(res.data.products);
+            setProducts(res.data);
         }
     }
 
@@ -54,7 +62,16 @@ const AllUsers = () => {
         { value: 'TOMATO PRODUCTS', label: 'TOMATO PRODUCTS' },
     ];
 
-    console.log('.........', state);
+    const handleView = ()=>{
+        
+    };
+    const handleEdit = ()=>{
+        
+    };
+
+    const handleDelete = ()=>{
+
+    };
 
     return (
         <>
@@ -195,7 +212,8 @@ const AllUsers = () => {
             </div>
             <div className="w-100 d-flex justify-content-end fs-5">
                 <div className="w-50 d-flex justify-content-end gap-4">
-                    <button className="px-4 py-2 btn btn-primary fs-5">Search</button>
+                    <button className="px-4 py-2 btn btn-primary fs-5" onClick={()=> setRefeshState(true)}>Search</button>
+                     <button className="px-4 py-2 btn btn-primary fs-5" onClick={()=> route.push('/product/create')}>Add</button>
                     <button className="px-4 py-2 btn btn-secondary fs-5">Clear</button>
                 </div>
             </div>
@@ -207,34 +225,41 @@ const AllUsers = () => {
                 <table className="min-w-full border border-gray-300">
                     <thead className="bg-gray-100">
                         <tr>
-                            <th className="border px-4 py-2">Type</th>
                             <th className="border px-4 py-2">Name</th>
                             <th className="border px-4 py-2">SKU</th>
-                            <th className="border px-4 py-2">Unit</th>
                             <th className="border px-4 py-2">Price</th>
-                            <th className="border px-4 py-2">Stock Status</th>
-                            <th className="border px-4 py-2">Self Life</th>
-                            <th className="border px-4 py-2">MRP price</th>
-                            <th className="border px-4 py-2">Discount(%)</th>
-                            <th className="border px-4 py-2">Sale Price</th>
+                            <th className="border px-4 py-2">Tax</th>
+                            <th className="border px-4 py-2">Stock</th>
+                            <th className="border px-4 py-2">dimension</th>
+                            <th className="border px-4 py-2">Category</th>
+                            <th className="border px-4 py-2">Brand</th>
+                            <th className="border px-4 py-2">Orders</th>
+                            <th className="border px-4 py-2">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {products?.length ? (
                             products.map((product) => (
                                 <tr key={product.id}>
-                                    <td className="border px-4 py-2">{product.type}</td>
                                     <td className="border px-4 py-2">{product.name}</td>
                                     <td className="border px-4 py-2">{product.sku}</td>
-                                    <td className="border px-4 py-2">{product.unit}</td>
                                     <td className="border px-4 py-2">${product.price}</td>
-                                    <td className="border px-4 py-2">{product.stock_status}</td>
-                                    <td className="border px-4 py-2">{product.self_life}</td>
-                                    <td className="border px-4 py-2">{product.price}</td>
-                                    <td className="border px-4 py-2">{product.discount}</td>
-                                    <td className="border px-4 py-2">{product.sale_price}</td>
+                                    <td className="border px-4 py-2">{product.tax}%</td>
+                                    <td className="border px-4 py-2">{product.stock}</td>
+                                    <td className="border px-4 py-2">{product.dimension}</td>
+                                    <td className="border px-4 py-2">{product.category?.name}</td>
+                                    <td className="border px-4 py-2">{product.brand?.name}</td>
+                                    <td className="border px-4 py-2">{product.ordersCount}</td>
+                                    <td>
+                                        <div className="d-flex gap-2">
+                                            <button onClick={() => handleView(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">View</button>
+                                            <button onClick={() => handleEdit(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">Edit</button>
+                                            <button onClick={() => handleDelete(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-danger">Delete</button>
+                                        </div>
+                                    </td>
                                 </tr>
-                            ))
+                            )
+                            )
                         ) : (
                             <tr>
                                 <td colSpan="6" className="text-center py-4">

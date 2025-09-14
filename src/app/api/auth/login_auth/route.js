@@ -46,7 +46,7 @@ export async function POST(request) {
       return NextResponse.json({ error: MESSAGES.USER_ROLE_NOT_ADMIN }, { status: 401 });
     }
     // Check user status
-    if (user.status !== 1) {
+    if (!user.status) {
       return NextResponse.json({ error: MESSAGES.USER_INACTIVE }, { status: 401 });
     }
 

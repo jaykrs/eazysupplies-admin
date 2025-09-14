@@ -30,7 +30,7 @@ model User {
   otp        Int       @default(0)
   payments  Payment[]
   createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
+  updatedAt DateTime?  @updatedAt @map("updated_at")
   createdBy Int?  
   wishlist       String?
   favorite       String?     
@@ -41,7 +41,7 @@ model Role {
   name  String @unique
   users User[]
   createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
+  updatedAt DateTime?  @updatedAt @map("updated_at")
   createdBy Int?  
   permission String?
 }
@@ -79,7 +79,7 @@ model Product {
   orderItems  OrderItem[]
   cartItems   CartItem[]
   createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @updatedAt @map("updated_at")
+  updatedAt   DateTime?     @updatedAt @map("updated_at")
   productIcon  String?
   productImage String?
   createdBy    Int?
@@ -101,7 +101,7 @@ model Blog {
   meta_description   String?
   keyword             String?
    createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
+  updatedAt DateTime?  @updatedAt @map("updated_at")
   createdBy Int? 
 } 
 
@@ -110,7 +110,7 @@ model Category {
   name     String    @unique
   products Product[]
   createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @updatedAt @map("updated_at")
+  updatedAt   DateTime?     @updatedAt @map("updated_at")
 }
 
 model Brand {
@@ -118,7 +118,7 @@ model Brand {
   name     String    @unique
   products Product[]
   createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @updatedAt @map("updated_at")
+  updatedAt   DateTime?     @updatedAt @map("updated_at")
 }
 
 model Tag {
@@ -126,7 +126,7 @@ model Tag {
   name      String       @unique
   description String?
   createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @updatedAt @map("updated_at")
+  updatedAt   DateTime?     @updatedAt @map("updated_at")
 }
 
 //model ProductTag {
@@ -146,7 +146,7 @@ model Order {
   payment    Payment?
   status     String      @default("PENDING") // PENDING, PAID, SHIPPED, COMPLETED, CANCELLED
   createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @updatedAt @map("updated_at")
+  updatedAt   DateTime?     @updatedAt @map("updated_at")
 }
 
 model OrderItem {
@@ -158,7 +158,7 @@ model OrderItem {
   order     Order    @relation(fields: [orderId], references: [id])
   product   Product  @relation(fields: [productId], references: [id])
   createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @updatedAt @map("updated_at")
+  updatedAt   DateTime?     @updatedAt @map("updated_at")
 }
 
 model Cart {
@@ -167,7 +167,7 @@ model Cart {
   user      User       @relation(fields: [userId], references: [id])
   items     CartItem[]
   createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @updatedAt @map("updated_at")
+  updatedAt   DateTime?     @updatedAt @map("updated_at")
 }
 
 model CartItem {
@@ -178,7 +178,7 @@ model CartItem {
   cart      Cart     @relation(fields: [cartId], references: [id])
   product   Product  @relation(fields: [productId], references: [id])
   createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @updatedAt @map("updated_at")
+  updatedAt   DateTime?     @updatedAt @map("updated_at")
 }
 
 model Shipping {
@@ -192,7 +192,7 @@ model Shipping {
   status    String   @default("PENDING") // PENDING, SHIPPED, DELIVERED
   order     Order   @relation(fields: [orderId], references: [id])
   createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @updatedAt @map("updated_at")
+  updatedAt   DateTime?     @updatedAt @map("updated_at")
 }
 
 model Payment {
@@ -205,5 +205,5 @@ model Payment {
   user      User    @relation(fields: [userId], references: [id])
   order     Order   @relation(fields: [orderId], references: [id])
   createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @updatedAt @map("updated_at")
+  updatedAt   DateTime?     @updatedAt @map("updated_at")
 }

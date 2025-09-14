@@ -1,25 +1,27 @@
 import TableWrapper from "../../utils/hoc/TableWrapper";
-import ShowTable from "../table/ShowTable";
 import usePermissionCheck from "../../utils/hooks/usePermissionCheck";
+import { title } from "process";
+import ShowTableCategory from "../table/ShowCategoryTable";
 
-const AllTagsTable = ({ data, ...props }) => {
+const AllCategoryTable = ({ data, ...props }) => {
   const [edit, destroy] = usePermissionCheck(["edit", "destroy"]);
   const headerObj = {
     checkBox: true,
+    isSerialNo: false,
     isOption: edit == false && destroy == false ? false : true,
     noEdit: edit ? false : true,
-    isSerialNo:false,
     optionHead: { title: "Action" },
     column: [
+      // { title: "Id", apiKey: "id", sorting: true },
       { title: "Name", apiKey: "name", sorting: true, sortBy: "desc" },
-      { title: "Description", apiKey: "description", sorting: true }
+      // { title: "CreateAt", apiKey: "createdAt", sorting: true, sortBy: "desc", type: "date" }
     ],
     data: data || []
   };
   if (!data) return null;
   return <>
-    <ShowTable {...props} headerData={headerObj} />
+    <ShowTableCategory {...props} headerData={headerObj} />
   </>
 };
 
-export default TableWrapper(AllTagsTable);
+export default TableWrapper(AllCategoryTable);

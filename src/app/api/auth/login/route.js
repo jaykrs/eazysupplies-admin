@@ -136,7 +136,7 @@ export async function GET(request) {
         return NextResponse.json({ error: MESSAGES.USER_NOT_FOUND }, { status: 404 });
       }
 
-      if (user.status === 1) {
+      if (user.status) {
         return NextResponse.json({ message: MESSAGES.USER_ALREADY_ACTIVE });
       }
 
