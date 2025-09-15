@@ -23,11 +23,12 @@ const CategoryCreate = () => {
     <Col sm="12">
       <AllCategoryTable
         url={BrandAPI}
-        moduleName="Category"
+        moduleName="category"
         isCheck={isCheck}
         setIsCheck={setIsCheck}
         keyInPermission={"category"}
         data= {data}
+        fetchProduct={fetchProduct}
       />
     </Col>
   );

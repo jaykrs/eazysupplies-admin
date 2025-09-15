@@ -33,6 +33,7 @@ const AllTags = () => {
         exportButton={true}
        // importExport={{ importUrl: TagImportAPI, exportUrl: TagExportAPI ,sampleFile:"tags.csv",}}
         data= {data}
+        fetchProduct={fetchProduct}
       />
     </Col>
   );

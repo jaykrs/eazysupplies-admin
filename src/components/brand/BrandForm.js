@@ -13,7 +13,7 @@ import FileUploadField from "../inputFields/FileUploadField";
 import SimpleInputField from "../inputFields/SimpleInputField";
 import useCustomQuery from "@/utils/hooks/useCustomQuery";
 import axios from "axios";
-const BrandForm = ({ updateId, buttonName }) => {
+const BrandForm = ({ updateId, buttonName, model }) => {
   const { t } = useTranslation("common");
   const router = useRouter();
   const [data, setData] = useState({});
@@ -46,7 +46,7 @@ const BrandForm = ({ updateId, buttonName }) => {
 
         if (res.status == 200) {
           alert('Brand: ' + values.name + " updated successfully!");
-          router.push("/brand");
+         // router.push("/brand");
         }
 
       } else {
@@ -57,13 +57,13 @@ const BrandForm = ({ updateId, buttonName }) => {
 
         if (res.status == 201) {
           alert('Brand: ' + values.name + " added successfully!");
-          router.push("/brand");
+         // router.push("/brand");
         }
       }
       setIsLoading(false);
     } catch (err) {
       console.log('.........', err)
-      alert(err.response.data.error);
+      alert('something went wrong');
     }
   }
   return (

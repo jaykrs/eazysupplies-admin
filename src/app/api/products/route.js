@@ -4,11 +4,34 @@ import { verifyAdmin } from "../utils/jwt";
 import { MESSAGES } from "../utils/statusConstant";
 const prisma = new PrismaClient();
 
-export async function GET() {
-  const res =  await prisma.product.findMany({
-    include: { category: true, brand: true }  // tags: { include: { tag: true } }tags: { include: { tag: true } }
-  })
-  return NextResponse.json(res);
+// export async function GET() {
+//   const res =  await prisma.product.findMany({
+//     include: { category: true, brand: true }  // tags: { include: { tag: true } }tags: { include: { tag: true } }
+//   })
+//   return NextResponse.json(res);
+// }
+
+export async function GET(request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = Number(searchParams.get('productId'));
+    let res;
+    if (id) {
+      const res = await prisma.product.findUnique({
+        where: {
+          id: id
+        },
+        include: { category: true, brand: true }
+      })
+      return NextResponse.json({ data: res ? res : [] }, { status: 200 });
+    }
+    res = await prisma.product.findMany({
+      include: { category: true, brand: true }
+    });
+    return NextResponse.json({ data: res }, { status: 200 });
+  } catch (err) {
+    return NextResponse.json({ error: MESSAGES.SERVER_ERROR }, { status: 500 });
+  }
 }
 
 export async function POST(request) {
@@ -16,7 +39,7 @@ export async function POST(request) {
     if (verifyAdmin(request)) {
       const body = await request.json();
       const res = await prisma.product.create({ data: body });
-      return NextResponse.json({ data: res}, { status: 201 });
+      return NextResponse.json({ data: res }, { status: 201 });
     }
   } catch (Error) {
     return NextResponse.json(

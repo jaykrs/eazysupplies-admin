@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import Select from "react-select";
 
 const AllUsers = () => {
-   const route = useRouter();
+    const route = useRouter();
     const [products, setProducts] = useState([]);
     const [refreshState, setRefeshState] = useState(false);
     const [state, setState] = useState({
@@ -27,7 +27,7 @@ const AllUsers = () => {
         fetchProduct();
     }, [])
 
-     useEffect(() => {
+    useEffect(() => {
         const initial = document.body.classList.contains("dark-only");
         setIsDarkMode(initial);
         fetchProduct();
@@ -35,9 +35,9 @@ const AllUsers = () => {
     }, [refreshState])
 
     const fetchProduct = async () => {
-        let res = await axios.get('/api/products?products=all', { withCredentials: true });
+        let res = await axios.get('/api/products', { withCredentials: true });
         if (res.status == 200) {
-            setProducts(res.data);
+            setProducts(res.data.data);
         }
     }
 
@@ -62,14 +62,14 @@ const AllUsers = () => {
         { value: 'TOMATO PRODUCTS', label: 'TOMATO PRODUCTS' },
     ];
 
-    const handleView = ()=>{
-        
+    const handleView = () => {
+
     };
-    const handleEdit = ()=>{
-        
+    const handleEdit = (id) => {
+       route.push('/product/edit/' + id);
     };
 
-    const handleDelete = ()=>{
+    const handleDelete = () => {
 
     };
 
@@ -212,9 +212,8 @@ const AllUsers = () => {
             </div>
             <div className="w-100 d-flex justify-content-end fs-5">
                 <div className="w-50 d-flex justify-content-end gap-4">
-                    <button className="px-4 py-2 btn btn-primary fs-5" onClick={()=> setRefeshState(true)}>Search</button>
-                     <button className="px-4 py-2 btn btn-primary fs-5" onClick={()=> route.push('/product/create')}>Add</button>
-                    <button className="px-4 py-2 btn btn-secondary fs-5">Clear</button>
+                    <button className="px-4 py-2 btn btn-primary fs-5" onClick={() => setRefeshState(true)}>Search</button>
+                    <button className="px-4 py-2 btn btn-primary fs-5" onClick={() => route.push('/product/create')}>Add</button>
                 </div>
             </div>
 
@@ -270,7 +269,6 @@ const AllUsers = () => {
                     </tbody>
                 </table>
             </div>
-
         </>
     )
 }

@@ -12,12 +12,18 @@ import NoDataFound from "../commonComponent/NoDataFound";
 import Options from "./Options";
 import Status from "./Status";
 import TableLoader from "./TableLoader";
+import { Loader } from "react-feather";
+import ShowModal from "@/elements/alerts&Modals/Modal";
+import Btn from "@/elements/buttons/Btn";
+import CreateNewBrand from "@/app/(mainLayout)/brand/create/createNewBrand";
 
-const ShowTableBrands = ({ current_page, per_page, mutate, isCheck, setIsCheck, url, sortBy, setSortBy, headerData, fetchStatus, moduleName, type, redirectLink, refetch, keyInPermission, link }) => {
+const ShowTableBrands = ({ current_page, per_page, mutate, isCheck, setIsCheck, url, sortBy, setSortBy, headerData, fetchStatus, moduleName, type, redirectLink, refetch, keyInPermission, link, fetchProduct = () => { } }) => {
   const { t } = useTranslation("common");
   const { convertCurrency } = useContext(SettingContext);
   const [edit] = usePermissionCheck(["edit", "destroy"]);
   const [colSpan, setColSpan] = useState();
+  const [isLoading, setIsLoading] = useState(false);
+  const [model, setModal] = useState(false);
   const router = useRouter();
   //  const originalDataLength = headerData?.data?.data?.filter((elem) => elem.system_reserve == "1").length;
   const originalDataLength = headerData?.data?.data?.length;
@@ -67,76 +73,93 @@ const ShowTableBrands = ({ current_page, per_page, mutate, isCheck, setIsCheck, 
   };
 
   const handleEdit = (tableData) => {
-     if(isCheck.length> 0){
-      router.push('/brand/edit/' + tableData?.id);
-     }
+    router.push('/brand/edit/' + tableData?.id);
   }
+  if (isLoading) return <Loader />;
   return (
-    <Table id="table_id" className={`role-table ${headerData?.noCustomClass ? "" : "refund-table"} all-package theme-table datatable-wrapper`}>
-      <TableLoader fetchStatus={fetchStatus} />
-      <thead>
-        <tr>
-          <>
-            {headerData?.checkBox && (
-              <th className="sm-width">
-                <Input
-                  className="custom-control-input checkbox_animated"
-                  type={"checkbox"}
-                  checked={headerData?.data?.data?.length > 0 && isCheck?.length == headerData?.data?.data?.length}
-                  disabled={originalDataLength == headerData?.data?.data?.length ? true : false}
-                  onChange={(e) => {
-                    e.target.checked ? setIsCheck([...headerData?.data?.data?.map((item) => item.id)]) : setIsCheck([]);
-                  }}
-                />
-              </th>
-            )}
-            {headerData.isSerialNo !== false && <th className="sm-width">{t("No")}</th>}
-            {/* Table Heading */}
-            {headerData?.column.map((elem, i) => (
-              <th key={i} className={` ${elem?.type === "image" ? "sm-width" : ""} ${elem.class ? elem.class : ""}`} onClick={() => (elem.sorting ? handleSort(elem.apiKey) : false)}>
-                {t(elem.title)}
-                {elem.sorting ? <div className="filter-arrow">{sortBy?.field == elem.apiKey && sortBy.sort == "desc" ? <RiArrowDownSFill /> : <RiArrowUpSFill />}</div> : ""}
-              </th>
-            ))}
-            {headerData?.isOption && <th>{t(headerData?.optionHead?.title)}</th>}
-          </>
-        </tr>
-      </thead>
-      <tbody>
-        {headerData?.data?.data?.length > 0 ? (
-          headerData?.data?.data?.map((tableData, index) => (
-            <tr key={index}>
-              {headerData?.checkBox && (
-                <td className="sm-width">
-                  <Input className="custom-control-input checkbox_animated" checked={headerData?.data?.data?.[index]?.system_reserve !== "1" && isCheck?.includes(tableData?.id)} disabled={headerData?.data?.data?.[index]?.system_reserve == "1" ? true : false} onChange={(e) => handleChange(tableData)} type={"checkbox"} />
-                </td>
-              )}
-              {headerData.isSerialNo !== false && (
-                <td className="sm-width" onClick={(e) => isHandelEdit(e, headerData, tableData)}>
-                  {index + 1 + (current_page - 1) * per_page}
-                </td>
-              )}
-              <>
-                <td>{tableData?.name}</td>
-                <td>
-                  <div className="d-flex gap-2">
-                    <button onClick={() => handleEdit(tableData)}  style={{padding:"4px 6px", fontSize:"12px"}} className="btn btn-warning">Edit</button>
-                    <button onClick={() => handleDelete(tableData)} style={{padding:"4px 6px", fontSize:"12px"}} className="btn btn-danger">Delete</button>
-                  </div>
-                </td>
-              </>
-              {headerData?.isOption && <td>{headerData?.data?.data?.[index]?.system_reserve == "1" ? <RiLock2Line /> : <Options fullObj={tableData} mutate={mutate} moduleName={moduleName} type={type} optionPermission={headerData} refetch={refetch} keyInPermission={keyInPermission} />}</td>}
-            </tr>
-          ))
-        ) : (
+    <>
+      <div className="w-100 d-flex justify-content-end fs-5 py-3">
+        <div className="w-50 d-flex justify-content-end gap-4">
+          <button className="px-4 py-2 btn btn-primary fs-5" onClick={() => {
+            setIsLoading(true);
+            fetchProduct()
+            setIsLoading(false);
+          }}  >Refresh</button>
+          <button className="px-4 py-2 btn btn-primary fs-5" onClick={() => setModal(true)} >Add</button>
+        </div>
+      </div>
+      <Table id="table_id" className={`role-table table-hover ${headerData?.noCustomClass ? "" : "refund-table"} all-package theme-table datatable-wrapper`}>
+        <TableLoader fetchStatus={fetchStatus} />
+        <thead>
           <tr>
-            <td colSpan={colSpan}>
-              <NoDataFound noImage={true} />
-            </td>
+            <>
+              <th>SN</th>
+              <th>Name</th>
+              <th>Action</th>
+            </>
           </tr>
-        )}
-      </tbody>
-    </Table>
+        </thead>
+        <tbody>
+          {headerData?.data?.data?.length > 0 ? (
+            headerData?.data?.data?.map((tableData, index) => (
+              <tr key={index}>
+                {/* {headerData?.checkBox && (
+                  <td className="sm-width">
+                    <Input className="custom-control-input checkbox_animated" checked={headerData?.data?.data?.[index]?.system_reserve !== "1" && isCheck?.includes(tableData?.id)} disabled={headerData?.data?.data?.[index]?.system_reserve == "1" ? true : false} onChange={(e) => handleChange(tableData)} type={"checkbox"} />
+                  </td>
+                )}
+                {headerData.isSerialNo !== false && (
+                  <td className="sm-width" onClick={(e) => isHandelEdit(e, headerData, tableData)}>
+                    {index + 1 + (current_page - 1) * per_page}
+                  </td>
+                )} */}
+                <>
+                  <td>{index + 1}</td>
+                  <td>{tableData?.name}</td>
+                  <td className="d-flex justify-content-center">
+                    <div className="d-flex gap-2">
+                      <button onClick={() => {
+                        handleEdit(tableData)
+                      }} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">Edit</button>
+                      <button onClick={() => handleDelete(tableData)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-danger">Delete</button>
+                    </div>
+                  </td>
+                </>
+                {headerData?.isOption && <td>{headerData?.data?.data?.[index]?.system_reserve == "1" ? <RiLock2Line /> : <Options fullObj={tableData} mutate={mutate} moduleName={moduleName} type={type} optionPermission={headerData} refetch={refetch} keyInPermission={keyInPermission} />}</td>}
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={colSpan}>
+                <NoDataFound noImage={true} />
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </Table>
+
+      <ShowModal
+        open={model}
+        close={false}
+        buttons={
+          <>
+            <Btn title="Close" onClick={() => setModal(false)} className="btn-md btn-outline fw-bold" />
+            {/* <Btn title="Yes" onClick={() => handleLogout()} className="btn-theme btn-md fw-bold" /> */}
+          </>
+        }
+      >
+        <div className="remove-box">
+          {/* <div className="remove-icon">
+                  <RiQuestionLine className="icon-box wo-bg" />
+                </div>
+                <h5 className="modal-title">{t("Confirmation")}</h5>
+                <p>{t("Areyousureyouwanttoproceed?")} </p> */}
+          {
+            <CreateNewBrand model={model} />
+          }
+        </div>
+      </ShowModal>
+    </>
   );
 };
 

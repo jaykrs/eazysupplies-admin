@@ -12,7 +12,7 @@ const AllBrand = ({ data, ...props }) => {
     noEdit: edit ? false : true,
     optionHead: { title: "Action" },
     column: [
-      // { title: "Id", apiKey: "id", sorting: true },
+      { title: "S.N.", apiKey: "sn", sorting: true },
       { title: "Name", apiKey: "name", sorting: true, sortBy: "desc" },
       // { title: "CreateAt", apiKey: "createdAt", sorting: true, sortBy: "desc", type: "date" }
     ],

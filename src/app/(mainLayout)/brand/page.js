@@ -23,11 +23,12 @@ const Brand = () => {
     <Col sm="12">
       <AllBrandTable
         url={BrandAPI}
-        moduleName="Brand"
+        moduleName="brand"
         isCheck={isCheck}
         setIsCheck={setIsCheck}
         keyInPermission={"brand"}
         data= {data}
+        fetchProduct={fetchProduct}
       />
     </Col>
   );
