@@ -12,6 +12,7 @@ import CheckBoxField from "../inputFields/CheckBoxField";
 import FileUploadField from "../inputFields/FileUploadField";
 import SimpleInputField from "../inputFields/SimpleInputField";
 import useCustomQuery from "@/utils/hooks/useCustomQuery";
+import { formatString } from "../../lib/format-number";
 import axios from "axios";
 const BrandForm = ({ updateId, buttonName, model }) => {
   const { t } = useTranslation("common");
@@ -50,8 +51,10 @@ const BrandForm = ({ updateId, buttonName, model }) => {
         }
 
       } else {
+        let slugs = formatString(values.name);
         const res = await axios.post('/api/brands', {
           "name": values.name,
+          "slug" : slugs
           // "description": values.description,
         }, { withCredentials: true });
 

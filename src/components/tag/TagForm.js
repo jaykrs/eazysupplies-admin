@@ -11,6 +11,7 @@ import CheckBoxField from "../inputFields/CheckBoxField";
 import SimpleInputField from "../inputFields/SimpleInputField";
 import useCustomQuery from "@/utils/hooks/useCustomQuery";
 import axios from "axios";
+import { formatString } from "../../lib/format-number";
 
 const TagForm = ({ updateId, type, buttonName }) => {
   const { t } = useTranslation("common");
@@ -54,8 +55,10 @@ const TagForm = ({ updateId, type, buttonName }) => {
         }
 
       } else {
+        let tags = formatString(values.name);
         const res = await axios.post('/api/tags', {
           "name": values.name,
+          "slug" : tags,
           "description": values.description,
         }, { withCredentials: true });
 
