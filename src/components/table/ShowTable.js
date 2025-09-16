@@ -155,11 +155,6 @@ const ShowTable = ({ current_page, per_page, mutate, isCheck, setIsCheck, url, s
         }
       >
         <div className="remove-box">
-          {/* <div className="remove-icon">
-                        <RiQuestionLine className="icon-box wo-bg" />
-                      </div>
-                      <h5 className="modal-title">{t("Confirmation")}</h5>
-                      <p>{t("Areyousureyouwanttoproceed?")} </p> */}
           {
             <CreateNewTag model={model} />
           }

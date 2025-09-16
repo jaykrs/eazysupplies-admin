@@ -1,36 +1,17 @@
-"use client";
-import Loader from "@/components/commonComponent/Loader";
-import { role } from "@/utils/axiosUtils/API";
-import useUpdate from "@/utils/hooks/useUpdate";
-import dynamic from "next/dynamic";
+'use client'
 import { useParams } from "next/navigation";
-import { useTranslation } from "react-i18next";
-import { Card, CardBody, Col, Row } from "reactstrap";
+import RoleForm from "@/components/role/roleForm";
 
-const UserUpdate = () => {
-  const params = useParams();
-  const { t } = useTranslation("common");
-  const { mutate, isLoading } = useUpdate(role, params?.updateId, `/role`);
-  const PermissionForm = dynamic(() => import("@/components/role/PermissionForm").then((mod) => mod.default), {
-    loading: () => <Loader />,
-    ssr: false,
-  });
+const UpdateProduct = () => {
+  const params  = useParams();
+
   return (
     params?.updateId && (
-      <Row>
-        <Col xxl="8" lg="10" className="m-auto">
-          <Card>
-            <CardBody>
-              <div className="title-header option-title">
-                <h5>{t("EditRole")}</h5>
-              </div>
-              <PermissionForm mutate={mutate} updateId={params?.updateId} loading={isLoading} buttonName="Update" />
-            </CardBody>
-          </Card>
-        </Col>
-      </Row>
+      // <ProductForm saveButton={saveButton} setSaveButton={setSaveButton} values={mutate} mutate={mutate} updateId={params?.updateId} loading={isLoading} title={"EditProduct"} key={resetKey}  buttonName="Update"/>
+      //  <CategoryNewForm updateId={params?.updateId} loading={isLoading} mutate={mutate}   buttonName="Update" title={"EditProduct"} />
+       <RoleForm updateId={params?.updateId}  type={"product"} buttonName="Update" title={"Edit Role"} />
     )
   );
 };
 
-export default UserUpdate;
+export default UpdateProduct;
