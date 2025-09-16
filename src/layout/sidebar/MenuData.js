@@ -66,6 +66,15 @@ const MENUITEMS = [
     ],
   },
   {
+    title: "Tax",
+    displayTitle: "Tax",
+    icon: <RiContactsLine />,
+    type: "sub",
+    children: [
+      { title: "Tax List", path: "/tax", displayTitle: "Tax List", permission: ["tax.index"] }
+    ],
+  },
+  {
     title: "Stores",
     displayTitle: "Store",
     icon: <RiStore2Line />,
