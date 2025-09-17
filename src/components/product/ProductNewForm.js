@@ -22,7 +22,7 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
   const { t } = useTranslation("common");
   const [catData, setCatData] = useState([]);
   const [brandData, setBranddata] = useState([]);
-  const [tagdata, setTagData] = useState([]);
+  const [tagData, setTagData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [search, setSearch] = useState(false);
   const [productData, setProductData] = useState({});
@@ -68,7 +68,8 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
       if (brandId == 0 || categoryId == 0) {
         alert('brand or category is missing');
       }
-
+      console.log(values, (values.tags).toString());
+      const tagStr = (values.tags).toString();
       if (updateId) {
         const res = await axios.put('/api/products', {
           "id": Number(updateId),
@@ -78,7 +79,7 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
           "stock": values.stock,
           "categoryId": values.categoryId,
           "brandId": values.brandId,
-          "tags": "1,2",
+          "tags": tagStr,
           "sku": values.sku,
           "dimension": values.dimension,
           "tax": values.tax
@@ -96,10 +97,10 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
           "stock": values.stock,
           "categoryId": values.categoryId,
           "brandId": values.brandId,
-          "tags": "1,2",
+          "tags": tagStr,
           "sku": values.sku,
           "dimension": values.dimension,
-          "tax": values.tax
+          "tax": values.tax,
         }, { withCredentials: true });
 
         if (res.status == 201) {
@@ -136,7 +137,7 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
                 tax: Object.keys(productData).length > 0 ? productData?.tax : 0,
                 brandId: Object.keys(productData).length > 0 ? productData?.brand?.id : 0,
                 categoryId: Object.keys(productData).length > 0 ? productData?.category?.id : 0,
-
+                tags : Object.keys(productData).length > 0 ? (productData?.tags ? productData?.tags.split(',').map(Number) : []) : []
               }}
               validationSchema={YupObject({
                 name: nameSchema,
@@ -185,6 +186,7 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
                             id: "categoryId",
                             options: catData.length > 0 ? catData : [],
                             close: false,
+                            isMulti: false
                           },
                         },
                       ]}
@@ -200,6 +202,24 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
                             id: "brandId",
                             options: brandData.length > 0 ? brandData : [],
                             close: false,
+                            isMulti: false
+                          },
+                        },
+                      ]}
+                    />
+
+                    <SearchableSelectInput
+                      nameList={[
+                        {
+                          name: "tags",
+                          title: "Tags",
+                          require: "true",
+                          inputprops: {
+                            name: "tags",
+                            id: "tags",
+                            options: tagData.length > 0 ? tagData : [],
+                            close: false,
+                            isMulti: true,
                           },
                         },
                       ]}

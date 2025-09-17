@@ -1,3 +1,169 @@
+// import Image from "next/image";
+// import { Fragment, useEffect, useMemo, useState } from "react";
+// import { RiCloseLine } from "react-icons/ri";
+// import { FormFeedback, Input, Label } from "reactstrap";
+// import useOutsideDropdown from "../../utils/hooks/customHooks/useOutsideDropdown";
+// import { useTranslation } from "react-i18next";
+
+// const ReactstrapSelectInput = ({ field, form: { touched, errors, setFieldValue }, getValuesKey = "id", setvalue,noSearchBar, ...props }) => {
+  
+//   const { t } = useTranslation("common");
+//   const [searchInput, setSearchInput] = useState();
+//   const [selectedItems, setSelectedItems] = useState({});
+//   const [list, setList] = useState([]);
+//   const { ref, isComponentVisible, setIsComponentVisible } = useOutsideDropdown();
+//   let error = errors[field.name];
+//   let touch = touched[field.name];
+//   // On initial mount setting options data
+//   useEffect(() => {
+//     setList(props.inputprops.options);
+//   }, []);
+
+//   useEffect(() => {
+//     setList(props.inputprops.options);
+//     if (searchInput) {
+//       if (props.inputprops?.setsearch) {
+//         props.inputprops?.setsearch(searchInput)
+//       } else {
+//         setList(props.inputprops.options.filter((item) => item.name.toLowerCase().includes(searchInput?.toLowerCase())))
+//       }
+//     } else {
+//       props.inputprops?.setsearch && props.inputprops?.setsearch(searchInput)
+//     }
+//   }, [searchInput]);
+//   // Memorized the value and update on option changes
+//   const listOpt = useMemo(() => {
+//     return props?.inputprops?.options
+//   }, [props?.inputprops?.options])
+//   useEffect(() => {
+//     setSearchInput();
+//     setList(props.inputprops.options);
+//   }, [isComponentVisible]);
+//   // Selecting Values from dropdown
+//   const onSelectValue = (option) => {
+//     if (Array.isArray(field?.value)) {
+//       const temp = [...selectedItems];
+//       const index = temp.findIndex((elem) => elem[getValuesKey] == option[getValuesKey])
+//       if (index !== -1) {
+//         temp.splice(index, 1);
+//       } else {
+//         temp.push(option)
+//       }
+//       setSelectedItems(temp);
+//       setFieldValue(field?.name, temp.map((elem) => elem[getValuesKey]))
+//     } else {
+//       setIsComponentVisible(false);
+//       const valueToSet = props.store === "obj" ? option : option.id;
+//       const { inputprops, index, title } = props;
+//       setSelectedItems(option);
+//       setvalue ? setvalue(inputprops.name, valueToSet, index, title) : setFieldValue(inputprops.name, valueToSet, index);
+//     }
+//   }
+//   useEffect(() => {
+//     // Setting variables for type Array data
+//     if (props.inputprops?.setsearch) {
+//       (Array.isArray(field?.value) && setSelectedItems) && setSelectedItems(listOpt?.filter((elem) => field?.value?.includes(elem[getValuesKey])))
+//     } else {
+//       (Array.isArray(field?.value) && setSelectedItems) && setSelectedItems(list?.filter((elem) => field?.value?.includes(elem[getValuesKey])))
+//     }
+//     // Setting variables for type String data
+//     if (props.inputprops?.setsearch) {
+//       !Array.isArray(field?.value) && setSelectedItems && setSelectedItems(listOpt?.find((elem) => field?.value == elem[getValuesKey]))
+//     } else {
+//       !Array.isArray(field?.value) && setSelectedItems && setSelectedItems(list?.find((elem) => field?.value == elem[getValuesKey]))
+//     }
+//   }, [])
+
+//   const RemoveSelectedItem = (id, item) => {
+//     if (props?.inputprops?.close) {
+//       setSelectedItems('')
+//       setFieldValue(field.name, '')
+//     } else {
+//       let temp = field.value;
+//       if (temp.length > 0) {
+//         temp?.splice(temp.indexOf(id), 1)
+//         setFieldValue(field.name, temp);
+//       }
+//     }
+//   }
+//   return (
+//     <>
+//       {props.label && (
+//         <Label htmlFor={props.inputprops.id} className={"label-color"}>
+//           {props.label}
+//         </Label>
+//       )}
+//       <div className={`custom-select-box ${props.formfloat=="true"&&'form-floating'}`} ref={ref}>
+//         {Array.isArray(selectedItems) ?
+//           <div className={`category-select-box`} onClick={() => setIsComponentVisible((p) => p !== field?.name && field?.name)}>
+//             <div className={`bootstrap-tagsinput form-select`} >
+//               {selectedItems.length > 0 ? (
+//                 selectedItems?.map((item, i) => (
+//                   <span className="tag label label-info" key={i}>
+//                     {item?.name}
+//                     <a className="ms-2 text-white">
+//                       <RiCloseLine
+//                         onClick={(e) => {
+//                           e.stopPropagation();
+//                           RemoveSelectedItem(item[getValuesKey], item);
+//                           setSelectedItems((p) => p.filter((elem) => elem[getValuesKey] !== item[getValuesKey]));
+//                           setFieldValue(field.name, field?.value?.filter((elem) => elem[getValuesKey] !== item[getValuesKey]))
+//                         }}
+//                       />
+//                     </a>
+//                   </span>
+//                 ))
+//               ) : (
+//                 <span>{t(props?.inputprops?.initialTittle ? props?.inputprops?.initialTittle :"Select")}</span>
+//               )}              
+//             </div>
+//           </div>
+//           :
+//           <Input type="text" className="form-control form-select cursor position-absolute"
+//             value={t(setvalue !== undefined ? (props.inputprops.value || selectedItems?.name) : props.inputprops?.options?.find((item) => item.id === field.value)?.name) || t(props?.inputprops?.initialTittle ? props?.inputprops?.initialTittle :"Select")}
+//             onClick={() => setIsComponentVisible(prev => !prev)} readOnly invalid={Boolean(touched[field.name] && errors[field.name])}
+//           />
+//         }
+//         {!Array.isArray(selectedItems) && <Input id={props.inputprops.id} {...field} {...props} placeholder="Search" className="form-control form-select" type="text" invalid={Boolean(touched[field.name] && errors[field.name])} disabled />}
+//         <p className="help-text">{props?.inputprops?.helpertext}</p>
+//         <div className={`box-content ${isComponentVisible ? "open" : ""}`}>
+//           {!noSearchBar && <Input type="text" className="form-control" value={searchInput || ""} onChange={(e) => setSearchInput(e.target.value)} />}
+//           <ul className="intl-tel-input">
+//             {(props.inputprops?.setsearch ? listOpt : list)?.map((option, index) => (
+//               <Fragment key={index}>
+//                 {option?.data ?
+//                   <li onClick={() => {
+//                     setIsComponentVisible(false);
+//                     setvalue ? setvalue(props.inputprops.name, props.store === "obj" ? option : option.id, props.index, props?.title) : setFieldValue(props.inputprops.name, props.store === "obj" ? option : option.id, props.index);
+//                   }}>
+//                     <div className="country">
+//                       <div className="flag-box">
+//                         <div className={`iti-flag ${option?.data?.class}`}></div>
+//                       </div>
+//                       <span className="dial-code">{option?.data?.code}</span>
+//                     </div>
+//                   </li>
+//                   : <li onClick={() => onSelectValue(option)}>
+//                     {option?.image && <Image src={option?.image} className="img-fluid category-image" alt={option?.name} height={50} width={50}
+//                     />}
+//                     <p className={`cursor ${(selectedItems?.[index]?.[getValuesKey] || selectedItems?.[getValuesKey]) == option[getValuesKey] ? 'selected' : ""}`}>{t(option.name)}</p>
+//                   </li>}
+//               </Fragment>
+//             ))}
+//           </ul>
+//           {
+//             props.inputprops?.setsearch ? listOpt?.length <= 0 && "No Data" : list?.length <= 0 && "No Data"
+//           }
+//         </div>
+//         {touch && error && <FormFeedback>{t(props.title) || t(props?.floatlabel)} {t("IsRequired")}</FormFeedback>}
+//         {props?.inputprops?.close && <div className="close-icon"><RiCloseLine onClick={() => RemoveSelectedItem()} /></div>}
+//        { props?.floatlabel&&<Label>{t(props?.floatlabel)}</Label>}
+//       </div>
+//     </>
+//   );
+// };
+// export default ReactstrapSelectInput;
+
 import Image from "next/image";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { RiCloseLine } from "react-icons/ri";
@@ -5,161 +171,234 @@ import { FormFeedback, Input, Label } from "reactstrap";
 import useOutsideDropdown from "../../utils/hooks/customHooks/useOutsideDropdown";
 import { useTranslation } from "react-i18next";
 
-const ReactstrapSelectInput = ({ field, form: { touched, errors, setFieldValue }, getValuesKey = "id", setvalue,noSearchBar, ...props }) => {
-  
+const ReactstrapSelectInput = ({
+  field,
+  form: { touched, errors, setFieldValue },
+  getValuesKey = "id",
+  setvalue,
+  noSearchBar,
+  ...props
+}) => {
   const { t } = useTranslation("common");
-  const [searchInput, setSearchInput] = useState();
-  const [selectedItems, setSelectedItems] = useState({});
+  const [searchInput, setSearchInput] = useState("");
+  const [selectedItems, setSelectedItems] = useState([]);
   const [list, setList] = useState([]);
   const { ref, isComponentVisible, setIsComponentVisible } = useOutsideDropdown();
-  let error = errors[field.name];
-  let touch = touched[field.name];
-  // On initial mount setting options data
+
+  const error = errors[field.name];
+  const touch = touched[field.name];
+
+  const isMulti = props?.inputprops?.isMulti;
+
+  // Load options initially
   useEffect(() => {
-    setList(props.inputprops.options);
+    setList(props.inputprops.options || []);
   }, []);
 
+  // Filter logic when search input changes
   useEffect(() => {
-    setList(props.inputprops.options);
+    const options = props.inputprops.options || [];
     if (searchInput) {
       if (props.inputprops?.setsearch) {
-        props.inputprops?.setsearch(searchInput)
+        props.inputprops.setsearch(searchInput);
       } else {
-        setList(props.inputprops.options.filter((item) => item.name.toLowerCase().includes(searchInput?.toLowerCase())))
+        setList(
+          options.filter((item) =>
+            item.name.toLowerCase().includes(searchInput.toLowerCase())
+          )
+        );
       }
     } else {
-      props.inputprops?.setsearch && props.inputprops?.setsearch(searchInput)
+      props.inputprops?.setsearch && props.inputprops.setsearch("");
+      setList(options);
     }
-  }, [searchInput]);
-  // Memorized the value and update on option changes
-  const listOpt = useMemo(() => {
-    return props?.inputprops?.options
-  }, [props?.inputprops?.options])
+  }, [searchInput, props.inputprops]);
+
+  const listOpt = useMemo(() => props.inputprops.options || [], [props.inputprops.options]);
+
+  // Reset search on dropdown toggle
   useEffect(() => {
-    setSearchInput();
-    setList(props.inputprops.options);
+    setSearchInput("");
+    setList(props.inputprops.options || []);
   }, [isComponentVisible]);
-  // Selecting Values from dropdown
+
+  // Set initial selected items
+  useEffect(() => {
+    if (isMulti) {
+      const selected = listOpt.filter((item) => field.value?.includes(item[getValuesKey]));
+      setSelectedItems(selected);
+    } else {
+      const selected = listOpt.find((item) => item[getValuesKey] === field.value);
+      setSelectedItems(selected || null);
+    }
+  }, [listOpt, field.value, getValuesKey, isMulti]);
+
   const onSelectValue = (option) => {
-    if (Array.isArray(field?.value)) {
-      const temp = [...selectedItems];
-      const index = temp.findIndex((elem) => elem[getValuesKey] == option[getValuesKey])
+    if (isMulti) {
+      let temp = Array.isArray(selectedItems) ? [...selectedItems] : [];
+      const index = temp.findIndex((elem) => elem[getValuesKey] === option[getValuesKey]);
+
       if (index !== -1) {
         temp.splice(index, 1);
       } else {
-        temp.push(option)
+        temp.push(option);
       }
+
       setSelectedItems(temp);
-      setFieldValue(field?.name, temp.map((elem) => elem[getValuesKey]))
+      setFieldValue(field.name, temp.map((item) => item[getValuesKey]));
     } else {
       setIsComponentVisible(false);
-      const valueToSet = props.store === "obj" ? option : option.id;
-      const { inputprops, index, title } = props;
+      const valueToSet = props.store === "obj" ? option : option[getValuesKey];
       setSelectedItems(option);
-      setvalue ? setvalue(inputprops.name, valueToSet, index, title) : setFieldValue(inputprops.name, valueToSet, index);
+      setvalue
+        ? setvalue(props.inputprops.name, valueToSet, props.index, props.title)
+        : setFieldValue(props.inputprops.name, valueToSet, props.index);
     }
-  }
-  useEffect(() => {
-    // Setting variables for type Array data
-    if (props.inputprops?.setsearch) {
-      (Array.isArray(field?.value) && setSelectedItems) && setSelectedItems(listOpt?.filter((elem) => field?.value?.includes(elem[getValuesKey])))
-    } else {
-      (Array.isArray(field?.value) && setSelectedItems) && setSelectedItems(list?.filter((elem) => field?.value?.includes(elem[getValuesKey])))
-    }
-    // Setting variables for type String data
-    if (props.inputprops?.setsearch) {
-      !Array.isArray(field?.value) && setSelectedItems && setSelectedItems(listOpt?.find((elem) => field?.value == elem[getValuesKey]))
-    } else {
-      !Array.isArray(field?.value) && setSelectedItems && setSelectedItems(list?.find((elem) => field?.value == elem[getValuesKey]))
-    }
-  }, [])
+  };
 
-  const RemoveSelectedItem = (id, item) => {
-    if (props?.inputprops?.close) {
-      setSelectedItems('')
-      setFieldValue(field.name, '')
+  const RemoveSelectedItem = (id) => {
+    if (props.inputprops?.close) {
+      setSelectedItems([]);
+      setFieldValue(field.name, []);
     } else {
-      let temp = field.value;
-      if (temp.length > 0) {
-        temp?.splice(temp.indexOf(id), 1)
-        setFieldValue(field.name, temp);
-      }
+      const updated = selectedItems.filter((item) => item[getValuesKey] !== id);
+      setSelectedItems(updated);
+      setFieldValue(field.name, updated.map((item) => item[getValuesKey]));
     }
-  }
+  };
+
+  // ✅ Hide selected options in dropdown (multi-select only)
+  const filteredOptions = useMemo(() => {
+    const options = props.inputprops.setsearch ? listOpt : list;
+    if (isMulti) {
+      return options.filter(
+        (option) =>
+          !selectedItems.some((item) => item[getValuesKey] === option[getValuesKey])
+      );
+    }
+    return options;
+  }, [list, listOpt, selectedItems, isMulti, getValuesKey, props.inputprops.setsearch]);
+
   return (
     <>
       {props.label && (
-        <Label htmlFor={props.inputprops.id} className={"label-color"}>
+        <Label htmlFor={props.inputprops.id} className="label-color">
           {props.label}
         </Label>
       )}
-      <div className={`custom-select-box ${props.formfloat=="true"&&'form-floating'}`} ref={ref}>
-        {Array.isArray(selectedItems) ?
-          <div className={`category-select-box`} onClick={() => setIsComponentVisible((p) => p !== field?.name && field?.name)}>
-            <div className={`bootstrap-tagsinput form-select`} >
+
+      <div
+        className={`custom-select-box ${props.formfloat === "true" && "form-floating"}`}
+        ref={ref}
+      >
+        {isMulti ? (
+          <div
+            className="category-select-box"
+            onClick={() => setIsComponentVisible((prev) => !prev)}
+          >
+            <div className="bootstrap-tagsinput form-select">
               {selectedItems.length > 0 ? (
-                selectedItems?.map((item, i) => (
+                selectedItems.map((item, i) => (
                   <span className="tag label label-info" key={i}>
-                    {item?.name}
+                    {item.name}
                     <a className="ms-2 text-white">
                       <RiCloseLine
                         onClick={(e) => {
                           e.stopPropagation();
-                          RemoveSelectedItem(item[getValuesKey], item);
-                          setSelectedItems((p) => p.filter((elem) => elem[getValuesKey] !== item[getValuesKey]));
-                          setFieldValue(field.name, field?.value?.filter((elem) => elem[getValuesKey] !== item[getValuesKey]))
+                          RemoveSelectedItem(item[getValuesKey]);
                         }}
                       />
                     </a>
                   </span>
                 ))
               ) : (
-                <span>{t(props?.inputprops?.initialTittle ? props?.inputprops?.initialTittle :"Select")}</span>
-              )}              
+                <span>{t(props?.inputprops?.initialTittle || "Select")}</span>
+              )}
             </div>
           </div>
-          :
-          <Input type="text" className="form-control form-select cursor position-absolute"
-            value={t(setvalue !== undefined ? (props.inputprops.value || selectedItems?.name) : props.inputprops?.options?.find((item) => item.id === field.value)?.name) || t(props?.inputprops?.initialTittle ? props?.inputprops?.initialTittle :"Select")}
-            onClick={() => setIsComponentVisible(prev => !prev)} readOnly invalid={Boolean(touched[field.name] && errors[field.name])}
+        ) : (
+          <Input
+            type="text"
+            className="form-control form-select cursor position-absolute"
+            value={
+              t(
+                setvalue !== undefined
+                  ? props.inputprops.value || selectedItems?.name
+                  : props.inputprops?.options?.find(
+                      (item) => item[getValuesKey] === field.value
+                    )?.name
+              ) || t(props?.inputprops?.initialTittle || "Select")
+            }
+            onClick={() => setIsComponentVisible((prev) => !prev)}
+            readOnly
+            invalid={Boolean(touch && error)}
           />
-        }
-        {!Array.isArray(selectedItems) && <Input id={props.inputprops.id} {...field} {...props} placeholder="Search" className="form-control form-select" type="text" invalid={Boolean(touched[field.name] && errors[field.name])} disabled />}
+        )}
+
+        {!isMulti && (
+          <Input
+            id={props.inputprops.id}
+            {...field}
+            {...props}
+            placeholder="Search"
+            className="form-control form-select"
+            type="text"
+            invalid={Boolean(touch && error)}
+            disabled
+          />
+        )}
+
         <p className="help-text">{props?.inputprops?.helpertext}</p>
+
         <div className={`box-content ${isComponentVisible ? "open" : ""}`}>
-          {!noSearchBar && <Input type="text" className="form-control" value={searchInput || ""} onChange={(e) => setSearchInput(e.target.value)} />}
+          {!noSearchBar && (
+            <Input
+              type="text"
+              className="form-control"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+            />
+          )}
+
           <ul className="intl-tel-input">
-            {(props.inputprops?.setsearch ? listOpt : list)?.map((option, index) => (
+            {filteredOptions.map((option, index) => (
               <Fragment key={index}>
-                {option?.data ?
-                  <li onClick={() => {
-                    setIsComponentVisible(false);
-                    setvalue ? setvalue(props.inputprops.name, props.store === "obj" ? option : option.id, props.index, props?.title) : setFieldValue(props.inputprops.name, props.store === "obj" ? option : option.id, props.index);
-                  }}>
-                    <div className="country">
-                      <div className="flag-box">
-                        <div className={`iti-flag ${option?.data?.class}`}></div>
-                      </div>
-                      <span className="dial-code">{option?.data?.code}</span>
-                    </div>
-                  </li>
-                  : <li onClick={() => onSelectValue(option)}>
-                    {option?.image && <Image src={option?.image} className="img-fluid category-image" alt={option?.name} height={50} width={50}
-                    />}
-                    <p className={`cursor ${(selectedItems?.[index]?.[getValuesKey] || selectedItems?.[getValuesKey]) == option[getValuesKey] ? 'selected' : ""}`}>{t(option.name)}</p>
-                  </li>}
+                <li onClick={() => onSelectValue(option)}>
+                  {option.image && (
+                    <Image
+                      src={option.image}
+                      className="img-fluid category-image"
+                      alt={option.name}
+                      height={50}
+                      width={50}
+                    />
+                  )}
+                  <p className="cursor">{t(option.name)}</p>
+                </li>
               </Fragment>
             ))}
           </ul>
-          {
-            props.inputprops?.setsearch ? listOpt?.length <= 0 && "No Data" : list?.length <= 0 && "No Data"
-          }
+
+          {filteredOptions.length === 0 && <div>No Data</div>}
         </div>
-        {touch && error && <FormFeedback>{t(props.title) || t(props?.floatlabel)} {t("IsRequired")}</FormFeedback>}
-        {props?.inputprops?.close && <div className="close-icon"><RiCloseLine onClick={() => RemoveSelectedItem()} /></div>}
-       { props?.floatlabel&&<Label>{t(props?.floatlabel)}</Label>}
+
+        {touch && error && (
+          <FormFeedback>
+            {t(props.title) || t(props?.floatlabel)} {t("IsRequired")}
+          </FormFeedback>
+        )}
+
+        {props?.inputprops?.close && (
+          <div className="close-icon">
+            <RiCloseLine onClick={() => RemoveSelectedItem()} />
+          </div>
+        )}
+
+        {props?.floatlabel && <Label>{t(props?.floatlabel)}</Label>}
       </div>
     </>
   );
 };
+
 export default ReactstrapSelectInput;
+

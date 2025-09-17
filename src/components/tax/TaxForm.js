@@ -42,7 +42,7 @@ const TaxForm = ({ updateId, type, buttonName }) => {
         const res = await axios.put('/api/tax?taxId=' + updateId, {
           "name": values.name,
           "value": Number(values.value),
-          "description": values.value
+          "description": values.description
         }, { withCredentials: true });
         if (res.status == 200) {
           alert('Tax: ' + values.name + " updated successfully!");
@@ -73,7 +73,7 @@ const TaxForm = ({ updateId, type, buttonName }) => {
       initialValues={{
         name: Object.keys(data).length > 0 ? data?.name : "",
         description: Object.keys(data).length > 0 ? data?.description : "",
-        tax: Object.keys(data).length > 0 ? data?.value : 0
+        value: Object.keys(data).length > 0 ? data?.value : 0
       }}
       validationSchema={YupObject({ name: nameSchema, description: descriptionSchema })}
       onSubmit={(values) => {
