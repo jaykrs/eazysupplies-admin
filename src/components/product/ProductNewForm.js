@@ -3,7 +3,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import FormBtn from "../../elements/buttons/FormBtn";
 import CategoryContext from "../../helper/categoryContext";
 import request from "../../utils/axiosUtils";
-import { nameSchema, descriptionSchema, YupObject } from "../../utils/validation/ValidationSchemas";
+import { nameSchema, descriptionSchema, YupObject, numberSchema, roleIdSchema } from "../../utils/validation/ValidationSchemas";
 import Loader from "../commonComponent/Loader";
 import CheckBoxField from "../inputFields/CheckBoxField";
 import FileUploadField from "../inputFields/FileUploadField";
@@ -17,15 +17,17 @@ import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import useCustomQuery from "../../utils/hooks/useCustomQuery";
 import axios from "axios";
+import { NumberSchema } from "yup";
 
 const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) => {
   const { t } = useTranslation("common");
   const [catData, setCatData] = useState([]);
-  const [brandData, setBranddata] = useState([]);
+  const [brandData, setBrandData] = useState([]);
   const [tagData, setTagData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [search, setSearch] = useState(false);
+  const [taxData, setTaxData] = useState([]);
   const [productData, setProductData] = useState({});
+  const [supplierData, setSupplierData] = useState([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -43,22 +45,18 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
     }
   }
   const fetchData = async () => {
-    const categories = await axios.get('/api/categories');
-    if (categories.status == 200) {
-      let data = categories?.data?.data?.map(item => ({ id: item.id, name: item.name }));
-      setCatData(data);
-    }
-
-    const brand = await axios.get('/api/brands');
-    if (brand.status == 200) {
-      let data = brand?.data?.data?.map(item => ({ id: item.id, name: item.name }));
-      setBranddata(data);
-    }
-
-    const tag = await axios.get('/api/tags');
-    if (tag.status == 200) {
-      let data = tag?.data?.data?.map(item => ({ id: item.id, name: item.name }));
-      setTagData(data);
+    const allData = await axios.get('/api/products/filter/filter_tag_brand_category?tag_brand_category=true');
+    if (allData.status == 200) {
+      const tagData = allData?.data?.tags?.map(item => ({ id: item.id, name: item.name }));
+      setTagData(tagData);
+      const brandData = allData?.data?.brands?.map(item => ({ id: item.id, name: item.name }));
+      setBrandData(brandData);
+      const tagCategory = allData?.data?.categories?.map(item => ({ id: item.id, name: item.name }));
+      setCatData(tagCategory);
+      const tax = allData?.data?.tax?.map(item => ({ id: item.id, name: item.name + "-" + item.value + "%", value: item.value }));
+      setTaxData(tax);
+      const supplier = allData?.data?.supplier?.map(item => ({ id: item.id, name: item.name }));
+      setSupplierData(supplier);
     }
   }
 
@@ -68,8 +66,13 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
       if (brandId == 0 || categoryId == 0) {
         alert('brand or category is missing');
       }
-      console.log(values, (values.tags).toString());
+      // const taxDataFilter = taxData.filter(item => item.id == Number(values.tax));
+      // if (taxDataFilter.length == 0) {
+      //   alert('All field is mandatory!');
+      // }
       const tagStr = (values.tags).toString();
+      const supplierStr = (values.supplier).toString();
+
       if (updateId) {
         const res = await axios.put('/api/products', {
           "id": Number(updateId),
@@ -82,7 +85,8 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
           "tags": tagStr,
           "sku": values.sku,
           "dimension": values.dimension,
-          "tax": values.tax
+          "tax": Number(values.tax),
+          "supplier": supplierStr
         }, { withCredentials: true });
 
         if (res.status == 200) {
@@ -100,7 +104,8 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
           "tags": tagStr,
           "sku": values.sku,
           "dimension": values.dimension,
-          "tax": values.tax,
+          "tax": Number(values.tax),
+          "supplier": supplierStr
         }, { withCredentials: true });
 
         if (res.status == 201) {
@@ -134,15 +139,23 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
                 stock: Object.keys(productData).length > 0 ? productData?.stock : 0,
                 sku: Object.keys(productData).length > 0 ? productData?.sku : "",
                 dimension: Object.keys(productData).length > 0 ? productData?.dimension : "",
-                tax: Object.keys(productData).length > 0 ? productData?.tax : 0,
+                tax: Object.keys(productData).length > 0 ? Number(productData?.tax) : 0, //  :
                 brandId: Object.keys(productData).length > 0 ? productData?.brand?.id : 0,
                 categoryId: Object.keys(productData).length > 0 ? productData?.category?.id : 0,
-                tags : Object.keys(productData).length > 0 ? (productData?.tags ? productData?.tags.split(',').map(Number) : []) : []
+                tags: Object.keys(productData).length > 0 ? (productData?.tags ? productData?.tags.split(',').map(Number) : []) : [],
+                supplier: Object.keys(productData).length > 0 ? Number(productData?.supplier) : 0,
               }}
               validationSchema={YupObject({
                 name: nameSchema,
-                description: descriptionSchema
-
+                description: descriptionSchema,
+                price: numberSchema,
+                stock: numberSchema,
+                sku: nameSchema,
+                dimension: nameSchema,
+                tax: numberSchema,
+                // brandId: roleIdSchema,
+                // categoryId: roleIdSchema,
+                //tags: nameSchema
               })}
               onSubmit={(values, helpers) => {
                 // setResetData && setResetData(true);
@@ -174,7 +187,23 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
                     <SimpleInputField nameList={[{ name: "stock", title: "stock", placeholder: t("Enter stock available"), type: "number", require: "true", }]} />
                     <SimpleInputField nameList={[{ name: "sku", title: "sku type", placeholder: t("Enter sku type"), type: "text", require: "true", }]} />
                     <SimpleInputField nameList={[{ name: "dimension", title: "dimension", placeholder: t("Enter dimension"), type: "text", require: "true", }]} />
-                    <SimpleInputField nameList={[{ name: "tax", title: "tax", postprefix: "%", inputaddon: "true", placeholder: t("Enter tax"), min: "0", max: "100", type: "number", helpertext: "*Define the percentage of tax to be paid", require: "true", }]} />
+                    {/* <SimpleInputField nameList={[{ name: "tax", title: "tax", postprefix: "%", inputaddon: "true", placeholder: t("Enter tax"), min: "0", max: "100", type: "number", helpertext: "*Define the percentage of tax to be paid", require: "true", }]} /> */}
+                    <SearchableSelectInput
+                      nameList={[
+                        {
+                          name: "tax",
+                          title: "Tax(%)",
+                          require: "true",
+                          inputprops: {
+                            name: "tax",
+                            id: "tax",
+                            options: taxData.length > 0 ? taxData : [],
+                            close: false,
+                            isMulti: false
+                          },
+                        },
+                      ]}
+                    />
                     <SearchableSelectInput
                       nameList={[
                         {
@@ -220,6 +249,23 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
                             options: tagData.length > 0 ? tagData : [],
                             close: false,
                             isMulti: true,
+                          },
+                        },
+                      ]}
+                    />
+
+                    <SearchableSelectInput
+                      nameList={[
+                        {
+                          name: "supplier",
+                          title: "Supplier",
+                          require: "true",
+                          inputprops: {
+                            name: "supplier",
+                            id: "supplier",
+                            options: supplierData.length > 0 ? supplierData : [],
+                            close: false,
+                            isMulti: false
                           },
                         },
                       ]}

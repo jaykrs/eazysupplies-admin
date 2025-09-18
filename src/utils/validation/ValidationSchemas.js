@@ -18,7 +18,7 @@ export const passwordSchema = Yup.string()
 
 export const recaptchaSchema = Yup.string().required();
 export const nameSchema = Yup.string().required();
-
+export const numberSchema = Yup.number().positive().required();
 
 export const descriptionSchema = Yup.string()
   .required()

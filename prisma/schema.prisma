@@ -65,9 +65,9 @@ model Supplier {
   name String
   description String? @db.Text
   productList String?
-  gstin String?
+  gstIn String?
   address String?
-  pincode String?
+  pinCode String?
   city    String?
   phone   String?
   remarks String? @db.Text
@@ -92,7 +92,7 @@ model Product {
   tags        String?
   sku         String?
   skuType         String?
-  slelflife   Int?
+  selfLife   Int?
   mfDate      DateTime?
   expDate     DateTime?
   orderItems  OrderItem[]
@@ -106,11 +106,11 @@ model Product {
   keyword      String?
   ordersCount  Int?
   tax          Int?
-  pkggwt    String?
-  pkgunit   String?
-  pkgcnt    Int?
-  caserate  Float?
-  unitrate  Float?
+  pkgGwt    String?
+  pkgUnit   String?
+  pkgCnt    Int?
+  caseRate  Float?
+  unitRate  Float?
   supplier String?
   status   Boolean   @default(false)
   jsonData Json?

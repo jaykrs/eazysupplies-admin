@@ -7,6 +7,8 @@ import Select from "react-select";
 const AllUsers = () => {
     const route = useRouter();
     const [products, setProducts] = useState([]);
+    const [taxData, setTaxData] = useState([]);
+    const [supplierData, setSupplierData] = useState([]);
     const [refreshState, setRefeshState] = useState(false);
     const [state, setState] = useState({
         name: "all",
@@ -38,6 +40,8 @@ const AllUsers = () => {
         let res = await axios.get('/api/products', { withCredentials: true });
         if (res.status == 200) {
             setProducts(res.data.data);
+            setTaxData(res.data.tax);
+            
         }
     }
 
@@ -66,7 +70,7 @@ const AllUsers = () => {
 
     };
     const handleEdit = (id) => {
-       route.push('/product/edit/' + id);
+        route.push('/product/edit/' + id);
     };
 
     const handleDelete = () => {
@@ -232,32 +236,45 @@ const AllUsers = () => {
                             <th className="border px-4 py-2">dimension</th>
                             <th className="border px-4 py-2">Category</th>
                             <th className="border px-4 py-2">Brand</th>
+                            <th className="border px-4 py-2">Supplier</th>
                             <th className="border px-4 py-2">Orders</th>
                             <th className="border px-4 py-2">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {products?.length ? (
-                            products.map((product) => (
-                                <tr key={product.id}>
-                                    <td className="border px-4 py-2">{product.name}</td>
-                                    <td className="border px-4 py-2">{product.sku}</td>
-                                    <td className="border px-4 py-2">${product.price}</td>
-                                    <td className="border px-4 py-2">{product.tax}%</td>
-                                    <td className="border px-4 py-2">{product.stock}</td>
-                                    <td className="border px-4 py-2">{product.dimension}</td>
-                                    <td className="border px-4 py-2">{product.category?.name}</td>
-                                    <td className="border px-4 py-2">{product.brand?.name}</td>
-                                    <td className="border px-4 py-2">{product.ordersCount}</td>
-                                    <td>
-                                        <div className="d-flex gap-2">
-                                            <button onClick={() => handleView(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">View</button>
-                                            <button onClick={() => handleEdit(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">Edit</button>
-                                            <button onClick={() => handleDelete(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-danger">Delete</button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )
+                            products.map((product) => {
+                                const tax = taxData.filter(el=> el.id = Number(product.tax));
+                                let supplierName;
+                                if(product?.suppliers.length == 1){
+                                    supplierName = product?.suppliers[0].name
+                                }else if(product?.suppliers.length > 1){
+                                   supplierName = product?.suppliers.reduce((a,b)=> a.name + ", " + b.name);
+                                }else{
+                                    supplierName = ""
+                                }
+                                return (
+                                    <tr key={product.id}>
+                                        <td className="border px-4 py-2">{product.name}</td>
+                                        <td className="border px-4 py-2">{product.sku}</td>
+                                        <td className="border px-4 py-2">{product.price}</td>
+                                        <td className="border px-4 py-2">{tax.length > 0 ? tax[0]?.name + "-" + tax[0]?.value : 0}</td>
+                                        <td className="border px-4 py-2">{product.stock}</td>
+                                        <td className="border px-4 py-2">{product.dimension}</td>
+                                        <td className="border px-4 py-2">{product.category?.name}</td>
+                                        <td className="border px-4 py-2">{product.brand?.name}</td>
+                                        <td className="border px-4 py-2">{supplierName}</td>
+                                        <td className="border px-4 py-2">{product.ordersCount}</td>
+                                        <td>
+                                            <div className="d-flex gap-2">
+                                                <button onClick={() => handleView(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">View</button>
+                                                <button onClick={() => handleEdit(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">Edit</button>
+                                                <button onClick={() => handleDelete(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-danger">Delete</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )
+                            }
                             )
                         ) : (
                             <tr>
