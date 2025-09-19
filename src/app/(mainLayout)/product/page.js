@@ -41,7 +41,7 @@ const AllUsers = () => {
         if (res.status == 200) {
             setProducts(res.data.data);
             setTaxData(res.data.tax);
-            
+
         }
     }
 
@@ -216,8 +216,8 @@ const AllUsers = () => {
             </div>
             <div className="w-100 d-flex justify-content-end fs-5">
                 <div className="w-50 d-flex justify-content-end gap-4">
-                    <button className="px-4 py-2 btn btn-primary fs-5" onClick={() => setRefeshState(true)}>Search</button>
-                    <button className="px-4 py-2 btn btn-primary fs-5" onClick={() => route.push('/product/create')}>Add</button>
+                    <button className="px-2 py-1 btn btn-primary fs-4" onClick={() => setRefeshState(true)}>Search</button>
+                    <button className="px-2 py-1 btn btn-primary fs-4" onClick={() => route.push('/product/create')}>Add</button>
                 </div>
             </div>
 
@@ -236,23 +236,33 @@ const AllUsers = () => {
                             <th className="border px-4 py-2">dimension</th>
                             <th className="border px-4 py-2">Category</th>
                             <th className="border px-4 py-2">Brand</th>
+                            <th className="border px-4 py-2">SKU</th>
+                            <th className="border px-4 py-2">SKUType</th>
+                            <th className="border px-4 py-2">SelfLife</th>
+                            <th className="border px-4 py-2">pkgUnit</th>
+                            <th className="border px-4 py-2">pkgCnt</th>
+                            <th className="border px-4 py-2">caseRate</th>
+                            <th className="border px-4 py-2">unitRate</th>
+                            <th className="border px-4 py-2">Status</th>
                             <th className="border px-4 py-2">Supplier</th>
-                            <th className="border px-4 py-2">Orders</th>
+                            <th className="border px-4 py-2">ordersCount</th>
                             <th className="border px-4 py-2">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {products?.length ? (
                             products.map((product) => {
-                                const tax = taxData.filter(el=> el.id = Number(product.tax));
+                                const tax = taxData.filter(el => el.id = Number(product.tax));
                                 let supplierName;
-                                if(product?.suppliers.length == 1){
+                                if (product?.suppliers.length == 1) {
                                     supplierName = product?.suppliers[0].name
-                                }else if(product?.suppliers.length > 1){
-                                   supplierName = product?.suppliers.reduce((a,b)=> a.name + ", " + b.name);
-                                }else{
+                                } else if (product?.suppliers.length > 1) {
+                                    supplierName = product?.suppliers.reduce((a, b) => a.name + ", " + b.name);
+                                } else {
                                     supplierName = ""
                                 }
+
+                                console.log('........product', product);
                                 return (
                                     <tr key={product.id}>
                                         <td className="border px-4 py-2">{product.name}</td>
@@ -263,6 +273,14 @@ const AllUsers = () => {
                                         <td className="border px-4 py-2">{product.dimension}</td>
                                         <td className="border px-4 py-2">{product.category?.name}</td>
                                         <td className="border px-4 py-2">{product.brand?.name}</td>
+                                        <th className="border px-4 py-2">{product?.sku}</th>
+                                        <td className="border px-4 py-2">{product?.skuType}</td>
+                                        <td className="border px-4 py-2">{product?.selfLife}</td>
+                                        <td className="border px-4 py-2">{product?.pkgUnit}</td>
+                                        <td className="border px-4 py-2">{product?.pkgCnt}</td>
+                                        <td className="border px-4 py-2">{product?.caseRate}</td>
+                                        <td className="border px-4 py-2">{product?.unitRate}</td>
+                                        <td className="border px-4 py-2" style={{color: product?.status? "green": "grey"}}>{product?.status? "Active": "Inactive"}</td>
                                         <td className="border px-4 py-2">{supplierName}</td>
                                         <td className="border px-4 py-2">{product.ordersCount}</td>
                                         <td>

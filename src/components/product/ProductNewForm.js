@@ -66,6 +66,7 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
       if (brandId == 0 || categoryId == 0) {
         alert('brand or category is missing');
       }
+      console.log('.............data', values);
       // const taxDataFilter = taxData.filter(item => item.id == Number(values.tax));
       // if (taxDataFilter.length == 0) {
       //   alert('All field is mandatory!');
@@ -84,9 +85,14 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
           "brandId": values.brandId,
           "tags": tagStr,
           "sku": values.sku,
+          "skuType": values.skuType,
           "dimension": values.dimension,
           "tax": Number(values.tax),
-          "supplier": supplierStr
+          "supplier": supplierStr,
+          "pkgUnit": values.pkgUnit,
+          "pkgCnt": values.pkgCnt,
+          "unitRate": values.unitRate,
+          "status": values.status
         }, { withCredentials: true });
 
         if (res.status == 200) {
@@ -103,9 +109,14 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
           "brandId": values.brandId,
           "tags": tagStr,
           "sku": values.sku,
+          "skuType": values.skuType,
           "dimension": values.dimension,
           "tax": Number(values.tax),
-          "supplier": supplierStr
+          "supplier": supplierStr,
+          "pkgUnit": values.pkgUnit,
+          "pkgCnt": values.pkgCnt,
+          "unitRate": values.unitRate,
+          "status": Boolean(values.status)
         }, { withCredentials: true });
 
         if (res.status == 201) {
@@ -144,6 +155,11 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
                 categoryId: Object.keys(productData).length > 0 ? productData?.category?.id : 0,
                 tags: Object.keys(productData).length > 0 ? (productData?.tags ? productData?.tags.split(',').map(Number) : []) : [],
                 supplier: Object.keys(productData).length > 0 ? Number(productData?.supplier) : 0,
+                skuType:  Object.keys(productData).length > 0 ? productData?.skuType : "",
+                pkgUnit:  Object.keys(productData).length > 0 ? Number(productData?.pkgUnit) : 0,
+                pkgCnt:  Object.keys(productData).length > 0 ? Number(productData?.pkgCnt) : 0,
+                unitRate:  Object.keys(productData).length > 0 ? Number(productData?.unitRate) : 0,
+                status:  Object.keys(productData).length > 0 ? (productData?.status) : false
               }}
               validationSchema={YupObject({
                 name: nameSchema,
@@ -183,10 +199,15 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
                         },
                       ]}
                     />
-                    <SimpleInputField nameList={[{ name: "price", title: "price", placeholder: t("Enter price"), type: "number", require: "true", }]} />
-                    <SimpleInputField nameList={[{ name: "stock", title: "stock", placeholder: t("Enter stock available"), type: "number", require: "true", }]} />
-                    <SimpleInputField nameList={[{ name: "sku", title: "sku type", placeholder: t("Enter sku type"), type: "text", require: "true", }]} />
-                    <SimpleInputField nameList={[{ name: "dimension", title: "dimension", placeholder: t("Enter dimension"), type: "text", require: "true", }]} />
+                    <SimpleInputField nameList={[{ name: "price", title: "Price", placeholder: t("Enter price"), type: "number", require: "true", }]} />
+                    <SimpleInputField nameList={[{ name: "stock", title: "Stock", placeholder: t("Enter stock available"), type: "number", require: "true", }]} />
+                    <SimpleInputField nameList={[{ name: "dimension", title: "Dimension", placeholder: t("Enter dimension"), type: "text", require: "true", }]} />
+                    <SimpleInputField nameList={[{ name: "sku", title: "Sku", placeholder: t("Enter sku type"), type: "text", require: "true", }]} />
+                    <SimpleInputField nameList={[{ name: "skuType", title: "Sku type", placeholder: t("Enter sku type"), type: "text", require: "true", }]} />
+                    <SimpleInputField nameList={[{ name: "pkgUnit", title: "Pkg Unit", placeholder: t("Enter sku type"), type: "text", require: "true", }]} />
+                    <SimpleInputField nameList={[{ name: "unitRate", title: "Unit Rate", placeholder: t("Enter sku type"), type: "number", require: "true", }]} />
+                    <SimpleInputField nameList={[{ name: "pkgCnt", title: "Pkg Count", placeholder: t("Enter sku type"), type: "number", require: "true", }]} />
+                    <CheckBoxField name="status" title="Status" />
                     {/* <SimpleInputField nameList={[{ name: "tax", title: "tax", postprefix: "%", inputaddon: "true", placeholder: t("Enter tax"), min: "0", max: "100", type: "number", helpertext: "*Define the percentage of tax to be paid", require: "true", }]} /> */}
                     <SearchableSelectInput
                       nameList={[

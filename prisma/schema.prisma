@@ -20,7 +20,7 @@ model User {
   password  String
   roleId    Int
   status    Boolean   @default(false)
-  profileImagepath String?
+  profileImagePath String?
   lastLoginDt    DateTime?
   countryCode String    @default("+91")
   phone     String
@@ -188,7 +188,7 @@ model OrderItem {
   orderId   Int
   productId Int
   quantity  Int
-  backlogquantity  Int?
+  backlogQuantity  Int?
   price     Float
   order     Order    @relation(fields: [orderId], references: [id])
   product   Product  @relation(fields: [productId], references: [id])
@@ -235,7 +235,7 @@ model Payment {
   userId    Int
   orderId   Int     @unique
   amount    Float
-  transectionid String?
+  transactionId String?
   method    String  // CARD, UPI, PAYPAL, COD
   status    String  @default("PENDING") // PENDING, SUCCESS, FAILED
   user      User    @relation(fields: [userId], references: [id])
