@@ -27,6 +27,11 @@ function authenticate(request) {
     return token ? verifyJwt(token) : null;
 }
 
+export async function getUserFromToken(request) {
+const payload = authenticate(request);
+return payload && payload.userId? payload : null;
+}
+
 export async function verifyAdmin(request) {
   try {
     const payload = authenticate(request);

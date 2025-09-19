@@ -67,6 +67,7 @@ export async function POST(request) {
     // Response payload (safe fields only)
     const data = {
       email: user.email,
+      userId: user.id,
       name: user.name
     };
 
