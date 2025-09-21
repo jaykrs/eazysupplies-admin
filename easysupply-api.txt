@@ -1293,3 +1293,39 @@ curl --location --request PUT 'http://api.eazysupplies.com/api/template' \
 }
   
 }'
+
+
+curl --location --request POST 'http://localhost:3000/api/orders' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "userId": 1,
+  "status" :      "PENDING",
+  "items": [
+    {
+      "productId": 3,
+      "quantity": 2,
+      "price": 199.99
+    },
+    {
+      "productId": 2,
+      "quantity": 1,
+      "price": 49.99
+    }
+  ],
+  "shipping": {
+    "address": "123 Main St",
+    "city": "New York",
+    "state" : "CA",
+    "postalCode": "10001",
+    "country": "USA"
+  },
+  "payment": {
+    "method": "CREDIT_CARD",
+    "status": "PENDING",
+    "userId": 1,
+    "amount": 249.98
+  },
+  "jsonData": {
+    "note": "First test order"
+  }
+}'
