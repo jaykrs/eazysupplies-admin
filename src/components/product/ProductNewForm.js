@@ -154,7 +154,7 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
                 brandId: Object.keys(productData).length > 0 ? productData?.brand?.id : 0,
                 categoryId: Object.keys(productData).length > 0 ? productData?.category?.id : 0,
                 tags: Object.keys(productData).length > 0 ? (productData?.tags ? productData?.tags.split(',').map(Number) : []) : [],
-                supplier: Object.keys(productData).length > 0 ? Number(productData?.supplier) : 0,
+                supplier: Object.keys(productData).length > 0 ? (productData?.tags ? productData?.supplier.split(',').map(Number) : []) : [],
                 skuType:  Object.keys(productData).length > 0 ? productData?.skuType : "",
                 pkgUnit:  Object.keys(productData).length > 0 ? Number(productData?.pkgUnit) : 0,
                 pkgCnt:  Object.keys(productData).length > 0 ? Number(productData?.pkgCnt) : 0,
@@ -286,7 +286,7 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
                             id: "supplier",
                             options: supplierData.length > 0 ? supplierData : [],
                             close: false,
-                            isMulti: false
+                            isMulti: true
                           },
                         },
                       ]}

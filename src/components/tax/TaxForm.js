@@ -41,7 +41,7 @@ const TaxForm = ({ updateId, type, buttonName }) => {
       if (buttonName == "Update") {
         const res = await axios.put('/api/tax?taxId=' + updateId, {
           "name": values.name,
-          "value": Number(values.value),
+          "value": Number(values.taxValue),
           "description": values.description
         }, { withCredentials: true });
         if (res.status == 200) {
@@ -52,7 +52,7 @@ const TaxForm = ({ updateId, type, buttonName }) => {
       } else {
         const res = await axios.post('/api/tax', {
           "name": values.name,
-          "value": Number(values.value),
+          "value": Number(values.taxValue),
           "description": values.description,
         }, { withCredentials: true });
 
@@ -73,7 +73,7 @@ const TaxForm = ({ updateId, type, buttonName }) => {
       initialValues={{
         name: Object.keys(data).length > 0 ? data?.name : "",
         description: Object.keys(data).length > 0 ? data?.description : "",
-        value: Object.keys(data).length > 0 ? data?.value : 0
+        taxValue: Object.keys(data).length > 0 ? data?.value : 0
       }}
       validationSchema={YupObject({ name: nameSchema, description: descriptionSchema })}
       onSubmit={(values) => {
@@ -86,7 +86,7 @@ const TaxForm = ({ updateId, type, buttonName }) => {
             <SimpleInputField
               nameList={[
                 { name: "name", placeholder: t("EnterTaxName"), require: "true" },
-                { name: "value", title: "Value", placeholder: t("EnterTaxValue"), require: "true", type: "number" },
+                { name: "taxValue", title: "Value", placeholder: t("EnterTaxValue"), require: "true", type: "number" },
                 { name: "description", type: "textarea", title: "Description", placeholder: t("EnterDescription") }
               ]}
             />

@@ -360,7 +360,7 @@ const ReactstrapSelectInput = ({
             />
           )}
 
-          <ul className="intl-tel-input">
+          <ul className="intl-tel-input" style={{ maxHeight: "300px", overflowY: "auto", overflowX: "hidden" }}>
             {filteredOptions.map((option, index) => (
               <Fragment key={index}>
                 <li onClick={() => onSelectValue(option)}>
