@@ -22,19 +22,19 @@ export function verifyJwt(token: string) {
   }
 }
 
-function authenticate(request) {
+export async function authenticate(request) {
     const token = parseAuthCookie(request.headers.get("cookie"));
     return token ? verifyJwt(token) : null;
 }
 
 export async function getUserFromToken(request) {
-const payload = authenticate(request);
+const payload = await authenticate(request);
 return payload && payload.userId? payload : null;
 }
 
 export async function verifyAdmin(request) {
   try {
-    const payload = authenticate(request);
+    const payload = await authenticate(request);
     const userRole = await verifyRole(payload.userId);
     return userRole == 'admin';
   } catch (error) {

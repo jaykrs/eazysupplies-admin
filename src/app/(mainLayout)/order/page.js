@@ -12,6 +12,7 @@ const AllOrders = () => {
   //const [paymentModel, setPaymentModel] = useState(false);
   const [supplierData, setSupplierData] = useState([]);
   const [refreshState, setRefeshState] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const [state, setState] = useState({
     paymentModel: false,
     paymentDetails: {},
@@ -20,7 +21,8 @@ const AllOrders = () => {
     userModel: false,
     userDetails: {},
     productModel: false,
-    productDetails: {}
+    productDetails: {},
+    qtyTempValue: 0
   });
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -53,15 +55,18 @@ const AllOrders = () => {
     }
   }
 
-  const handleView = () => {
-
-  };
-  const handleEdit = (id) => {
-    route.push('/product/edit/' + id);
-  };
-
   const handleDelete = () => {
 
+  };
+
+  const handleBlur = () => {
+
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleBlur();
+    }
   };
 
   return (
@@ -110,8 +115,23 @@ const AllOrders = () => {
                           handleStateChange('userDetails', subOrder?.product);
                         }} style={{ "color": "#1515df", cursor: "pointer" }} >{subOrder?.product?.name}</td>
 
-                        <td className="border px-4 py-2">{subOrder?.quantity}</td>
-                        <td className="border px-4 py-2">{subOrder?.price}</td>
+                        <td className="border px-4 py-2">
+                          <input
+                            type="number"
+                            value={Number(subOrder?.quantity)}
+                            onChange={(e) => handleStateChange('qtyTempValue', e.target.value)}
+                            onBlur={(e) => {
+                              setIsFocused(false);
+                              handleBlur(e);
+                            }}
+                            onFocus={() => setIsFocused(true)}
+                            onKeyDown={handleKeyDown}
+                            autoFocus
+                            className={`w-full px-1 outline-none transition-all ${isFocused ? 'border border-blue-500' : 'border border-transparent'
+                              }`}
+                          />
+                        </td>
+                        <td className="border px-4 py-2">{Number(subOrder?.price) * Number(subOrder?.quantity)}</td>
                         <td className="border px-4 py-2" onClick={() => {
                           handleStateChange("shippingModel", true);
                           handleStateChange('shippingDetails', order?.shipping);
@@ -124,8 +144,8 @@ const AllOrders = () => {
                         <td className="border px-4 py-2">{order?.supplier}</td>
                         <td>
                           <div className="d-flex gap-2">
-                            <button onClick={() => handleView(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">View</button>
-                            <button onClick={() => handleEdit(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">Edit</button>
+                            {/* <button onClick={() => handleView(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">View</button>
+                            <button onClick={() => handleEdit(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">Edit</button> */}
                             <button onClick={() => handleDelete(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-danger">Delete</button>
                           </div>
                         </td>
