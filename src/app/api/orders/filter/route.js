@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
 // 📌 GET /api/orders?page=1&limit=10&sortBy=createdAt&order=desc&status=PENDING
 export async function GET(request) {
     try {
-        const payload = authenticate(request);
+        const payload = await authenticate(request);
         if (!payload) {
             return NextResponse.json({ error: MESSAGES.UNAUTHORIZED }, { status: 401 });
         }
