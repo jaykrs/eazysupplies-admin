@@ -29,7 +29,11 @@ export async function GET(request) {
             },
             include: {
                 user: true,
-                items: true,
+                items: {
+                    include: {
+                        product: true, // 👈 this includes product details inside each item
+                    },
+                },
                 shipping: true,
                 payment: true,
             },

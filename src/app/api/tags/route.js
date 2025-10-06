@@ -42,21 +42,12 @@ export async function PUT(request) {
     const body = await request.json();
     const { searchParams } = new URL(request.url);
     const id = Number(searchParams.get('tagId'));
-    // const token = parseAuthCookie(request.headers.get('cookie'));
-    // const payload = token ? verifyJwt(token) : null;
-    // if (!payload || (await verifyRole(payload.userId)).toLowerCase() !== 'admin') {
-    //   return NextResponse.json(
-    //     { error: 'Unauthorized: Admin role required' },
-    //     { status: 403 }
-    //   );
-    // }
 
     const tag = await prisma.tag.findUnique({
       where: {
         id: id
       }
     })
-    console.log('.........', tag, id);
     if (!tag) {
       return NextResponse.json({ error: 'Tag does not exist' }, { status: 404 });
     }

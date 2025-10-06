@@ -9,7 +9,6 @@ import Select from "react-select";
 const AllOrders = () => {
   const route = useRouter();
   const [orders, setOrders] = useState({});
-  //const [paymentModel, setPaymentModel] = useState(false);
   const [supplierData, setSupplierData] = useState([]);
   const [refreshState, setRefeshState] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -31,7 +30,6 @@ const AllOrders = () => {
       return { ...prev, [name]: value }
     })
   }
-
   useEffect(() => {
     const initial = document.body.classList.contains("dark-only");
     setIsDarkMode(initial);
@@ -46,29 +44,17 @@ const AllOrders = () => {
   }, [refreshState])
 
   const fetchProduct = async () => {
-    let res = await axios.get('/api/orders', { withCredentials: true });
+    let res = await axios.get('/api/orders/auth', { withCredentials: true });
     if (res.status == 200) {
-      console.log('.............', res);
-      setOrders(res.data);
-      // setTaxData(res.data.tax);
+      let filterData = res?.data?.data?.filter(el => el?.orders?.length != 0);
+      setOrders(filterData);
 
     }
   }
 
-  const handleDelete = () => {
-
-  };
-
-  const handleBlur = () => {
-
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      handleBlur();
-    }
-  };
-
+  const handleView = (id) => {
+    route.push('/order/details/' + id);
+  }
   return (
     <>
       <div className="w-100 d-flex flex-wrap justify-content-start m-4 fs-6" style={{ gap: "50px" }}>
@@ -89,69 +75,38 @@ const AllOrders = () => {
             <tr>
               <th className="border px-4 py-2">S.N.</th>
               <th className="border px-4 py-2">User</th>
-              <th className="border px-4 py-2">Product</th>
-              <th className="border px-4 py-2">Quantity</th>
-              <th className="border px-4 py-2">Price</th>
-              <th className="border px-4 py-2">Shipping</th>
-              <th className="border px-4 py-2">Payment</th>
-              <th className="border px-4 py-2">Supplier</th>
+              <th className="border px-4 py-2">Order Count</th>
+              <th className="border px-4 py-2">Order Status</th>
               <th className="border px-4 py-2">Action</th>
             </tr>
           </thead>
           <tbody>
-            {orders?.orders?.length ? (
-              orders?.orders.map((order, index) => {
+            {orders?.length ? (
+              orders?.map((order, index) => {
+                const PENDINGStatus = order?.orders?.filter(el => el?.status === "PENDING");
+                const ApprovedStatus = order?.orders?.filter(el => el?.status === "APPROVED");
+                const RejectedStatus = order?.orders?.filter(el => el?.status === "REJECTED");
                 return (
-                  order?.items?.map((subOrder, subIndex) => {
-                    return (
-                      <tr key={subOrder?.id + 1}>
-                        <td className="border px-4 py-2">{index + 1}</td>
-                        <td className="border px-4 py-2" onClick={() => {
-                          handleStateChange("userModel", true);
-                          handleStateChange('userDetails', order?.user);
-                        }} style={{ "color": "#1515df", cursor: "pointer" }}>{order?.user?.name}</td>
-                        <td className="border px-4 py-2" onClick={() => {
-                          handleStateChange("userModel", true);
-                          handleStateChange('userDetails', subOrder?.product);
-                        }} style={{ "color": "#1515df", cursor: "pointer" }} >{subOrder?.product?.name}</td>
-
-                        <td className="border px-4 py-2">
-                          <input
-                            type="number"
-                            value={Number(subOrder?.quantity)}
-                            onChange={(e) => handleStateChange('qtyTempValue', e.target.value)}
-                            onBlur={(e) => {
-                              setIsFocused(false);
-                              handleBlur(e);
-                            }}
-                            onFocus={() => setIsFocused(true)}
-                            onKeyDown={handleKeyDown}
-                            autoFocus
-                            className={`w-full px-1 outline-none transition-all ${isFocused ? 'border border-blue-500' : 'border border-transparent'
-                              }`}
-                          />
-                        </td>
-                        <td className="border px-4 py-2">{Number(subOrder?.price) * Number(subOrder?.quantity)}</td>
-                        <td className="border px-4 py-2" onClick={() => {
-                          handleStateChange("shippingModel", true);
-                          handleStateChange('shippingDetails', order?.shipping);
-                        }} style={{ "color": "#1515df", cursor: "pointer" }} title={order?.shipping?.address + " ," + order?.shipping?.city + ' ,' + order?.shipping?.country} >{order?.shipping?.address}</td>
-
-                        <td className="border px-4 py-2" onClick={() => {
-                          handleStateChange("paymentModel", true);
-                          handleStateChange('paymentDetails', order?.payment);
-                        }} style={{ "color": "#1515df", cursor: "pointer" }} >{order?.payment?.status + "(" + order?.payment?.amount + ")"}</td>
-                        <td className="border px-4 py-2">{order?.supplier}</td>
-                        <td>
-                          <div className="d-flex gap-2">
-                            {/* <button onClick={() => handleView(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">View</button>
-                            <button onClick={() => handleEdit(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">Edit</button> */}
-                            <button onClick={() => handleDelete(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-danger">Delete</button>
-                          </div>
-                        </td>
-                      </tr>
-                    )
-                  })
+                  <tr key={order?.id + index + 1}>
+                    <td className="border px-4 py-2">{index + 1}</td>
+                    <td className="border px-4 py-2" onClick={() => {
+                      handleStateChange("userModel", true);
+                      handleStateChange('userDetails', order);
+                    }} style={{ "color": "#1515df", cursor: "pointer" }}>{order?.name}</td>
+                    <td className="border px-4 py-2">{order?.orders?.length}</td>
+                    <td className="border px-4 py-2">
+                      <div className="d-flex gap-5">
+                        <span><p>PENDING</p> <br /> <p>{PENDINGStatus?.length}</p></span>
+                        <span><p>APPROVED</p> <br /> <p>{ApprovedStatus?.length}</p></span>
+                        <span><p>REJECTED</p> <br /> <p>{RejectedStatus?.length}</p></span>
+                      </div>
+                    </td>
+                    <td>
+                      <div className="d-flex justify-content-center gap-2">
+                        <button onClick={() => handleView(order?.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">View</button>
+                      </div>
+                    </td>
+                  </tr>
                 )
               }
               )
@@ -338,7 +293,7 @@ const AllOrders = () => {
         </div>
       </ShowModal>
       <ShowModal
-        open={state.userModel}
+        open={state.productModel}
         close={false}
         buttons={
           <>
