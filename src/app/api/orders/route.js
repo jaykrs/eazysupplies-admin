@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { verifyAdmin } from "../utils/jwt";
 
 const prisma = new PrismaClient();
 
@@ -61,7 +62,7 @@ export async function POST(request) {
       );
     }
 
-      // ✅ Check if user exists
+    // ✅ Check if user exists
     const _user = await prisma.user.findUnique({ where: { id: userId } });
     if (!_user) {
       return NextResponse.json(
@@ -97,5 +98,21 @@ export async function POST(request) {
   } catch (error) {
     console.error("POST /orders error:", error);
     return NextResponse.json({ error: "Failed to create order" }, { status: 500 });
+  }
+}
+
+export async function PUT(request) {
+  try {
+    if (verifyAdmin(request)) {
+      const body = await request.json();
+      const { id, status, approved = false } = body;
+      return NextResponse.json(await prisma.order.update({ where: { id }, data: { status, approved } }));
+    }
+  } catch (Error) {
+    console.log(Error);
+    return NextResponse.json(
+      { error: MESSAGES.SERVER_ERROR },
+      { status: 500 }
+    );
   }
 }

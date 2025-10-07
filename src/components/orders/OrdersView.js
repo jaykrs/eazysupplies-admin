@@ -32,12 +32,12 @@ const OrdersView = ({ id }) => {
         fetchProduct();
     }, [])
 
-    // useEffect(() => {
-    //   const initial = document.body.classList.contains("dark-only");
-    //   setIsDarkMode(initial);
-    //   fetchProduct();
-    //   handleStateChange('refreshState', false);
-    // }, [state.refreshState])
+    useEffect(() => {
+        const initial = document.body.classList.contains("dark-only");
+        setIsDarkMode(initial);
+        fetchProduct();
+        handleStateChange('refreshState', false);
+    }, [state.refreshState])
 
     const handleView = (el) => {
         handleStateChange('productItemDetails', el);
@@ -45,24 +45,48 @@ const OrdersView = ({ id }) => {
 
     const fetchProduct = async () => {
         let res = await axios.get('/api/orders/filter?userId=' + id, { withCredentials: true });
+        // if (res.status == 200) {
+        //     handleStateChange('Orders', res.data.data);
+        //     if (Object.keys(state.editOrderItem).length > 0) {
+        //         const filterData = res.data.data.filter(el => el.id === state.editOrderItem?.orderId);
+        //         handleStateChange('productItemDetails', filterData[0]);
+        //         handleStateChange('editOrderItem', {});
+        //     }
+        // }
+
         if (res.status == 200) {
             handleStateChange('Orders', res.data.data);
+
+            const currentProductId = state.productItemDetails?.id;
+
+            if (currentProductId) {
+                const updatedProduct = res.data.data.find(el => el.id === currentProductId);
+                if (updatedProduct) {
+                    handleStateChange('productItemDetails', updatedProduct);
+                }
+            }
+
+            if (Object.keys(state.editOrderItem).length > 0) {
+                const filterData = res.data.data.filter(el => el.id === state.editOrderItem?.orderId);
+                handleStateChange('editOrderItem', {});
+            }
         }
+
     }
     const handleOrderItemUpdate = async () => {
         try {
-            console.log('state.editOrderItem', state.editOrderItem);
             const res = await axios.put('/api/orders/auth', {
                 "id": Number(state.editOrderItem?.id),
                 "quantity": Number(state.orderItemQty !== 0 ? state.orderItemQty : state.editOrderItem?.quantity),
                 "price": Number(state.orderItemPrice !== 0 ? state.orderItemPrice : state.editOrderItem?.price)
             }, { withCredentials: true });
             if (res.status == 200) {
-                alert("Supplier:  updated successfully!");
-                window.location.reload();
+                alert("Order item updated successfully!");
+                // window.location.reload();
+                handleStateChange('refreshState', true);
             }
         } catch (err) {
-           console.log('error', err);
+            console.log('error', err);
         }
     }
     const orderItemEdit = (el) => {
@@ -71,11 +95,26 @@ const OrdersView = ({ id }) => {
         handleStateChange('orderItemPrice', el?.price);
     }
 
+    const updateOrderStatus = async (id, action) => {
+        try {
+            const res = await axios.put('/api/orders', {
+                id: Number(id),
+                status: action.toUpperCase(),
+                approved: action.toUpperCase() === "APPROVED"
+            }, { withCredentials: true });
+
+            if (res.status === 200) {
+                alert(`Order ${action.toUpperCase()} successfully!`);
+                handleStateChange('refreshState', true);
+            }
+        } catch (err) {
+            console.error('error', err);
+        }
+    };
+
+
     return (
         <>
-            <div className="w-100 d-flex flex-wrap justify-content-start m-4 fs-6" style={{ gap: "50px" }}>
-            </div>
-
             <div>
                 Orders Details
             </div>
@@ -99,9 +138,10 @@ const OrdersView = ({ id }) => {
                             return (
                                 <div key={index} className="card mb-3" style={{ width: "100%" }}>
                                     <div className="card-body">
+                                        <h5 className="card-title">Order ID: {el?.id}</h5>
                                         <h5 className="card-title">Items: {el?.items.length}</h5>
                                         <p className="card-text">Status: {el?.status}</p>
-                                        <p className="card-text">Total: RS {totalPrice.toFixed(2)}</p>
+                                        <p className="card-text">Total Price(RS): {totalPrice.toFixed(2)}</p>
                                         <p className="card-text">Orders On: {el?.createdAt
                                             ? new Date(el?.createdAt).toLocaleDateString()
                                             : "-"}</p>
@@ -117,7 +157,18 @@ const OrdersView = ({ id }) => {
 
                 {/* Main Content (Static) */}
                 <div className="flex-grow-1 p-3">
-                    <h4>Order Items Details</h4>
+                    <div className="w-100 d-flex justify-content-between mb-2">
+                        <div><h4>Order Items Details</h4></div>
+                        {
+                            Object.keys(state.productItemDetails).length > 0 &&
+                            <div className="d-flex justify-content-end gap-3 pr-3">
+                                <button type="button" className="btn btn-info">Download Invoice</button>
+                                {(state.productItemDetails?.approved && (state.productItemDetails?.status).toUpperCase() === "APPROVED") ? <button type="button" className="btn btn-success" disabled title="disabled" >Approved</button> : (state.productItemDetails?.status).toUpperCase() === "PENDING" ? <button type="button" className="btn btn-success" onClick={() => updateOrderStatus(state.productItemDetails?.id, "APPROVED")} >Approve</button> : ''}
+                                {(state.productItemDetails?.status).toUpperCase() === "REJECTED" ? <button type="button" className="btn btn-danger" disabled >Rejected</button> : (state.productItemDetails?.status).toUpperCase() === "PENDING" ? <button type="button" className="btn btn-danger" onClick={() => updateOrderStatus(state.productItemDetails?.id, "REJECTED")} >Reject</button> : ''}
+                            </div>
+                        }
+                    </div>
+
                     {Object.keys(state.productItemDetails).length > 0 ? (
                         state.productItemDetails?.items?.map((el, index) => {
                             return (
@@ -145,9 +196,9 @@ const OrdersView = ({ id }) => {
                                             ? new Date(el?.updatedAt).toLocaleDateString()
                                             : "-"}</p>
                                         <div className="w-100 d-flex justify-content-between">
-                                            <h3>Tost Price(RS): {(Number(el?.price) * Number(el?.quantity).toFixed(2))}</h3>
+                                            <h3>Total Price(RS): {(Number(el?.price) * Number(el?.quantity)).toFixed(2)}</h3>
                                             {
-                                                Object.keys(state.editOrderItem).length == 0 ? <a href="#" className="btn btn-primary btn-sm" onClick={() => orderItemEdit(el)} >Edit</a> : el.id === state.editOrderItem?.id ? <a href="#" className="btn btn-primary btn-sm" onClick={() => handleOrderItemUpdate()} >Update</a> : <a href="#" className="btn btn-primary btn-sm" onClick={() => orderItemEdit(el)} >Edit</a>
+                                              (!state.productItemDetails?.approved && (state.productItemDetails?.status).toUpperCase() === "PENDING") && (Object.keys(state.editOrderItem).length == 0 ? <a href="#" className="btn btn-primary btn-sm" onClick={() => orderItemEdit(el)} >Edit</a> : el.id === state.editOrderItem?.id ? <a href="#" className="btn btn-primary btn-sm" onClick={() => handleOrderItemUpdate()} >Update</a> : <a href="#" className="btn btn-primary btn-sm" onClick={() => orderItemEdit(el)} >Edit</a>)
                                             }
                                             {/* <a href="#" className="btn btn-primary btn-sm" onClick={() => handleStateChange('editOrderItem', el)} >Edit</a> */}
                                         </div>
@@ -156,7 +207,7 @@ const OrdersView = ({ id }) => {
                             );
                         })
                     ) : (
-                        <p>No orders</p>
+                        <p></p>
                     )}
                 </div>
             </div>
