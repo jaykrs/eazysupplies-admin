@@ -26,7 +26,7 @@ export async function middleware(request) {
   const allowedOrigins = ['http://earthling.ddns.net', 'https://earthling.ddns.net',"earthling.ddns.net","*"];
   if (request.nextUrl.pathname.startsWith('/api')) {
     const response = NextResponse.next();
-     const origin = request.headers.origin;
+     const origin = request.headers.get("origin");
     if (allowedOrigins.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   } else {
