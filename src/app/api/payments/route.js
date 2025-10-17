@@ -1,64 +1,104 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import { verifyAdmin } from "../utils/jwt";
+import { verifyAdmin, authenticate } from "../utils/jwt";
 import { MESSAGES } from "../utils/statusConstant";
+
 const prisma = new PrismaClient();
 
+const handleError = (error) => {
+  console.error(error);
+  return NextResponse.json({ error: MESSAGES.SERVER_ERROR }, { status: 500 });
+};
+
+const unauthorized = () =>
+  NextResponse.json({ error: MESSAGES.UNAUTHORIZED }, { status: 400 });
+
 export async function GET(request) {
+  const isUser = authenticate(request);
+  if (!isUser) return unauthorized();
+
   try {
     const { searchParams } = new URL(request.url);
-    const id = Number(searchParams.get('paymentId'));
-    let res;
-    if (id) {
-       res = await prisma.payment.findUnique({
-        where: {
-          id: id
-        },
-        include: { user: true, order: true }
-      })
-      return NextResponse.json({ data: res ? res : [] }, { status: 200 });
-    }
-    
-    res = await prisma.payment.findMany({
-      include: { user: true, order: true },
-    });
+    const id = Number(searchParams.get("paymentId"));
+    const userId = Number(searchParams.get("userId"));
+    const orderId = Number(searchParams.get("orderId"));
 
-    return NextResponse.json({ data: res }, { status: 200 });
+    let result;
+
+    if (id) {
+      result = await prisma.payment.findUnique({
+        where: { id },
+        include: { user: true, order: true },
+      });
+    } else if (userId) {
+      result = await prisma.payment.findMany({
+        where: { userId },
+        include: { user: true, order: true },
+      });
+    } else if (orderId) {
+      result = await prisma.payment.findUnique({
+        where: { orderId },
+        include: { user: true, order: true },
+      });
+    } else {
+      result = await prisma.payment.findMany({
+        include: { user: true, order: true },
+      });
+    }
+
+    return NextResponse.json({ data: result || [] }, { status: 200 });
   } catch (err) {
-    return NextResponse.json({ error: MESSAGES.SERVER_ERROR }, { status: 500 });
+    return handleError(err);
   }
 }
 
 export async function POST(request) {
   try {
-    if (verifyAdmin(request)) {
-      const body = await request.json();
-      const res = await prisma.payment.create({ data: body });
-      return NextResponse.json({ data: res }, { status: 201 });
-    }
-  } catch (Error) {
-    console.log(Error);
-    return NextResponse.json(
-      { error: MESSAGES.SERVER_ERROR },
-      { status: 500 }
-    );
+    if (!verifyAdmin(request)) return unauthorized();
+    const body = await request.json();
+    const created = await prisma.payment.create({ data: body });
+    return NextResponse.json({ data: created }, { status: 201 });
+  } catch (err) {
+    return handleError(err);
   }
 }
 
-
 export async function PUT(request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const id = Number(searchParams.get("paymentId"));
+    const userId = Number(searchParams.get("userId"));
+    const paymentStatus = searchParams.get("paymentStatus");
+
+    const validStatuses = ["offline", "cod", "online"];
+
+    // user updating their payment status
+    if (
+      id &&
+      userId &&
+      authenticate(request) &&
+      validStatuses.includes(paymentStatus)
+    ) {
+      const updated = await prisma.payment.update({
+        where: { id, userId },
+        data: { status: paymentStatus },
+      });
+      return NextResponse.json({ data: updated }, { status: 200 });
+    }
+
+    // admin update via request body
     if (verifyAdmin(request)) {
       const body = await request.json();
-      const { id, ...rest } = body;
-      let prod = await prisma.payment.update({ where: { id }, data: rest });
-      return NextResponse.json(prod);
+      const { id: bodyId, ...rest } = body;
+      const updated = await prisma.payment.update({
+        where: { id: bodyId },
+        data: rest,
+      });
+      return NextResponse.json({ data: updated }, { status: 200 });
     }
-  } catch (Error) {
-    console.log(Error);
-    return NextResponse.json(
-      { error: MESSAGES.SERVER_ERROR },
-      { status: 500 }
-    );
+
+    return unauthorized();
+  } catch (err) {
+    return handleError(err);
   }
 }
