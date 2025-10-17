@@ -23,14 +23,21 @@ export async function middleware(request) {
     }
     return NextResponse.next();
   }
+  const allowedOrigins = ['http://earthling.ddns.net', 'https://earthling.ddns.net',"earthling.ddns.net","*"];
   if (request.nextUrl.pathname.startsWith('/api')) {
     const response = NextResponse.next();
-    response.headers.set('Access-Control-Allow-Origin', '*');
+     const origin = request.headers.origin;
+    if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', '*'); // Deny if not allowed
+  }
+  //   response.headers.set('Access-Control-Allow-Origin', '*' || "earthling.ddns.net");
     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     response.headers.set('Access-Control-Allow-Credentials', 'true'); // If you need to send cookies/credentials
     if (request.method === 'OPTIONS') {
-    return res.status(200).end();
+    return response.status(200).end();
   }
     return response;
   }
