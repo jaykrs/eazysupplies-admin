@@ -29,8 +29,12 @@ export async function middleware(request) {
     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     response.headers.set('Access-Control-Allow-Credentials', 'true'); // If you need to send cookies/credentials
+    if (request.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
     return response;
   }
+  
   if (!token) {
     return NextResponse.redirect(new URL('/auth/login', request.url));
   }
