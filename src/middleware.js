@@ -28,17 +28,15 @@ export async function middleware(request) {
     const response = NextResponse.next();
      const origin = request.headers.get("origin");
     if (allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
+    response.headers.set('Access-Control-Allow-Origin', origin);
   } else {
-    res.setHeader('Access-Control-Allow-Origin', '*'); // Deny if not allowed
+    response.headers.set('Access-Control-Allow-Origin', '*'); // Deny if not allowed
   }
   //   response.headers.set('Access-Control-Allow-Origin', '*' || "earthling.ddns.net");
     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     response.headers.set('Access-Control-Allow-Credentials', 'true'); // If you need to send cookies/credentials
-    if (request.method === 'OPTIONS') {
-    return response.status(200).end();
-  }
+    
     return response;
   }
   
