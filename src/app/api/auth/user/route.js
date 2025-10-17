@@ -29,15 +29,44 @@ function authenticate(request) {
 /**
  * GET handler - returns authenticated user info
  */
+
 export async function GET(request) {
   const payload = authenticate(request);
 
   if (!payload) {
     return NextResponse.json({ error: MESSAGES.UNAUTHORIZED }, { status: 401 });
   }
+  const userSelect = {
+    id: true,
+    name: true,
+    email: true,
+    roleId: true,
+    status: true,
+    profileImagepath: true,
+    lastLoginDt: true,
+    countryCode: true,
+    phone: true,
+    role: true, // will include related Role object
+    orders: true, // will include related Orders
+    cart: true,
+    otp: true,
+    payments: true,
+    createdAt: true,
+    updatedAt: true,
+    createdBy: true,
+    wishlist: true,
+    favorite: true,
+    gstn: true,
+    bankDetails: true,
+  };
+
+  const user = await prisma.user.findUnique({
+    where: { email: payload.email },
+    select: userSelect,
+  });
 
   return NextResponse.json(
-    { userId: payload.userId, username: payload.email },
+    { userId: payload.userId, username: payload.email, data: user },
     { status: 200 }
   );
 }
@@ -59,7 +88,7 @@ export async function POST(request) {
     console.log('body', body);
 
     // Validate required fields
-    if (!name || !email || !password || !phone ||!countryCode) {
+    if (!name || !email || !password || !phone || !countryCode) {
       return NextResponse.json(
         { error: MESSAGES.MISSING_FIELDS },
         { status: 400 }
@@ -81,8 +110,8 @@ export async function POST(request) {
     // Ensure role exists, fallback to 'user'
     let userRole = await prisma.role.findUnique({ where: { name: 'customer' } });
     if (!userRole) {
-        userRole = await prisma.role.create({ data: { name: "customer" } });
-      }
+      userRole = await prisma.role.create({ data: { name: "customer" } });
+    }
     //let random = Math.floor(100000 + Math.random() * 900000);
     // Create user
     let random = 123456;
