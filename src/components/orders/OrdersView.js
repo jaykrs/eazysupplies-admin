@@ -3,7 +3,6 @@ import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import ShowModal from "@/elements/alerts&Modals/Modal";
-import FullScreenModel from "@/elements/alerts&Modals/FullScreenModel";
 import Btn from "@/elements/buttons/Btn";
 import { useRouter } from "next/navigation";
 
@@ -113,8 +112,6 @@ const OrdersView = ({ id }) => {
             console.error('error', err);
         }
     };
-
-    console.log('.............state', state.Orders);
     return (
         <>
             <div>
@@ -171,7 +168,9 @@ const OrdersView = ({ id }) => {
                         {
                             Object.keys(state.productItemDetails).length > 0 &&
                             <div className="d-flex justify-content-end gap-3 pr-3">
-                                <button type="button" className="btn btn-info">Download Invoice</button>
+                                {state.productItemDetails?.payment?.status !== "PENDING" && <button type="button" className="btn btn-info">Download Invoice</button>}
+                                {state.productItemDetails?.payment?.status == "PENDING" && (state.productItemDetails?.status).toUpperCase() === "APPROVED" && <button type="button" onClick={()=> route.push('/payment/create') } className="btn btn-info">Pay</button>}
+
                                 {(state.productItemDetails?.approved && (state.productItemDetails?.status).toUpperCase() === "APPROVED") ? <button type="button" className="btn btn-success" disabled title="disabled" >Approved</button> : (state.productItemDetails?.status).toUpperCase() === "PENDING" ? <button type="button" className="btn btn-success" onClick={() => updateOrderStatus(state.productItemDetails?.id, "APPROVED")} >Approve</button> : ''}
                                 {(state.productItemDetails?.status).toUpperCase() === "REJECTED" ? <button type="button" className="btn btn-danger" disabled >Rejected</button> : (state.productItemDetails?.status).toUpperCase() === "PENDING" ? <button type="button" className="btn btn-danger" onClick={() => updateOrderStatus(state.productItemDetails?.id, "REJECTED")} >Reject</button> : ''}
                             </div>
@@ -239,7 +238,7 @@ const OrdersView = ({ id }) => {
                     Object.keys(state.shippingDetails).length > 0 ?
                         <div>
                             <p>Status: {state.shippingDetails?.status}</p>
-                            <p style={{color: "#0b24ed"}}>Address: {state.shippingDetails?.address}, {state.shippingDetails?.city}, {state.shippingDetails?.state},
+                            <p style={{ color: "#0b24ed" }}>Address: {state.shippingDetails?.address}, {state.shippingDetails?.city}, {state.shippingDetails?.state},
                                 {state.shippingDetails?.country}- {state.shippingDetails?.postalCode}
                             </p>
                         </div>
