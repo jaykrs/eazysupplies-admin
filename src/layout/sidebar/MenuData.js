@@ -39,7 +39,7 @@ const MENUITEMS = [
       { title: "AllBrand", path: "/brand", displayTitle: "Brand List", permission: ["brand.index"] }
     ],
   },
-   {
+  {
     title: "Categories",
     displayTitle: "Categories",
     icon: <RiContactsLine />,
@@ -107,14 +107,27 @@ const MENUITEMS = [
       // { title: "CreateOrder", path: "/order/create", displayTitle: "Create Order", permission: ["order.create"] },
     ],
   },
-  // {
-  //   title: "Media",
-  //   displayTitle: "Media",
-  //   icon: <RiImageLine />,
-  //   path: "/attachment",
-  //   permission: ["attachment.index", "attachment.create"],
-  //   type: "link",
-  // },
+  {
+    title: "Payments",
+    displayTitle: "Payments",
+    icon: <RiContactsLine />,
+    type: "sub",
+    children: [
+      { title: "AddPayment", path: "/payment/create", displayTitle: "Add Payment", permission: ["payment.create"] },
+      { title: "AllPayments", path: "/payment", displayTitle: "Payments List", permission: ["payment.index"] }
+    ],
+  },
+
+  {
+    title: "Address",
+    displayTitle: "Address",
+    icon: <RiContactsLine />,
+    type: "sub",
+    children: [
+      { title: "AddAddress", path: "/address/create", displayTitle: "Add Address", permission: ["address.create"] },
+      { title: "AllAddress", path: "/address", displayTitle: "Address List", permission: ["address.index"] }
+    ],
+  },
   // {
   //   title: "Blog",
   //   displayTitle: "Blog",

@@ -40,9 +40,10 @@ export async function GET(request) {
 // 🟡 POST — create new address
 export async function POST(request) {
   try {
-    if (!authenticate(request)) return unauthorized();
-
-    const body = await request.json();
+    if (! await authenticate(request)) return unauthorized();
+    let payload = await authenticate(request);
+    let body = await request.json();
+    body.userId = payload.userId;
     const created = await prisma.address.create({ data: body });
 
     return NextResponse.json({ data: created }, { status: 201 });
@@ -54,7 +55,7 @@ export async function POST(request) {
 // 🟠 PUT — update existing address
 export async function PUT(request) {
   try {
-    if (!authenticate(request)) return unauthorized();
+    if (! await authenticate(request)) return unauthorized();
 
     const body = await request.json();
     const { id, ...rest } = body;

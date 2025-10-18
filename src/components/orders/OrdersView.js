@@ -17,7 +17,9 @@ const OrdersView = ({ id }) => {
         editOrderItem: {},
         orderItemQty: 0,
         orderItemPrice: 0,
-        refreshState: false
+        refreshState: false,
+        shippingModel: false,
+        shippingDetails: {}
     });
     const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -112,7 +114,7 @@ const OrdersView = ({ id }) => {
         }
     };
 
-
+    console.log('.............state', state.Orders);
     return (
         <>
             <div>
@@ -138,7 +140,14 @@ const OrdersView = ({ id }) => {
                             return (
                                 <div key={index} className="card mb-3" style={{ width: "100%" }}>
                                     <div className="card-body">
-                                        <h5 className="card-title">Order ID: {el?.id}</h5>
+                                        <div className="d-flex justify-content-between">
+                                            <h5 className="card-title">Order ID: {el?.id}</h5>
+                                            <button className="btn btn-outline-primary cursor-pointer" style={{ width: "70px", color: "#1921e8" }} onClick={() => {
+                                                setState(prev => {
+                                                    return { ...prev, ["shippingModel"]: true, ["shippingDetails"]: el?.shipping }
+                                                })
+                                            }}>Shipping</button>
+                                        </div>
                                         <h5 className="card-title">Items: {el?.items.length}</h5>
                                         <p className="card-text">Status: {el?.status}</p>
                                         <p className="card-text">Total Price(RS): {totalPrice.toFixed(2)}</p>
@@ -198,7 +207,7 @@ const OrdersView = ({ id }) => {
                                         <div className="w-100 d-flex justify-content-between">
                                             <h3>Total Price(RS): {(Number(el?.price) * Number(el?.quantity)).toFixed(2)}</h3>
                                             {
-                                              (!state.productItemDetails?.approved && (state.productItemDetails?.status).toUpperCase() === "PENDING") && (Object.keys(state.editOrderItem).length == 0 ? <a href="#" className="btn btn-primary btn-sm" onClick={() => orderItemEdit(el)} >Edit</a> : el.id === state.editOrderItem?.id ? <a href="#" className="btn btn-primary btn-sm" onClick={() => handleOrderItemUpdate()} >Update</a> : <a href="#" className="btn btn-primary btn-sm" onClick={() => orderItemEdit(el)} >Edit</a>)
+                                                (!state.productItemDetails?.approved && (state.productItemDetails?.status).toUpperCase() === "PENDING") && (Object.keys(state.editOrderItem).length == 0 ? <a href="#" className="btn btn-primary btn-sm" onClick={() => orderItemEdit(el)} >Edit</a> : el.id === state.editOrderItem?.id ? <a href="#" className="btn btn-primary btn-sm" onClick={() => handleOrderItemUpdate()} >Update</a> : <a href="#" className="btn btn-primary btn-sm" onClick={() => orderItemEdit(el)} >Edit</a>)
                                             }
                                             {/* <a href="#" className="btn btn-primary btn-sm" onClick={() => handleStateChange('editOrderItem', el)} >Edit</a> */}
                                         </div>
@@ -212,22 +221,31 @@ const OrdersView = ({ id }) => {
                 </div>
             </div>
             <ShowModal
-                open={state.productModel}
+                open={state.shippingModel}
                 close={false}
                 buttons={
                     <>
                         <Btn title="Close" onClick={() => {
                             setState(prev => {
-                                return { ...prev, ["paymentModel"]: false, ["paymentDetails"]: {}, ["shippingModel"]: false, ["shippingDetails"]: {}, ["userModel"]: false, ["userDetails"]: {}, ["userModel"]: false, ["userDetails"]: {} }
+                                return { ...prev, ["shippingModel"]: false, ["shippingDetails"]: {} }
                             })
                         }} className="btn-md btn-outline fw-bold" />
                         {/* <Btn title="Yes" onClick={() => handleLogout()} className="btn-theme btn-md fw-bold" /> */}
                     </>
                 }
             >
-                <div className="remove-box">
-
-                </div>
+                {/* <div className="remove-box"> */}
+                {
+                    Object.keys(state.shippingDetails).length > 0 ?
+                        <div>
+                            <p>Status: {state.shippingDetails?.status}</p>
+                            <p style={{color: "#0b24ed"}}>Address: {state.shippingDetails?.address}, {state.shippingDetails?.city}, {state.shippingDetails?.state},
+                                {state.shippingDetails?.country}- {state.shippingDetails?.postalCode}
+                            </p>
+                        </div>
+                        : <p>No Shipping address available</p>
+                }
+                {/* </div> */}
             </ShowModal>
         </>
     )

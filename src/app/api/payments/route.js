@@ -76,7 +76,7 @@ export async function PUT(request) {
     if (
       id &&
       userId &&
-      authenticate(request) &&
+     await authenticate(request) &&
       validStatuses.includes(paymentStatus)
     ) {
       const updated = await prisma.payment.update({
