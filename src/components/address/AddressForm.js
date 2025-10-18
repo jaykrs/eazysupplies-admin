@@ -9,6 +9,7 @@ import Loader from "../commonComponent/Loader";
 import SimpleInputField from "../inputFields/SimpleInputField";
 import { formatString } from "../../lib/format-number";
 import axios from "axios";
+import { title } from "process";
 const AddressForm = ({ updateId, buttonName, model }) => {
     const { t } = useTranslation("common");
     const router = useRouter();
@@ -90,7 +91,7 @@ const AddressForm = ({ updateId, buttonName, model }) => {
                 {({ values, setFieldValue, errors, touched }) => (
                     <>
                         <Form id="blog" className="theme-form theme-form-2 mega-form">
-                            <SimpleInputField nameList={[{ name: "AddName", placeholder: t("EnterName"), require: "true" }]} />
+                            <SimpleInputField nameList={[{ name: "AddName", title:"Name" , placeholder: t("EnterName"), require: "true" }]} />
                             <SimpleInputField
                                 nameList={[
                                     { name: "address", title: "Address", placeholder: t("enter address") },
