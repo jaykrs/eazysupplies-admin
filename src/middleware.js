@@ -27,11 +27,12 @@ export async function middleware(request) {
   if (request.nextUrl.pathname.startsWith('/api')) {
     const response = NextResponse.next();
      const origin = request.headers.get("origin");
-    if (allowedOrigins.includes(origin)) {
-    response.headers.set('Access-Control-Allow-Origin', origin);
-  } else {
-    response.headers.set('Access-Control-Allow-Origin', '*'); // Deny if not allowed
-  }
+     response.headers.set('Access-Control-Allow-Origin', origin);
+  //   if (allowedOrigins.includes(origin)) {
+  //   response.headers.set('Access-Control-Allow-Origin', origin);
+  // } else {
+  //   response.headers.set('Access-Control-Allow-Origin', '*'); // Deny if not allowed
+  // }
   //   response.headers.set('Access-Control-Allow-Origin', '*' || "earthling.ddns.net");
     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
