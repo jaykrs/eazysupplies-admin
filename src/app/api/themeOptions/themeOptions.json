@@ -96,7 +96,7 @@
           "instagram": "https://instagram.com/",
           "pinterest": "https://pinterest.com/",
           "sub_title": "Never Miss Anything From Store By Signing Up To Our Newsletter.",
-          "about_email": "Support@Earthling.com",
+          "about_email": "contact@earthlingco.in",
           "help_center": [
               {
                   "id": 1,
@@ -163,13 +163,13 @@
           ],
           "footer_about": "Discover the latest trends and enjoy seamless shopping with our exclusive collections.",
           "footer_style": "footer_three",
-          "about_address": "Earthling Demo Store, Demo Store India 345-659",
+          "about_address": "Earthling Consumer Products Pvt. Ltd., 52/39, LGF, Ramjas Road, Karol Bagh, New Delhi 1100053",
           "app_store_url": "https://www.apple.com/in/app-store/",
-          "support_email": "support@gmail.com",
+          "support_email": "contact@earthlingco.in",
           "play_store_url": "https://play.google.com/store/apps",
-          "support_number": "123-456-7898",
+          "support_number": "+91-9818109394",
           "footer_copyright": true,
-          "copyright_content": "2023-24 themeforest powered by pixelstrap",
+          "copyright_content": "Copyright © 2025. Earthling Consumer Products Pvt. Ltd. | Designed and Developed @ MARKSMAN",
           "footer_categories": [
               74,
               41,
@@ -446,12 +446,12 @@
           },
           "detail_3": {
               "icon": "ri-mail-fill",
-              "text": "support@Earthling.com",
+              "text": "contact@earthlingco.in",
               "label": "Email"
           },
           "detail_4": {
               "icon": "ri-cellphone-fill",
-              "text": "support@Earthling.com",
+              "text": "contact@earthlingco.in",
               "label": "Fax"
           },
           "imageUrl": null,
