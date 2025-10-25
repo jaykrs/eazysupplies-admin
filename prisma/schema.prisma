@@ -160,13 +160,6 @@ model Tag {
   updatedAt   DateTime?     @updatedAt @map("updated_at")
 }
 
-//model ProductTag {
-//  productId Int
-//  tagId     Int
-//  product   Product @relation(fields: [productId], references: [id])
-//  tag       Tag     @relation(fields: [tagId], references: [id])
-//  @@id([productId, tagId])
-// }
 
 model Order {
   id         Int         @id @default(autoincrement())
@@ -279,4 +272,45 @@ model deliveryAgent {
   phone   String?
   email   String?
   remarks String? @db.Text
+}
+
+model notification {
+  id         Int  @id @default(autoincrement())
+  name String
+  type String?
+  data Json?
+  attachment String?
+  recepient String?
+  readStatus Boolean  @default(false)
+  sentStatus Boolean  @default(false)
+  remarks String? @db.Text
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime?     @updatedAt @map("updated_at")
+}
+
+model assets {
+  id         Int  @id @default(autoincrement())
+  name String
+  type String?
+  data Json?
+  path String?
+  author String?
+  tag String?
+  remarks String? @db.Text
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime?     @updatedAt @map("updated_at")
+}
+
+model offers {
+  id         Int  @id @default(autoincrement())
+  name String
+  discount Int?
+  userId String?
+  categoryId String?
+  data Json?
+  author String?
+  tag String?
+  remarks String? @db.Text
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime?     @updatedAt @map("updated_at")
 }
