@@ -4,9 +4,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Select from "react-select";
 
-const AllNotifications = () => {
+const AllOffers = () => {
     const route = useRouter();
-    const [notification, setNotification] = useState([]);
+    const [offers, setOffers] = useState([]);
     const [refreshState, setRefeshState] = useState(false);
     const [state, setState] = useState({
         name: "all",
@@ -35,10 +35,9 @@ const AllNotifications = () => {
     }, [refreshState])
 
     const fetchProduct = async () => {
-        let res = await axios.get('/api/notifications', { withCredentials: true });
-        console.log('res', res);
+        let res = await axios.get('/api/offer', { withCredentials: true });
         if (res.status == 200) {
-            setNotification(res.data);
+            setOffers(res.data.data);
 
         }
     }
@@ -61,7 +60,7 @@ const AllNotifications = () => {
         { value: 'all', label: 'All' },
         { value: 'BAR SYRUP & CORNFLAKES', label: 'BAR SYRUP & CORNFLAKES' },
         { value: 'CRUSHES', label: 'CRUSHES' },
-        { value: 'TOMATO notification', label: 'TOMATO notification' },
+        { value: 'TOMATO offers', label: 'TOMATO offers' },
     ];
 
     const handleView = () => {
@@ -92,30 +91,34 @@ const AllNotifications = () => {
                 <table className="min-w-full border border-gray-300">
                     <thead className="bg-gray-100">
                         <tr>
-                            <th className="border px-4 py-2">Name</th>
+                            <th className="border px-4 py-2">User</th>
+                            <th className="border px-4 py-2">Product</th>
                             <th className="border px-4 py-2">Discount(%)</th>
-                            <th className="border px-4 py-2">UserId</th>
-                            <th className="border px-4 py-2">CategoryId</th>
-                            <th className="border px-4 py-2">Author</th>
-                            <th className="border px-4 py-2">Tag</th>
-                            <th className="border px-4 py-2">Remarks</th>
+                            <th className="border px-4 py-2">Max Amount</th>
+                            <th className="border px-4 py-2">Code</th>
+                            <th className="border px-4 py-2">Start Date</th>
+                            <th className="border px-4 py-2">End Date</th>
                             <th className="border px-4 py-2">Created On</th>
                             <th className="border px-4 py-2">Updated On</th>
                             <th className="border px-4 py-2">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {notification?.length ? (
-                            notification.map((offer) => {
+                        {offers?.length ? (
+                            offers.map((offer) => {
                                 return (
                                     <tr key={offer.id}>
-                                        <td className="border px-4 py-2">{offer.name}</td>
-                                        <td className="border px-4 py-2">{offer.discount}</td>
-                                        <td className="border px-4 py-2">{offer.userId}</td>
-                                        <td className="border px-4 py-2">{offer.categoryId}</td>
-                                        <td className="border px-4 py-2">{offer.author}</td>
-                                        <td className="border px-4 py-2">{offer?.tag}</td>
-                                        <td className="border px-4 py-2">{offer?.remarks}</td>
+                                        <td className="border px-4 py-2">{offer.user}</td>
+                                        <td className="border px-4 py-2">{offer.product}</td>
+                                        <td className="border px-4 py-2">{offer.discountPercentage}</td>
+                                        <td className="border px-4 py-2">{offer.maxAmount}</td>
+                                        <td className="border px-4 py-2">{offer.code}</td>
+                                        <td className="border px-4 py-2">{offer?.startDate
+                                            ? new Date(offer?.startDate).toLocaleDateString()
+                                            : "-"}</td>
+                                        <td className="border px-4 py-2">{offer?.endDate
+                                            ? new Date(offer?.endDate).toLocaleDateString()
+                                            : "-"}</td>
                                         <td className="border px-4 py-2">{offer?.createdAt
                                             ? new Date(offer?.createdAt).toLocaleDateString()
                                             : "-"}</td>
@@ -136,7 +139,7 @@ const AllNotifications = () => {
                         ) : (
                             <tr>
                                 <td colSpan="6" className="text-center py-4">
-                                    No notification found.
+                                    No offers found.
                                 </td>
                             </tr>
                         )}
@@ -147,4 +150,4 @@ const AllNotifications = () => {
     )
 }
 
-export default AllNotifications;
+export default AllOffers;

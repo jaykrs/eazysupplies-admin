@@ -117,6 +117,16 @@ const MENUITEMS = [
       { title: "AllPayments", path: "/payment", displayTitle: "Payments List", permission: ["payment.index"] }
     ],
   },
+  {
+    title: "Offers",
+    displayTitle: "Offers",
+    icon: <RiContactsLine />,
+    type: "sub",
+    children: [
+      { title: "AddOffer", path: "/offer/create", displayTitle: "Add Offers", permission: ["offer.create"] },
+      { title: "AllOffers", path: "/offer", displayTitle: "Offers List", permission: ["offer.index"] }
+    ],
+  },
 
   {
     title: "Address",
@@ -126,6 +136,16 @@ const MENUITEMS = [
     children: [
       { title: "AddAddress", path: "/address/create", displayTitle: "Add Address", permission: ["address.create"] },
       { title: "AllAddress", path: "/address", displayTitle: "Address List", permission: ["address.index"] }
+    ],
+  },
+   {
+    title: "Notifications",
+    displayTitle: "Notification",
+    icon: <RiContactsLine />,
+    type: "sub",
+    children: [
+     // { title: "AddAddress", path: "/address/create", displayTitle: "Add Address", permission: ["address.create"] },
+      { title: "AllNotifications", path: "/notifications", displayTitle: "Notification List", permission: ["notification.index"] }
     ],
   },
   // {

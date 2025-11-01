@@ -4,9 +4,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Select from "react-select";
 
-const AllNotifications = () => {
+const AllOffers = () => {
     const route = useRouter();
-    const [notification, setNotification] = useState([]);
+    const [offers, setOffers] = useState([]);
     const [refreshState, setRefeshState] = useState(false);
     const [state, setState] = useState({
         name: "all",
@@ -35,10 +35,10 @@ const AllNotifications = () => {
     }, [refreshState])
 
     const fetchProduct = async () => {
-        let res = await axios.get('/api/notifications', { withCredentials: true });
+        let res = await axios.get('/api/offers', { withCredentials: true });
         console.log('res', res);
         if (res.status == 200) {
-            setNotification(res.data);
+            setOffers(res.data);
 
         }
     }
@@ -61,7 +61,7 @@ const AllNotifications = () => {
         { value: 'all', label: 'All' },
         { value: 'BAR SYRUP & CORNFLAKES', label: 'BAR SYRUP & CORNFLAKES' },
         { value: 'CRUSHES', label: 'CRUSHES' },
-        { value: 'TOMATO notification', label: 'TOMATO notification' },
+        { value: 'TOMATO offers', label: 'TOMATO offers' },
     ];
 
     const handleView = () => {
@@ -105,8 +105,8 @@ const AllNotifications = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {notification?.length ? (
-                            notification.map((offer) => {
+                        {offers?.length ? (
+                            offers.map((offer) => {
                                 return (
                                     <tr key={offer.id}>
                                         <td className="border px-4 py-2">{offer.name}</td>
@@ -136,7 +136,7 @@ const AllNotifications = () => {
                         ) : (
                             <tr>
                                 <td colSpan="6" className="text-center py-4">
-                                    No notification found.
+                                    No offers found.
                                 </td>
                             </tr>
                         )}
@@ -147,4 +147,4 @@ const AllNotifications = () => {
     )
 }
 
-export default AllNotifications;
+export default AllOffers;

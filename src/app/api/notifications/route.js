@@ -25,7 +25,7 @@ export async function GET(request) {
       notifications = await prisma.notification.findMany({
         where: {
           recepient: {
-            contains: userId,
+            contains: userId.toString(),
           },
         },
       }, {
@@ -36,8 +36,9 @@ export async function GET(request) {
         where: { id: Number(id) },
         data: { readStatus: true }
       });
-    return NextResponse.json(notifications);
+    return NextResponse.json({notifications});
   } catch (err) {
+    console.log('err', err);
     return handleError(err);
   }
 }
