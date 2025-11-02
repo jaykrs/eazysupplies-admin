@@ -15,28 +15,31 @@ const unauthorized = () =>
 
 // GET – fetch all notifications
 export async function GET(request) {
-  if (!authenticate(request)) return unauthorized();
+  const payload = await authenticate(request);
+  if (!payload) return unauthorized();
   const { searchParams } = new URL(request.url);
-  const userId = Number(searchParams.get("userId"));
+  // const userId = Number(searchParams.get("userId"));
   const id = Number(searchParams.get("id"));
   let notifications;
   try {
-    if (userId)
+    if (id) {
+      notifications = await prisma.notification.update({
+        where: { id: Number(id) },
+        data: { readStatus: true }
+      })
+    }
+    else if (payload?.userId) {
       notifications = await prisma.notification.findMany({
         where: {
           recepient: {
-            contains: userId.toString(),
+            contains: payload?.userId.toString(),
           },
         },
       }, {
         orderBy: { createdAt: "desc" },
       });
-    else if (id)
-      notifications = await prisma.notification.update({
-        where: { id: Number(id) },
-        data: { readStatus: true }
-      });
-    return NextResponse.json({notifications});
+    }
+    return NextResponse.json({ notifications });
   } catch (err) {
     console.log('err', err);
     return handleError(err);

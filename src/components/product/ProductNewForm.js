@@ -66,7 +66,6 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
       if (brandId == 0 || categoryId == 0) {
         alert('brand or category is missing');
       }
-      console.log('.............data', values);
       // const taxDataFilter = taxData.filter(item => item.id == Number(values.tax));
       // if (taxDataFilter.length == 0) {
       //   alert('All field is mandatory!');
