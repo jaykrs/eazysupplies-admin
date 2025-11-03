@@ -42,40 +42,21 @@ const AllNotifications = () => {
     }
   }
 
-  const nameOptions = [
-    { value: 'all', label: 'All' },
-    { value: 'CORN FLAKES', label: 'CORN FLAKES' },
-    { value: 'MOJITO MINT', label: 'MOJITO MINT' },
-    { value: 'BLUE CURACAO', label: 'BLUE CURACAO' },
-  ];
+  const handleView = async(el) => {
+    let res = await axios.get('/api/notifications?id=' + el.id, { withCredentials: true });
+    if (res.status == 200) {
+      const query = new URLSearchParams({
+        id: el.id,
+        name: el.name ?? "",
+        type: el.type ?? "",
+        recepient: el.recepient ?? "",
+        remarks: el.remarks ?? "",
+        createdAt: el.createdAt ?? "",
+        updatedAt: el.updatedAt ?? "",
+      }).toString();
+      route.push(`/notifications/view?${query}`);
+    }
 
-  const typeOptions = [
-    { value: 'all', label: 'All' },
-    { value: 'physical', label: 'Physical Product' },
-    { value: 'digital', label: 'Digital Product' },
-    { value: 'external', label: 'External/Affiliate Product' },
-  ];
-
-  const tagOptions = [
-    { value: 'all', label: 'All' },
-    { value: 'BAR SYRUP & CORNFLAKES', label: 'BAR SYRUP & CORNFLAKES' },
-    { value: 'CRUSHES', label: 'CRUSHES' },
-    { value: 'TOMATO notification', label: 'TOMATO notification' },
-  ];
-
-  const handleView = (el) => {
-    // route.push('/notifications/view?id=' + el.id + '&name=' + el?.name + '&type=' + el.type + '&recepient=' + el.recepient + '&remarks=' + el.remarks + '&createdAt=' + el.createdAt + '&updatedAt=' + el.updatedAt);
-    const query = new URLSearchParams({
-      id: el.id,
-      name: el.name ?? "",
-      type: el.type ?? "",
-      recepient: el.recepient ?? "",
-      remarks: el.remarks ?? "",
-      createdAt: el.createdAt ?? "",
-      updatedAt: el.updatedAt ?? "",
-    }).toString();
-
-    route.push(`/notifications/view?${query}`);
   };
   return (
     <>

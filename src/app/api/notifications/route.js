@@ -36,7 +36,7 @@ export async function GET(request) {
           },
         },
       }, {
-        orderBy: { createdAt: "desc" },
+        orderBy:[ { createdAt: "desc" }, {id: "desc"}],
       });
     }
     return NextResponse.json({ notifications });
