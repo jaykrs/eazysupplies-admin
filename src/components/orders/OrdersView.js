@@ -41,6 +41,7 @@ const OrdersView = ({ id }) => {
     }, [state.refreshState])
 
     const handleView = (el) => {
+        console.log('...........product details', el);
         handleStateChange('productItemDetails', el);
     }
 
@@ -179,6 +180,10 @@ const OrdersView = ({ id }) => {
 
                     {Object.keys(state.productItemDetails).length > 0 ? (
                         state.productItemDetails?.items?.map((el, index) => {
+                              const jsonData = Array.isArray(el?.product?.jsonData) ? el?.product?.jsonData : [];
+                              const filterJsonData = jsonData.length > 0 ? jsonData.filter(element=> el.orderId == element.orderId && state.productItemDetails?.userId == element.userId ) : [];
+                              console.log('.....jsonData from ui',el.orderId, state.productItemDetails?.userId, index, jsonData);
+                              console.log('.........filterJsonData', filterJsonData);
                             return (
                                 <div key={index} className="card mb-3" style={{ width: "100%" }}>
                                     <div className="card-body">
@@ -191,7 +196,9 @@ const OrdersView = ({ id }) => {
 
                                         </div>
                                         <div>
-                                            <p className="card-text">price/quantity(RS): {Number(el?.price)}</p>
+                                            <p className="card-text">price/quantity(RS): { Number(el?.product?.price)}</p>
+                                            <p className="card-text">discount(%): { filterJsonData.length > 0 ? Number(filterJsonData[0]?.discountPercentage) : 0}</p>
+                                            <p className="card-text"> Selling price/quantity(RS): {filterJsonData.length > 0 ? Number(filterJsonData[0]?.sellingPrice) :  Number(el?.price)}</p>
                                             {
                                                 Object.keys(state.editOrderItem).length == 0 ? '' : el.id === state.editOrderItem?.id ? <input type="number" placeholder="Enter price" name="price" value={state.orderItemPrice} onChange={(e) => handleStateChange('orderItemPrice', e.target.value)} /> : ''
                                             }
@@ -204,7 +211,7 @@ const OrdersView = ({ id }) => {
                                             ? new Date(el?.updatedAt).toLocaleDateString()
                                             : "-"}</p>
                                         <div className="w-100 d-flex justify-content-between">
-                                            <h3>Total Price(RS): {(Number(el?.price) * Number(el?.quantity)).toFixed(2)}</h3>
+                                            <h3>Total Price(RS): { filterJsonData.length > 0 ? ( Number(filterJsonData[0]?.sellingPrice) * Number(el?.quantity)).toFixed(2) :  (Number(el?.price) * Number(el?.quantity)).toFixed(2)}</h3>
                                             {
                                                 (!state.productItemDetails?.approved && (state.productItemDetails?.status).toUpperCase() === "PENDING") && (Object.keys(state.editOrderItem).length == 0 ? <a href="#" className="btn btn-primary btn-sm" onClick={() => orderItemEdit(el)} >Edit</a> : el.id === state.editOrderItem?.id ? <a href="#" className="btn btn-primary btn-sm" onClick={() => handleOrderItemUpdate()} >Update</a> : <a href="#" className="btn btn-primary btn-sm" onClick={() => orderItemEdit(el)} >Edit</a>)
                                             }

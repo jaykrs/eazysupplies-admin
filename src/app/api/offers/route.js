@@ -48,9 +48,11 @@ export async function GET(request) {
 // POST – Create a new offer
 export async function POST(request) {
     try {
-        if (!authenticate(request)) return unauthorized();
+        const payload = await authenticate(request);
+        if (!payload) return unauthorized();
         if (verifyAdmin(request)) {
             const body = await request.json();
+            body.author = payload?.userId.toString();
             const offer = await prisma.offers.create({ data: body });
             return NextResponse.json(offer, { status: 201 });
         }

@@ -4,7 +4,7 @@ import { product } from "@/utils/axiosUtils/API";
 import useCreate from "@/utils/hooks/useCreate";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import CategoryNewForm from "@/components/product/ProductNewForm";
+import OfferForm from "@/components/offer/offerForm";
 
 const UpdateProduct = () => {
   const params  = useParams()
@@ -19,7 +19,7 @@ const UpdateProduct = () => {
   return (
     params?.updateId && (
       // <ProductForm saveButton={saveButton} setSaveButton={setSaveButton} values={mutate} mutate={mutate} updateId={params?.updateId} loading={isLoading} title={"EditProduct"} key={resetKey}  buttonName="Update"/>
-       <CategoryNewForm updateId={params?.updateId} loading={isLoading} mutate={mutate}   buttonName="Update" title={"EditProduct"} />
+       <OfferForm updateId={params?.updateId} loading={isLoading} mutate={mutate}   buttonName="Update" title={"EditProduct"} />
     )
   );
 };

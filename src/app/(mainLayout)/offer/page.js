@@ -36,7 +36,6 @@ const AllOffers = () => {
 
     const fetchProduct = async () => {
         let res = await axios.get('/api/offers', { withCredentials: true });
-        console.log('res', res);
         if (res.status == 200) {
             setOffers(res.data);
 

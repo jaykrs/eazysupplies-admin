@@ -1,35 +1,37 @@
-import { mediaConfig } from "@/data/MediaConfig";
 import { Form, Formik } from "formik";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import FormBtn from "../../elements/buttons/FormBtn";
-import request from "../../utils/axiosUtils";
-import { BrandAPI } from "../../utils/axiosUtils/API";
 import { YupObject, nameSchema } from "../../utils/validation/ValidationSchemas";
 import Loader from "../commonComponent/Loader";
-import CheckBoxField from "../inputFields/CheckBoxField";
-import FileUploadField from "../inputFields/FileUploadField";
 import SimpleInputField from "../inputFields/SimpleInputField";
-import useCustomQuery from "@/utils/hooks/useCustomQuery";
 import { formatString } from "../../lib/format-number";
 import axios from "axios";
-import { type } from "os";
+import SearchableSelectInput from "../inputFields/SearchableSelectInput";
 const OfferForm = ({ updateId, buttonName }) => {
   const { t } = useTranslation("common");
   const router = useRouter();
   const [data, setData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [state, setState] = useState({
+    user: [],
+    categories: [],
+    tags: []
+  });
   useEffect(() => {
-    fetchDetails();
+    fetchOtherDetails();
+    if (updateId) {
+      fetchDetails();
+    }
   }, [updateId]);
 
   const fetchDetails = async () => {
     try {
       setIsLoading(true);
-      let res = await axios.get('/api/offer?offerId=' + updateId);
+      let res = await axios.get('/api/offers?id=' + updateId);
       if (res.status == 200) {
-        setData(res.data.data);
+        setData(res.data);
       }
       setIsLoading(false);
     } catch (err) {
@@ -38,27 +40,48 @@ const OfferForm = ({ updateId, buttonName }) => {
   }
   if (updateId && isLoading) return <Loader />;
 
+  const fetchOtherDetails = async () => {
+    try {
+      setIsLoading(true);
+      let res = await axios.get('/api/orders/user_tag_category_offer?user_tag_category=true');
+      if (res.status == 200) {
+        setState((prev) => {
+          return { ...prev, ['user']: res.data?.user, ['tags']: res.data?.tags, ['categories']: res.data?.categories }
+        })
+      }
+      setIsLoading(false);
+    } catch (err) {
+      alert('something went wrong');
+    }
+  }
+
   const handleSubmit = async (values) => {
     try {
       setIsLoading(true);
       if (buttonName == "Update") {
-        const res = await axios.put('/api/offer?offerId=' + updateId, {
+        const res = await axios.put('/api/offers/' + updateId, {
           "name": values.name,
+          "discount": Number(values.discount),
+          "userId": values.userId.toString(),
+          "tag": values.tag.toString(),
+          "categoryId": values.categoryId.toString(),
+          "remarks": values.remarks
         }, { withCredentials: true });
 
         if (res.status == 200) {
           alert('Offer: ' + values.name + " updated successfully!");
-          router.push("/category");
+          router.push("/offer");
         }
 
       } else {
-        let cats = formatString(values.name);
-        const res = await axios.post('/api/offer', {
+        const res = await axios.post('/api/offers', {
           "name": values.name,
-          "slug" : cats
-          // "description": values.description,
+          "discount": Number(values.discount),
+          "userId": values.userId.toString(),
+          "tag": values.tag.toString(),
+          "categoryId": values.categoryId.toString(),
+          "remarks": values.remarks
         }, { withCredentials: true });
-
         if (res.status == 201) {
           alert('Offer: ' + values.name + " added successfully!");
           router.push("/offer");
@@ -66,7 +89,6 @@ const OfferForm = ({ updateId, buttonName }) => {
       }
       setIsLoading(false);
     } catch (err) {
-      console.log('.........', err)
       alert(err.response.data.error);
     }
   }
@@ -76,15 +98,11 @@ const OfferForm = ({ updateId, buttonName }) => {
         enableReinitialize
         initialValues={{
           name: Object.keys(data).length > 1 ? data?.name : "",
-          // brand_image_id: updateId ? oldData?.data?.brand_image?.id || "" : "",
-          // brand_image: updateId ? oldData?.data?.brand_image || "" : "",
-          // brand_banner_id: updateId ? oldData?.data?.brand_banner?.id || "" : "",
-          // brand_banner: updateId ? oldData?.data?.brand_banner || "" : "",
-          // meta_title: updateId ? oldData?.data?.meta_title || "" : "",
-          // meta_description: updateId ? oldData?.data?.meta_description || "" : "",
-          // brand_meta_image_id: updateId ? oldData?.data?.brand_meta_image?.id : "",
-          // brand_meta_image: updateId ? oldData?.data?.brand_meta_image : "",
-          // status: updateId ? Boolean(Number(oldData?.data?.status)) : true,
+          tag: Object.keys(data).length > 0 ? (data?.tag ? data?.tag.split(',').map(Number) : []) : [],
+          categoryId: Object.keys(data).length > 0 ? (data?.categoryId ? data?.categoryId.split(',').map(Number) : []) : [],
+          userId: Object.keys(data).length > 0 ? (data?.userId ? data?.userId.split(',').map(Number) : []) : [],
+          discount: Object.keys(data).length > 0 ? data?.discount : 0,
+          remarks: Object.keys(data).length > 0 ? data?.remarks : ""
         }}
         validationSchema={YupObject({
           name: nameSchema,
@@ -96,22 +114,58 @@ const OfferForm = ({ updateId, buttonName }) => {
         {({ values, setFieldValue, errors, touched }) => (
           <>
             <Form id="blog" className="theme-form theme-form-2 mega-form">
-              <SimpleInputField nameList={[{ name: "discount", type:'number', placeholder: t("EnterName"), require: "true" }]} />
-              <SimpleInputField nameList={[{ name: "maxAmount", type:'number', placeholder: t("EnterName"), require: "true" }]} />
-              <SimpleInputField nameList={[{ name: "code", type:'number', placeholder: t("EnterName"), require: "true" }]} />
-              <SimpleInputField nameList={[{ name: "startDate", type:'datetime-local', placeholder: t("EnterName"), require: "true" }]} />
-              <SimpleInputField nameList={[{ name: "endDate", type:'datetime-local', placeholder: t("EnterName"), require: "true" }]} />
+              <SimpleInputField nameList={[{ name: "name", type: 'text', placeholder: t("EnterName"), require: "true" }]} />
+              <SimpleInputField nameList={[{ name: "discount", type: 'number', placeholder: t("EnterDiscount(%)"), require: "true" }]} />
 
-              {/* <FileUploadField paramsProps={{ mime_type: mediaConfig.image.join(",") }} name="brand_image_id" title="Image" id="brand_image_id" updateId={updateId} type="file" values={values} setFieldValue={setFieldValue} errors={errors} touched={touched} />
-              <FileUploadField paramsProps={{ mime_type: mediaConfig.image.join(",") }} name="brand_banner_id" title="BannerImage" id="brand_banner_id" updateId={updateId} type="file" values={values} setFieldValue={setFieldValue} errors={errors} touched={touched} />
-              <SimpleInputField
+              <SearchableSelectInput
                 nameList={[
-                  { name: "meta_title", title: "meta_title", placeholder: t("enter_meta_title") },
-                  { name: "meta_description", title: "meta_description", type: "textarea", rows: "3", placeholder: t("enter_meta_description") },
+                  {
+                    name: "categoryId",
+                    title: "CategoryId",
+                    require: "true",
+                    inputprops: {
+                      name: "categoryId",
+                      id: "categoryId",
+                      options: state.categories.length > 0 ? state.categories : [],
+                      close: false,
+                      isMulti: true
+                    },
+                  },
                 ]}
               />
-              <FileUploadField paramsProps={{ mime_type: mediaConfig.image.join(",") }} name="brand_meta_image_id" id="brand_meta_image_id" title="meta_image" updateId={updateId} type="file" values={values} setFieldValue={setFieldValue} />
-              <CheckBoxField name="status" /> */}
+              <SearchableSelectInput
+                nameList={[
+                  {
+                    name: "tag",
+                    title: "Tag",
+                    require: "true",
+                    inputprops: {
+                      name: "tag",
+                      id: "tag",
+                      options: state.tags.length > 0 ? state.tags : [],
+                      close: false,
+                      isMulti: true
+                    },
+                  },
+                ]}
+              />
+              <SearchableSelectInput
+                nameList={[
+                  {
+                    name: "userId",
+                    title: "User",
+                    require: "true",
+                    inputprops: {
+                      name: "userId",
+                      id: "userId",
+                      options: state.user.length > 0 ? state.user : [],
+                      close: false,
+                      isMulti: true
+                    },
+                  },
+                ]}
+              />
+              <SimpleInputField nameList={[{ name: "remarks", type: 'textarea', placeholder: t("remarks"), require: "true" }]} />
               <FormBtn buttonName={buttonName} />
             </Form>
           </>

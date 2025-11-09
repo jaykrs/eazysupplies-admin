@@ -106,7 +106,113 @@ export async function PUT(request) {
     if (verifyAdmin(request)) {
       const body = await request.json();
       const { id, status, approved = false } = body;
-      return NextResponse.json(await prisma.order.update({ where: { id }, data: { status, approved } }));
+
+      if (approved) {
+        let filterProduct, offer, jsonData = [], jsonFound = false;
+        let orders = await prisma.order.findUnique({
+          where: {
+            id: id,
+          },
+          include: {
+            user: true,
+            items: {
+              include: {
+                product: true, // 👈 this includes product details inside each item
+              },
+            },
+            shipping: true,
+            payment: true,
+          },
+        });
+        const Products = await prisma.product.findMany();
+        for (const el of orders.items) {
+          const offer = await prisma.offers.findMany({
+            where: {
+              userId: { contains: orders?.user?.id?.toString() },
+              categoryId: { contains: el.product?.categoryId?.toString() }
+            }
+          });
+
+          if (offer.length === 0) continue; // skip if no offer
+
+          const filterProduct = Products.filter(
+            (p) => Number(el.product?.id) === p.id
+          );
+
+          if (filterProduct.length === 0) continue;
+          let product = filterProduct[0];
+          let price = Number(product.price);
+          let discount = offer[0]?.discount || 0;
+
+          // always start with an array
+          let jsonData = Array.isArray(product.jsonData)
+            ? [...product.jsonData]
+            : [];
+
+          // try to find existing entry
+          let found = false;
+
+          jsonData = jsonData.map((entry) => {
+            if (
+              entry.orderId === orders.id &&
+              entry.userId === orders.user?.id &&
+              entry.categoryId === el.product?.categoryId
+            ) {
+              found = true;
+              const discountAmount = (price * discount) / 100;
+              return {
+                ...entry,
+                discountPercentage: discount,
+                discountAmount,
+                sellingPrice: price - discountAmount
+              };
+            }
+            return entry;
+          });
+
+          // if not found, add a new one
+          if (!found) {
+            const discountAmount = (price * discount) / 100;
+            jsonData.push({
+              orderId: orders.id,
+              userId: orders.user?.id,
+              categoryId: el.product?.categoryId,
+              discountPercentage: discount,
+              discountAmount,
+              sellingPrice: price - discountAmount
+            });
+          }
+
+          await prisma.product.update({
+            where: { id: product.id },
+            data: { jsonData }
+          });
+        }
+
+        let result = await prisma.order.update({ where: { id }, data: { status, approved } })
+        return NextResponse.json(result);
+        // return NextResponse.json({ offer, Products, filterProduct });
+      }
+
+      // if(approved === 'true' && applydiscount === 'true') {
+
+      //   let jsonData;
+      //   let productListJson;
+      //   let finalProductListJson;
+      //   let orderTotalPrice;
+      //   let orderDiscount;
+      //   let orderFinalPrice;
+      //   steps 1 - > read ProductList
+      //   step 2 - > iterateproductlist
+      //   step 3 - > else if (userId && categoryId) {
+      //         offers = await prisma.offers.findUnique({ where: { userId: Number(userId), categoryId: Number(categoryId) } });
+      //     }
+      //   step 4 - >  product model extend orderProduct (discount % , discount amt, sellprice)
+      //   finalProductListJson.push(orderProduct)
+      // }
+
+      // return NextResponse.json(await prisma.order.update({ where: { id }, data: { status, approved } }));
+      return NextResponse.json('updated');
     }
   } catch (Error) {
     console.log(Error);
