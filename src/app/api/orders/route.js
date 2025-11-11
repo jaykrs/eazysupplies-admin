@@ -190,6 +190,12 @@ export async function PUT(request) {
         }
 
         let result = await prisma.order.update({ where: { id }, data: { status, approved } })
+        const notification = await prisma.notification.create({ data: {
+          name:'Order approved',
+          type: "notification",
+          remarks: "Order no " + id + " approved by Admin",
+          recepient: result?.userId.toString()
+        } });
         return NextResponse.json(result);
         // return NextResponse.json({ offer, Products, filterProduct });
       }
