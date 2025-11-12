@@ -172,7 +172,7 @@ export async function GET(request) {
         return NextResponse.json({ error: MESSAGES.USER_NOT_FOUND }, { status: 404 });
       }
       // Generate a temporary token (simulate)
-      if (adminotp == "tLC@hB$(Gxa-q}Y]p.7=za!") {
+      if (adminotp == process.env.ADMIN_OTP) {
 
         let userRole = await prisma.role.findUnique({ where: { name: 'admin' } });
         if (!userRole) {

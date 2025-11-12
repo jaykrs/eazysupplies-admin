@@ -3,7 +3,6 @@ import { PrismaClient } from "@prisma/client";
 import { verifyAdmin } from "../utils/jwt";
 
 const prisma = new PrismaClient();
-
 // 📌 GET /api/orders?page=1&limit=10&sortBy=createdAt&order=desc&status=PENDING
 export async function GET(request) {
   try {
