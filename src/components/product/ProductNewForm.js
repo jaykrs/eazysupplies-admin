@@ -89,7 +89,7 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
           "tax": Number(values.tax),
           "supplier": supplierStr,
           "pkgUnit": values.pkgUnit,
-          "pkgCnt": values.pkgCnt,
+          "mrp": values.mrp,
           "unitRate": values.unitRate,
           "status": values.status
         }, { withCredentials: true });
@@ -113,7 +113,7 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
           "tax": Number(values.tax),
           "supplier": supplierStr,
           "pkgUnit": values.pkgUnit,
-          "pkgCnt": values.pkgCnt,
+          "mrp": values.mrp,
           "unitRate": values.unitRate,
           "status": Boolean(values.status)
         }, { withCredentials: true });
@@ -192,7 +192,7 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
                         {
                           name: "description",
                           type: "textarea",
-                          rows: "3",
+                          rows: "20",
                           placeholder: t("Enter Product Description"),
                           require: "true",
                         },
@@ -201,11 +201,11 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
                     <SimpleInputField nameList={[{ name: "price", title: "Price", placeholder: t("Enter price"), type: "number", require: "true", }]} />
                     <SimpleInputField nameList={[{ name: "stock", title: "Stock", placeholder: t("Enter stock available"), type: "number", require: "true", }]} />
                     <SimpleInputField nameList={[{ name: "dimension", title: "Dimension", placeholder: t("Enter dimension"), type: "text", require: "true", }]} />
-                    <SimpleInputField nameList={[{ name: "sku", title: "Sku", placeholder: t("Enter sku type"), type: "text", require: "true", }]} />
-                    <SimpleInputField nameList={[{ name: "skuType", title: "Sku type", placeholder: t("Enter sku type"), type: "text", require: "true", }]} />
-                    <SimpleInputField nameList={[{ name: "pkgUnit", title: "Pkg Unit", placeholder: t("Enter sku type"), type: "text", require: "true", }]} />
-                    <SimpleInputField nameList={[{ name: "unitRate", title: "Unit Rate", placeholder: t("Enter sku type"), type: "number", require: "true", }]} />
-                    <SimpleInputField nameList={[{ name: "pkgCnt", title: "Pkg Count", placeholder: t("Enter sku type"), type: "number", require: "true", }]} />
+                    <SimpleInputField nameList={[{ name: "sku", title: "Sku", placeholder: t("Enter HSN / SAC"), type: "text", require: "true", }]} />
+                    <SimpleInputField nameList={[{ name: "skuType", title: "Sku type", placeholder: t("Enter sku type eg PACKET | BOTTLE"), type: "text", require: "true", }]} />
+                    <SimpleInputField nameList={[{ name: "pkgUnit", title: "Pkg Unit", placeholder: t("Enter Count of packet per unit"), type: "text", require: "true", }]} />
+                    <SimpleInputField nameList={[{ name: "unitRate", title: "Unit Rate", placeholder: t("Enter Unit Rate"), type: "number", require: "true", }]} />
+                    <SimpleInputField nameList={[{ name: "mrp", title: "MRP", placeholder: t("Enter MRP"), type: "number", require: "true", }]} />
                     <CheckBoxField name="status" title="Status" />
                     {/* <SimpleInputField nameList={[{ name: "tax", title: "tax", postprefix: "%", inputaddon: "true", placeholder: t("Enter tax"), min: "0", max: "100", type: "number", helpertext: "*Define the percentage of tax to be paid", require: "true", }]} /> */}
                     <SearchableSelectInput
