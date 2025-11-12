@@ -14,7 +14,7 @@ const from = process.env.MAIL_FROM;
     const result = await mailjet.post('send', { version: 'v3.1' }).request({
       Messages: [
         {
-          From: { Email: from, Name: 'eazysupplies admin' },
+          From: { Email: from, Name: 'Jayant admin' },
           To: [{ Email: recepient }],
           Subject: subject,
           TextPart: body || '',
@@ -31,7 +31,35 @@ const from = process.env.MAIL_FROM;
 export function sendSms(recepient: string, subject: string, body: string) {
 
 }
+/**
+ * Creates a basic notification entry.
+ * @param {Object} params - Notification details.
+ * @param {string} params.name - Name of the notification.
+ * @param {string} params.recepient - Recipient identifier (email/phone/userId).
+ * @param {string} [params.remarks] - Optional remarks or message.
+ * @returns {Promise<Object>} Created notification record.
+ */
+export async function createNotification( name : string, recepient : string, remarks = "" ): Promise<object> {
+  console.log(name , recepient , remarks);
+  try {
+    if (!name || !recepient) {
+      throw new Error("Both 'name' and 'recepient' are required.");
+    }
 
+    const notification = await prisma["notification"].create({
+      data: {
+        name,
+        recepient,
+        remarks,
+      },
+    });
+
+    return notification;
+  } catch (error) {
+    console.error("[NOTIFICATION_CREATE_ERROR]", error);
+    throw new Error("Failed to create notification.");
+  }
+}
 // utils/sendMessage.ts
 
 export async function sendWhatsApp(receiver: string, mtype: string, text: string) {

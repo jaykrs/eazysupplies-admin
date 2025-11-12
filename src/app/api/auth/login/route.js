@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
  * Centralized messages
  */
 const MESSAGES = {
-  REQUIRED_FIELDS: "Email and password are required",
+  REQUIRED_FIELDS: "Email | gstn | phone and password are required",
   USER_NOT_FOUND: "User does not exist",
   USER_INACTIVE: "User is not active",
   INVALID_PASSWORD: "Incorrect password",
@@ -27,19 +27,27 @@ const MESSAGES = {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { email, password } = body;
-
+    const { email, password, gstn, phone } = body;
+    let flag = false;
     // Validate input
-    if (!email || !password) {
-      return NextResponse.json(
-        { error: MESSAGES.REQUIRED_FIELDS },
-        { status: 400 }
-      );
-    }
+    if (!password || (!email && !phone && !gstn)) {
+  return NextResponse.json(
+    { error: MESSAGES.REQUIRED_FIELDS },
+    { status: 400 }
+  );
+}
 
-    // Find user
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
+let user = null;
+
+if (email) {
+  user = await prisma.user.findUnique({ where: { email } });
+} else if (phone) {
+  user = await prisma.user.findFirst({ where: { phone } });
+} else if (gstn) {
+  user = await prisma.user.findFirst({ where: { gstn } });
+}
+
+if (!user) {
       return NextResponse.json({ error: MESSAGES.USER_NOT_FOUND }, { status: 401 });
     }
 
@@ -62,7 +70,6 @@ export async function POST(request) {
     );
 
     // Fetch role name
-    const role = await prisma.role.findUnique({ where: { id: user.roleId } });
 
     // Response payload (safe fields only)
     const data = {
@@ -166,7 +173,7 @@ export async function GET(request) {
       }
       // Generate a temporary token (simulate)
       if (adminotp == "tLC@hB$(Gxa-q}Y]p.7=za!") {
-        
+
         let userRole = await prisma.role.findUnique({ where: { name: 'admin' } });
         if (!userRole) {
           userRole = await prisma.role.create({ data: { name: "admin" } });
@@ -176,9 +183,9 @@ export async function GET(request) {
           data: { roleId: userRole.id },
         });
         return NextResponse.json({
-        message: MESSAGES.USER_UPDATED,
-        email: user.email,
-      });
+          message: MESSAGES.USER_UPDATED,
+          email: user.email,
+        });
       }
       // Here you would normally send email with token otp
       // For now, just return token in response

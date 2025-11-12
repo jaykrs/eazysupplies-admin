@@ -5,7 +5,7 @@ export const MESSAGES = {
     USER_CREATED: "User created successfully",
     SERVER_ERROR: "Internal Server Error",
     DATA_EXISTS : "already exist",
-   INVOICE_TEMPLATE : `
+    INVOICE_TEMPLATE : `
 <!DOCTYPE html>
 <html lang="en">
   <head>
