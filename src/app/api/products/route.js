@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import { verifyAdmin } from "../utils/jwt";
+import { authenticate, verifyAdmin } from "../utils/jwt";
 import { MESSAGES } from "../utils/statusConstant";
 const prisma = new PrismaClient();
 
@@ -72,12 +72,15 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
+    let payload = await authenticate(request);
     if (verifyAdmin(request)) {
       const body = await request.json();
+      body.createdBy = Number(payload?.userId);
       const res = await prisma.product.create({ data: body });
       return NextResponse.json({ data: res }, { status: 201 });
     }
   } catch (Error) {
+    console.log('..........Error', Error);
     return NextResponse.json(
       { error: MESSAGES.SERVER_ERROR },
       { status: 500 }

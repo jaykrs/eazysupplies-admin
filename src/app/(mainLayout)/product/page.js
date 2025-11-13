@@ -238,9 +238,9 @@ const AllUsers = () => {
                             <th className="border px-4 py-2">Brand</th>
                             <th className="border px-4 py-2">SKU</th>
                             <th className="border px-4 py-2">SKUType</th>
-                            <th className="border px-4 py-2">SelfLife</th>
+                            <th className="border px-4 py-2">SelfLife(Months)</th>
                             <th className="border px-4 py-2">pkgUnit</th>
-                            <th className="border px-4 py-2">pkgCnt</th>
+                            {/* <th className="border px-4 py-2">pkgCnt</th> */}
                             <th className="border px-4 py-2">caseRate</th>
                             <th className="border px-4 py-2">unitRate</th>
                             <th className="border px-4 py-2">Status</th>
@@ -277,7 +277,7 @@ const AllUsers = () => {
                                         <td className="border px-4 py-2">{product?.skuType}</td>
                                         <td className="border px-4 py-2">{product?.selfLife}</td>
                                         <td className="border px-4 py-2">{product?.pkgUnit}</td>
-                                        <td className="border px-4 py-2">{product?.pkgCnt}</td>
+                                        {/* <td className="border px-4 py-2">{product?.pkgCnt}</td> */}
                                         <td className="border px-4 py-2">{product?.caseRate}</td>
                                         <td className="border px-4 py-2">{product?.unitRate}</td>
                                         <td className="border px-4 py-2" style={{color: product?.status? "green": "grey"}}>{product?.status? "Active": "Inactive"}</td>
