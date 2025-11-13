@@ -42,7 +42,7 @@ export async function GET(request) {
 
 // POST - Create new asset
 export async function POST(request) {
-    if (!authenticate(request)) return unauthorized();
+    if (!authenticate(request)) return unauthorized(); 
     try {
         const body = await request.json();
         const asset = await prisma.assets.create({ data: body });

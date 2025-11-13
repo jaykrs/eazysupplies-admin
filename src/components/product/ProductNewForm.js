@@ -18,6 +18,10 @@ import { useTranslation } from "react-i18next";
 import useCustomQuery from "../../utils/hooks/useCustomQuery";
 import axios from "axios";
 import { NumberSchema } from "yup";
+import { SkuType } from "../../utils/constants/index";
+import KeywordInput from "../inputFields/KeywordInput";
+import FileImageUpload from "../inputFields/FileImageUpload";
+import {ConvertIntoIso8601} from "../../utils/constants/index";
 
 const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) => {
   const { t } = useTranslation("common");
@@ -35,7 +39,9 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
   }, []);
 
   useEffect(() => {
-    loadProductData();
+    if (updateId) {
+      loadProductData();
+    }
   }, [updateId]);
 
   const loadProductData = async () => {
@@ -72,6 +78,10 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
       // }
       const tagStr = (values.tags).toString();
       const supplierStr = (values.supplier).toString();
+      const mfDate = values.mfDate? ConvertIntoIso8601(values.mfDate) : null;
+      const expDate = values.expDate? ConvertIntoIso8601(values.expDate) : null
+
+      console.log("ConvertIntoIso8601(values.mfDate)", ConvertIntoIso8601(values.mfDate));
 
       if (updateId) {
         const res = await axios.put('/api/products', {
@@ -91,7 +101,14 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
           "pkgUnit": values.pkgUnit,
           "mrp": values.mrp,
           "unitRate": values.unitRate,
-          "status": values.status
+          "status": values.status,
+          "keyword": values.keyword.toString(),
+          "mrp": values.mrp,
+         // "images": values.images,
+          "selfLife": values.selfLife,
+          "pkgGwt": values.pkgGwt,
+          "mfDate": ConvertIntoIso8601(values.mfDate),
+          "expDate": ConvertIntoIso8601(values.expDate)
         }, { withCredentials: true });
 
         if (res.status == 200) {
@@ -115,7 +132,16 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
           "pkgUnit": values.pkgUnit,
           "mrp": values.mrp,
           "unitRate": values.unitRate,
-          "status": Boolean(values.status)
+          "status": Boolean(values.status),
+          "keyword": values.keyword.toString(),
+          "mrp": Number(values.mrp),
+         // "images": values.images,
+          "selfLife": Number(values.selfLife),
+          "pkgGwt": values.pkgGwt,
+          //"pkgCnt": values.pkgCnt,
+          ...(mfDate && {"mfDate": mfDate}),
+          ...( expDate && {"expDate": expDate})
+
         }, { withCredentials: true });
 
         if (res.status == 201) {
@@ -146,6 +172,7 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
                 name: Object.keys(productData).length > 0 ? productData?.name : "",
                 description: Object.keys(productData).length > 0 ? productData?.description : "",
                 price: Object.keys(productData).length > 0 ? productData?.price : 0.0,
+                mrp: Object.keys(productData).length > 0 ? productData?.mrp : 0.0,
                 stock: Object.keys(productData).length > 0 ? productData?.stock : 0,
                 sku: Object.keys(productData).length > 0 ? productData?.sku : "",
                 dimension: Object.keys(productData).length > 0 ? productData?.dimension : "",
@@ -154,11 +181,21 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
                 categoryId: Object.keys(productData).length > 0 ? productData?.category?.id : 0,
                 tags: Object.keys(productData).length > 0 ? (productData?.tags ? productData?.tags.split(',').map(Number) : []) : [],
                 supplier: Object.keys(productData).length > 0 ? (productData?.tags ? productData?.supplier.split(',').map(Number) : []) : [],
-                skuType:  Object.keys(productData).length > 0 ? productData?.skuType : "",
-                pkgUnit:  Object.keys(productData).length > 0 ? Number(productData?.pkgUnit) : 0,
-                pkgCnt:  Object.keys(productData).length > 0 ? Number(productData?.pkgCnt) : 0,
-                unitRate:  Object.keys(productData).length > 0 ? Number(productData?.unitRate) : 0,
-                status:  Object.keys(productData).length > 0 ? (productData?.status) : false
+                skuType: Object.keys(productData).length > 0 ? productData?.skuType : "",
+                pkgUnit: Object.keys(productData).length > 0 ? Number(productData?.pkgUnit) : 0,
+               // pkgCnt: Object.keys(productData).length > 0 ? Number(productData?.pkgCnt) : 0,
+                unitRate: Object.keys(productData).length > 0 ? Number(productData?.unitRate) : 0,
+                status: Object.keys(productData).length > 0 ? (productData?.status) : false,
+                keyword: Object.keys(productData).length > 0
+                  ? (productData?.keyword
+                    ? productData.keyword.split(",")
+                    : [])
+                  : [],
+                images: [],
+                selfLife: Object.keys(productData).length > 0 ? productData?.selfLife : "",
+                pkgGwt: Object.keys(productData).length > 0 ? productData?.pkgGwt : "",
+                mfDate: Object.keys(productData).length > 0 ? productData?.mfDate : "",
+                expDate: Object.keys(productData).length > 0 ? productData?.expDate : "",
               }}
               validationSchema={YupObject({
                 name: nameSchema,
@@ -176,6 +213,7 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
                 // setResetData && setResetData(true);
                 // router.push(`/category`);
                 handleSubmit(values);
+                 console.log('values', values);
               }}
             >
               {({ setFieldValue, values, errors }) => (
@@ -199,15 +237,45 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
                       ]}
                     />
                     <SimpleInputField nameList={[{ name: "price", title: "Price", placeholder: t("Enter price"), type: "number", require: "true", }]} />
+                    <SimpleInputField nameList={[{ name: "mrp", title: "MRP", placeholder: t("Enter Mrp"), type: "number", require: "true", }]} />
                     <SimpleInputField nameList={[{ name: "stock", title: "Stock", placeholder: t("Enter stock available"), type: "number", require: "true", }]} />
                     <SimpleInputField nameList={[{ name: "dimension", title: "Dimension", placeholder: t("Enter dimension"), type: "text", require: "true", }]} />
                     <SimpleInputField nameList={[{ name: "sku", title: "Sku", placeholder: t("Enter HSN / SAC"), type: "text", require: "true", }]} />
-                    <SimpleInputField nameList={[{ name: "skuType", title: "Sku type", placeholder: t("Enter sku type eg PACKET | BOTTLE"), type: "text", require: "true", }]} />
-                    <SimpleInputField nameList={[{ name: "pkgUnit", title: "Pkg Unit", placeholder: t("Enter Count of packet per unit"), type: "text", require: "true", }]} />
-                    <SimpleInputField nameList={[{ name: "unitRate", title: "Unit Rate", placeholder: t("Enter Unit Rate"), type: "number", require: "true", }]} />
-                    <SimpleInputField nameList={[{ name: "mrp", title: "MRP", placeholder: t("Enter MRP"), type: "number", require: "true", }]} />
+                    {/* <SimpleInputField nameList={[{ name: "skuType", title: "Sku type", placeholder: t("Enter sku type eg PACKET | BOTTLE"), type: "text", require: "true", }]} /> */}
+                    <SearchableSelectInput
+                      nameList={[
+                        {
+                          name: "skuType",
+                          title: "Sku Type",
+                          require: "true",
+                          inputprops: {
+                            name: "skuType",
+                            id: "skuType",
+                            options: SkuType.length > 0 ? SkuType : [],
+                            close: false,
+                            isMulti: false,
+                          },
+                        },
+                      ]}
+                    />
+                    <SimpleInputField nameList={[{ name: "pkgUnit", title: "Pkg Unit", placeholder: t("Enter pkg unit"), type: "text", require: "true", }]} />
+                    <SimpleInputField nameList={[{ name: "unitRate", title: "Unit Rate", placeholder: t("Enter unit rate"), type: "number", require: "true", }]} />
+                    {/* <SimpleInputField nameList={[{ name: "pkgCnt", title: "Pkg Count", placeholder: t("Enter pkg count"), type: "number", require: "true", }]} /> */}
+                    <SimpleInputField nameList={[{ name: "pkgGwt", title: "Pkg Weight", placeholder: t("Enter pkg weight"), type: "string", require: "true", }]} />
+                    <SimpleInputField nameList={[{ name: "selfLife", title: "Self Life(Months)", placeholder: t("Enter self life(months)"), type: "number", require: "true", }]} />
+                    <SimpleInputField nameList={[{ name: "mfDate", title: "Manufacture Date", placeholder: t("Enter self life"), type: "datetime-local", require: "true", }]} />
+                    <SimpleInputField nameList={[{ name: "expDate", title: "Expiry Date", placeholder: t("Enter self life"), type: "datetime-local", require: "true", }]} />
                     <CheckBoxField name="status" title="Status" />
-                    {/* <SimpleInputField nameList={[{ name: "tax", title: "tax", postprefix: "%", inputaddon: "true", placeholder: t("Enter tax"), min: "0", max: "100", type: "number", helpertext: "*Define the percentage of tax to be paid", require: "true", }]} /> */}
+
+                    <FileImageUpload
+                      name="images"
+                      multiple={true}
+                      selectedFiles={values.images || []}
+                      setSelectedFiles={(files) => setFieldValue("images", files)}
+                      helperText="Upload image"
+                    />
+                    <KeywordInput name="keyword" label="Keywords" required />
+
                     <SearchableSelectInput
                       nameList={[
                         {
