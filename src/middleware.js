@@ -23,7 +23,7 @@ export async function middleware(request) {
     }
     return NextResponse.next();
   }
-  const allowedOrigins = ['http://earthling.ddns.net', 'https://earthling.ddns.net',"earthling.ddns.net","*"];
+  const allowedOrigins = ["http://eazysupplies.com","https://eazysupplies.com","*"];
   if (request.nextUrl.pathname.startsWith('/api')) {
     const response = NextResponse.next();
      const origin = request.headers.get("origin");
