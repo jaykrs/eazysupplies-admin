@@ -8,11 +8,18 @@ const PUBLIC_ROUTES = [
   '/auth/register',
   '/auth/otp-verification'
 ];
+ const allowedOrigins = [
+  "http://localhost:3000",
+  "http://eazysupplies.com",
+  "https://eazysupplies.com",
+  "http://api.eazysupplies.com",
+  "https://api.eazysupplies.com"
+];
 
 export async function middleware(request) {
   const token = request.cookies.get('authToken')?.value;
   const { pathname } = request.nextUrl;
-
+  const origin = request.headers.get("origin");
   const isPublicRoute = PUBLIC_ROUTES.some((route) =>
     pathname === route || pathname.startsWith(`${route}/`)
   );
@@ -23,29 +30,34 @@ export async function middleware(request) {
     }
     return NextResponse.next();
   }
-  const allowedOrigins = ["http://eazysupplies.com","https://eazysupplies.com"];
+ 
   
   if (request.nextUrl.pathname.startsWith('/api')) {
     const response = NextResponse.next();
-     const origin = request.headers.get("origin");
-     if (allowedOrigins.includes(origin)) {
-    response.headers.set('Access-Control-Allow-Origin', origin);
-   } else {
-     response.headers.set('Access-Control-Allow-Origin', "*"); // Deny if not allowed
-   }
-   console.log(origin);
-   response.headers.set('Access-Control-Allow-Origin', '*');
-    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    response.headers.set('Access-Control-Allow-Credentials', 'true');  
-      
-  if (request.method === 'OPTIONS') {
+
+    // Allow dynamic origin if in allowlist
+    if (allowedOrigins.includes(origin)) {
+      response.headers.set("Access-Control-Allow-Origin", origin);
+    }
+
+    response.headers.set(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, DELETE, OPTIONS"
+    );
+    response.headers.set(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization"
+    );
+    response.headers.set("Access-Control-Allow-Credentials", "true");
+
+    // OPTIONS preflight handling
+    if (request.method === "OPTIONS") {
       return new NextResponse(null, {
         status: 204,
         headers: response.headers,
       });
     }
-    return response;
+	  return response;
   }
 
 
