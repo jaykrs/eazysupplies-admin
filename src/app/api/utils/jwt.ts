@@ -32,6 +32,11 @@ const payload = await authenticate(request);
 return payload && payload.userId? payload : null;
 }
 
+export async function getUserId(request) {
+const payload = await getUserFromToken(request);
+return payload && payload.userId? payload.userId : null;
+}
+
 export async function verifyAdmin(request) {
   try {
     const payload = await authenticate(request);

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import { authenticate } from "../utils/jwt"; // adjust import path if needed
+import { authenticate, verifyAdmin } from "../utils/jwt"; // adjust import path if needed
 import { MESSAGES } from "../utils/statusConstant";       // adjust import path if needed
 
 const prisma = new PrismaClient();
@@ -28,6 +28,7 @@ export async function GET(request) {
     } else if (userId) {
       addresses = await prisma.address.findMany({ where: { userId } });
     } else {
+      if(verifyAdmin(request))
       addresses = await prisma.address.findMany();
     }
 

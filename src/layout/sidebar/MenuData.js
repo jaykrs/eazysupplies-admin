@@ -127,7 +127,15 @@ const MENUITEMS = [
       { title: "AllOffers", path: "/offer", displayTitle: "Offers List", permission: ["offer.index"] }
     ],
   },
-
+{
+    title: "Assets",
+    displayTitle: "Assets",
+    icon: <RiContactsLine />,
+    type: "sub",
+    children: [
+      { title: "Assets", path: "/assets", displayTitle: "Digital Assets", permission: ["assets.index"] }
+    ],
+  },
   {
     title: "Address",
     displayTitle: "Address",

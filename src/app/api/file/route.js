@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import { writeFile } from "fs/promises";
-import { authenticate, verifyAdmin } from "../utils/jwt"; // adjust import path if needed
+import { PrismaClient } from "@prisma/client";
+import { authenticate, verifyAdmin, getUserId } from "../utils/jwt"; // adjust import path if needed
 import { MESSAGES } from "../utils/statusConstant";       // adjust import path if needed
+const prisma = new PrismaClient();
 
 const handleError = (error) => {
   console.error(error);
@@ -43,14 +45,14 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const fileName = searchParams.get("file");
-
+    const userId = searchParams.get("userId");
     // If ?file= is passed → return that file's absolute path
     if (fileName) {
       let files = getFiles(baseDir);
       let file = files.find(f => f.name === fileName);
       if (!file) {
         if(authenticate(request)) {
-        files = getFiles(privateDir);
+          files = getFiles(privateDir);
         file = files.find(f => f.name === fileName);
         if (!file)
           return NextResponse.json(
@@ -67,7 +69,7 @@ export async function GET(request) {
             ? "application/pdf"
             : fileName.endsWith(".json")
               ? "application/json"
-              : "application/octet-stream";
+              : "application/octet-stream";       
       const fileBuffer = fs.readFileSync(file.absolutePath);
       return new NextResponse(fileBuffer, {
         status: 200,
@@ -77,7 +79,10 @@ export async function GET(request) {
         },
       });
     }
-
+    if (userId && authenticate(request)) { 
+      let assets = await prisma.assets.findMany({ where: { author: userId } });
+    return NextResponse.json({ success: true, assets });
+    }
     // Otherwise, return all files
     const files = getFiles(baseDir);
     return NextResponse.json({ success: true, files });
@@ -93,31 +98,45 @@ export async function POST(request) {
   if (!authenticate(request)) return unauthorized();
   const { searchParams } = new URL(request.url);
   const type = Number(searchParams.get("type"));
+  const userId = await getUserId(request);
+  if (!userId) {
+        return NextResponse.json({ error: "No User available" }, { status: 400 });
+      }
   if (verifyAdmin(request) && type)
     try {
       // Parse multipart form data
       const formData = await request.formData();
       const file = formData.get("file");
-
       if (!file || typeof file === "string") {
         return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
       }
-      const dir = type === 'public' ? path.join(process.env.FILE_PATH, "/uploads") : path.join(process.env.FILE_PATH, "/private");
+      
+      const dir = type === 1 ? path.join(process.env.FILE_PATH, "/uploads") : path.join(process.env.FILE_PATH, "/private");
       // Create unique filename
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
-      const fileName = `${Date.now()}-${file.name}`;
+      let fname = file.name;
+      fname = fname.replace(/\s+/g, '');
+      const fileName = `${Date.now()}-${fname}`;
       const filePath = path.join(dir, fileName);
 
       // Save file
       await writeFile(filePath, buffer);
-
+      let asset;
+      
       // Public URL (relative to /public)
-      const publicPath = `/` + type + `/${fileName}`;
-
+      const publicPath = type == 1 ? `/` +  "uploads" + `/${fileName}` : `/` +  "private" + `/${fileName}`;
+      asset = await prisma.assets.create({  data: {
+       name : fileName,
+        type : type == 1 ? "public" : "private",
+        path: publicPath,
+        author: userId.toString(),
+        tag: fileName
+      }, });
       return NextResponse.json({
         message: "File uploaded successfully",
         path: publicPath,
+        assetId : asset ? asset.id : ""
       });
     } catch (error) {
       console.error("File upload error:", error);
