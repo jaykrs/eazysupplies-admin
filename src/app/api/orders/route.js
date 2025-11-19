@@ -199,24 +199,6 @@ export async function PUT(request) {
         // return NextResponse.json({ offer, Products, filterProduct });
       }
 
-      // if(approved === 'true' && applydiscount === 'true') {
-
-      //   let jsonData;
-      //   let productListJson;
-      //   let finalProductListJson;
-      //   let orderTotalPrice;
-      //   let orderDiscount;
-      //   let orderFinalPrice;
-      //   steps 1 - > read ProductList
-      //   step 2 - > iterateproductlist
-      //   step 3 - > else if (userId && categoryId) {
-      //         offers = await prisma.offers.findUnique({ where: { userId: Number(userId), categoryId: Number(categoryId) } });
-      //     }
-      //   step 4 - >  product model extend orderProduct (discount % , discount amt, sellprice)
-      //   finalProductListJson.push(orderProduct)
-      // }
-
-      // return NextResponse.json(await prisma.order.update({ where: { id }, data: { status, approved } }));
       return NextResponse.json('updated');
     }
   } catch (Error) {

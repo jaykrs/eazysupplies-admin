@@ -23,7 +23,7 @@ export const dateSubmitValue = (inputDateString) => {
   return `${year}-${month}-${day}`;
 };
 
-export const dateWithOnlyMonth = (inputDateString)=>{
+export const dateWithOnlyMonth = (inputDateString) => {
   const months = [
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
@@ -34,4 +34,25 @@ export const dateWithOnlyMonth = (inputDateString)=>{
   const month = months[inputDate.getUTCMonth()];
   const year = inputDate.getUTCFullYear();
   return `${day} ${month} ${year}`;
+}
+
+export const dateFormatInMonthYearNameFormat = (dateString)=> {
+  const date = new Date(dateString);
+
+  const day = date.getDate();
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const month = monthNames[date.getMonth()];
+  const year = date.getFullYear();
+
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
+  // Add suffix for day
+  const suffix =
+    day % 10 === 1 && day !== 11 ? "st" :
+      day % 10 === 2 && day !== 12 ? "nd" :
+        day % 10 === 3 && day !== 13 ? "rd" : "th";
+
+  return `${day}${suffix} ${month} ${year} ${hours}:${minutes}`;
 }

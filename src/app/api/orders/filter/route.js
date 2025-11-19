@@ -41,7 +41,8 @@ export async function GET(request) {
                 createdAt: 'desc',
             },
         });
-        return NextResponse.json({ data: orders }, { status: 200 });
+        const tax = await prisma.tax.findMany();
+        return NextResponse.json({ data: orders, tax }, { status: 200 });
     } catch (err) {
         return NextResponse.json({ error: MESSAGES.SERVER_ERROR }, { status: 500 });
     }

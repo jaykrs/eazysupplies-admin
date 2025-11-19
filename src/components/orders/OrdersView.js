@@ -5,6 +5,8 @@ import axios from "axios";
 import ShowModal from "@/elements/alerts&Modals/Modal";
 import Btn from "@/elements/buttons/Btn";
 import { useRouter } from "next/navigation";
+import { OrderEmailTemp } from "../../utils/constants/index";
+import { dateFormat } from "@/utils/customFunctions/DateFormat";
 
 const OrdersView = ({ id }) => {
     const route = useRouter();
@@ -21,6 +23,7 @@ const OrdersView = ({ id }) => {
         shippingDetails: {}
     });
     const [isDarkMode, setIsDarkMode] = useState(false);
+    const [taxData, setTaxData] = useState();
 
     const handleStateChange = (name, value) => {
         setState(prev => {
@@ -58,6 +61,8 @@ const OrdersView = ({ id }) => {
 
         if (res.status == 200) {
             handleStateChange('Orders', res.data.data);
+            setTaxData(res.data.tax);
+            console.log('....................res', res);
 
             const currentProductId = state.productItemDetails?.id;
 
@@ -113,6 +118,45 @@ const OrdersView = ({ id }) => {
             console.error('error', err);
         }
     };
+    const handleHtmlToPdf = async (id) => {
+        function generateProductRows(products) {
+            return products.map(p => `
+    <tr>
+      <td>${p?.product?.name}</td>
+      <td>${p?.quantity}</td>
+      <td>$${p?.product?.price.toFixed(2)}</td>
+      <td>$${(p?.quantity * p?.product?.price).toFixed(2)}</td>
+    </tr>
+  `).join("");
+        }
+        let OrderTemp = OrderEmailTemp;
+        //  let formatedDate = dateFormat?.dateFormatInMonthYearNameFormat(state?.productItemDetails?.createdAt);
+        let shippingAdds = state.productItemDetails?.shipping.address + ', ' + state.productItemDetails?.shipping?.city + ', ' + state.productItemDetails?.shipping?.country;
+        let subTotal = 0, Total = 0, tax = 0;
+        for (const el of state.productItemDetails?.items) {
+            subTotal += Number(el?.product?.price);
+            const taxFilter = taxData.filter(e => Number(e.id) == Number(el?.product?.tax));
+            tax += taxFilter?.length > 0 ? Number(taxFilter[0].value) : 0;
+        }
+        let taxAmount = subTotal * tax / 100;
+        const productRows = generateProductRows(state.productItemDetails?.items);
+
+        console.log('.........productRows',productRows);
+        OrderTemp = OrderTemp.replace('@Order', id);
+        OrderTemp = OrderTemp.replace('@OrderDate', state?.productItemDetails?.createdAt);
+        OrderTemp = OrderTemp.replace('@ShippingAddress', shippingAdds);
+        OrderTemp = OrderTemp.replace('@PaymentStatus', state.productItemDetails?.payment?.status);
+        OrderTemp = OrderTemp.replace('@SubTotal', subTotal.toFixed(2));
+        OrderTemp = OrderTemp.replace('@tax', taxAmount);
+        OrderTemp = OrderTemp.replace('@Total', (Number(subTotal) + Number(taxAmount)).toFixed(2));
+        OrderTemp = OrderTemp.replace('@ProductBody', productRows);
+
+        const res = await axios.post('/api/file/htmlToPdf', {
+            orderId: Number(id),
+            html: OrderTemp
+        }, { withCredentials: true });
+    }
+    console.log('...................state.productItemDetails?.id', state.productItemDetails)
     return (
         <>
             <div>
@@ -170,20 +214,23 @@ const OrdersView = ({ id }) => {
                             Object.keys(state.productItemDetails).length > 0 &&
                             <div className="d-flex justify-content-end gap-3 pr-3">
                                 {state.productItemDetails?.payment?.status !== "PENDING" && <button type="button" className="btn btn-info">Download Invoice</button>}
-                                {state.productItemDetails?.payment?.status == "PENDING" && (state.productItemDetails?.status).toUpperCase() === "APPROVED" && <button type="button" onClick={()=> route.push('/payment/create') } className="btn btn-info">Pay</button>}
+                                {state.productItemDetails?.payment?.status == "PENDING" && (state.productItemDetails?.status).toUpperCase() === "APPROVED" && <button type="button" onClick={() => route.push('/payment/create')} className="btn btn-info">Pay</button>}
 
                                 {(state.productItemDetails?.approved && (state.productItemDetails?.status).toUpperCase() === "APPROVED") ? <button type="button" className="btn btn-success" disabled title="disabled" >Approved</button> : (state.productItemDetails?.status).toUpperCase() === "PENDING" ? <button type="button" className="btn btn-success" onClick={() => updateOrderStatus(state.productItemDetails?.id, "APPROVED")} >Approve</button> : ''}
                                 {(state.productItemDetails?.status).toUpperCase() === "REJECTED" ? <button type="button" className="btn btn-danger" disabled >Rejected</button> : (state.productItemDetails?.status).toUpperCase() === "PENDING" ? <button type="button" className="btn btn-danger" onClick={() => updateOrderStatus(state.productItemDetails?.id, "REJECTED")} >Reject</button> : ''}
+                                {(state.productItemDetails?.approved && (state.productItemDetails?.status).toUpperCase() === "APPROVED") ? <button type="button" className="btn btn-success" title="invoice" onClick={() => handleHtmlToPdf(state.productItemDetails?.id)} >Download Invoice </button> : ''}
                             </div>
                         }
                     </div>
 
                     {Object.keys(state.productItemDetails).length > 0 ? (
                         state.productItemDetails?.items?.map((el, index) => {
-                              const jsonData = Array.isArray(el?.product?.jsonData) ? el?.product?.jsonData : [];
-                              const filterJsonData = jsonData.length > 0 ? jsonData.filter(element=> el.orderId == element.orderId && state.productItemDetails?.userId == element.userId ) : [];
-                              console.log('.....jsonData from ui',el.orderId, state.productItemDetails?.userId, index, jsonData);
-                              console.log('.........filterJsonData', filterJsonData);
+                            const jsonData = Array.isArray(el?.product?.jsonData) ? el?.product?.jsonData : [];
+                            const filterJsonData = jsonData.length > 0 ? jsonData.filter(element => el.orderId == element.orderId && state.productItemDetails?.userId == element.userId) : [];
+                            const taxId = Number(el?.product?.tax);
+                            const taxFilter = taxData.filter((el) => Number(el.id) == taxId);
+                            const taxAmount = filterJsonData.length > 0 ? (Number(filterJsonData[0]?.sellingPrice) * Number(el?.quantity) * (Number(taxFilter[0]?.value) / 100)).toFixed(2) : (Number(el?.price) * Number(el?.quantity) * (Number(taxFilter[0]?.value) / 100)).toFixed(2);
+                            const Subtotal = filterJsonData.length > 0 ? (Number(filterJsonData[0]?.sellingPrice) * Number(el?.quantity)) : (Number(el?.product?.price) * Number(el?.quantity));
                             return (
                                 <div key={index} className="card mb-3" style={{ width: "100%" }}>
                                     <div className="card-body">
@@ -196,9 +243,9 @@ const OrdersView = ({ id }) => {
 
                                         </div>
                                         <div>
-                                            <p className="card-text">price/quantity(RS): { Number(el?.product?.price)}</p>
-                                            <p className="card-text">discount(%): { filterJsonData.length > 0 ? Number(filterJsonData[0]?.discountPercentage) : 0}</p>
-                                            <p className="card-text"> Selling price/quantity(RS): {filterJsonData.length > 0 ? Number(filterJsonData[0]?.sellingPrice) :  Number(el?.price)}</p>
+                                            <p className="card-text">price/quantity(RS): {Number(el?.product?.price)}</p>
+                                            <p className="card-text">discount(%): {filterJsonData.length > 0 ? Number(filterJsonData[0]?.discountPercentage) : 0}</p>
+                                            <p className="card-text"> Selling price/quantity(RS): {filterJsonData.length > 0 ? Number(filterJsonData[0]?.sellingPrice) : Number(el?.product?.price)}</p>
                                             {
                                                 Object.keys(state.editOrderItem).length == 0 ? '' : el.id === state.editOrderItem?.id ? <input type="number" placeholder="Enter price" name="price" value={state.orderItemPrice} onChange={(e) => handleStateChange('orderItemPrice', e.target.value)} /> : ''
                                             }
@@ -210,8 +257,10 @@ const OrdersView = ({ id }) => {
                                         <p className="card-text">Updated On: {el?.updatedAt
                                             ? new Date(el?.updatedAt).toLocaleDateString()
                                             : "-"}</p>
+                                        <h6>Subtotal(RS): {Subtotal.toFixed(2)}</h6>
+                                        <h6>Tax(RS): {taxAmount}</h6>
                                         <div className="w-100 d-flex justify-content-between">
-                                            <h3>Total Price(RS): { filterJsonData.length > 0 ? ( Number(filterJsonData[0]?.sellingPrice) * Number(el?.quantity)).toFixed(2) :  (Number(el?.price) * Number(el?.quantity)).toFixed(2)}</h3>
+                                            <h3>Total(RS): {(Number(taxAmount) + Number(Subtotal)).toFixed(2)}</h3>
                                             {
                                                 (!state.productItemDetails?.approved && (state.productItemDetails?.status).toUpperCase() === "PENDING") && (Object.keys(state.editOrderItem).length == 0 ? <a href="#" className="btn btn-primary btn-sm" onClick={() => orderItemEdit(el)} >Edit</a> : el.id === state.editOrderItem?.id ? <a href="#" className="btn btn-primary btn-sm" onClick={() => handleOrderItemUpdate()} >Update</a> : <a href="#" className="btn btn-primary btn-sm" onClick={() => orderItemEdit(el)} >Edit</a>)
                                             }
