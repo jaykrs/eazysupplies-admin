@@ -62,7 +62,6 @@ const OrdersView = ({ id }) => {
         if (res.status == 200) {
             handleStateChange('Orders', res.data.data);
             setTaxData(res.data.tax);
-            console.log('....................res', res);
 
             const currentProductId = state.productItemDetails?.id;
 
@@ -126,24 +125,31 @@ const OrdersView = ({ id }) => {
       <td>${p?.quantity}</td>
       <td>₹${p?.product?.price.toFixed(2)}</td>
       <td>${generateProductDiscount(p.product ,id)?.discountPercentage}</td>
-      <td>${generateProductDiscount(p.product ,id)?.discountAmount}</td>
-      <td>${p?.product?.tax}</td>
-      <td>${generateProductDiscount(p.product ,id)?.taxAmount}</td>
-      <td>₹${(p?.quantity * p?.product?.price).toFixed(2)}</td>
+      <td>${(Number(generateProductDiscount(p.product ,id)?.discountAmount) * Number(p?.quantity)).toFixed(2)}</td>
+      <td>${generateProductDiscount(p.product ,id)?.taxpercent}</td>
+      <td>${(Number(generateProductDiscount(p.product ,id)?.taxAmount) * Number(p?.quantity)).toFixed(2)}</td>
+      <td>${Number(generateProductDiscount(p.product ,id)?.totalPrice * Number(p?.quantity)).toFixed(2)}</td>
     </tr>
   `).join("");
         }
         
         function generateProductDiscount(product, ordId ) {
             let jsonData = product.jsonData;
-            if(!jsonData) return {discountPercentage : 0, discountAmount : 0, taxAmount : 0, totalPrice : 0};
+            console.log(".. taxData", taxData);
+            if(!jsonData) return {discountPercentage : 0, discountAmount : 0, taxAmount : 0, totalPrice : 0, taxpercent: 0};
             else {
                 let _dd = jsonData.filter(el => el.orderId == ordId);
                 if(_dd.length > 0){
-                    let _taxpercent = taxData.filter(tx => tx.id == product.tax)?.value;
-                    let _taxAmt = Number(_dd[0].sellingPrice) * Number(_taxpercent)/100;
+                    let _taxId = Number(product?.tax);
+                    let _taxpercent = taxData.filter((elm) => Number(elm.id) == _taxId);
+                    console.log("...._taxpercent",_taxId, _taxpercent[0]);
+                    _taxpercent = _taxpercent[0].value;
+                    console.log("...._taxpercent",_taxId, _taxpercent);
+                    let _taxAmt = Number(_dd[0].sellingPrice) * Number(_taxpercent)/100 ;
                     _dd[0].taxAmount = _taxAmt;
+                    _dd[0].taxpercent = _taxpercent;
                     _dd[0].totalPrice = Number(_dd[0].sellingPrice) + _taxAmt; 
+                    console.log(_dd[0]);
                     return _dd[0];
             }
         }
@@ -154,7 +160,7 @@ const OrdersView = ({ id }) => {
         let shippingAdds = state.productItemDetails?.shipping.address + ', ' + state.productItemDetails?.shipping?.city + ', ' + state.productItemDetails?.shipping?.country;
         let subTotal = 0, Total = 0, tax = 0;
         for (const el of state.productItemDetails?.items) {
-           Total += Number(generateProductDiscount(el,id).totalPrice);   
+           Total += Number(generateProductDiscount(el.product,id).totalPrice * Number(el.quantity));   
         //    subTotal += Number(el?.product?.price);
         //    const taxFilter = taxData.filter(e => Number(e.id) == Number(el?.product?.tax));
         //    tax += taxFilter?.length > 0 ? Number(taxFilter[0].value) : 0;
@@ -173,14 +179,14 @@ const OrdersView = ({ id }) => {
     //    OrderTemp = OrderTemp.replace('@tax', taxAmount);
     //    OrderTemp = OrderTemp.replace('@Total', (Number(subTotal) + Number(taxAmount)).toFixed(2));
         OrderTemp = OrderTemp.replace('@ProductBody', productRows);
-        OrderTemp = OrderTemp.replace('@totalOrderAmount',Total);
+        OrderTemp = OrderTemp.replace('@totalOrderAmount',Total.toFixed(2));
         const res = await axios.post('/api/file/htmlToPdf', {
             orderId: Number(id),
             userId: userId,
             html: OrderTemp
         }, { withCredentials: true });
     }
-    console.log('...................state.productItemDetails?.id', state.productItemDetails?.userId)
+    console.log('...................taxData', taxData);
     return (
         <>
             <div>

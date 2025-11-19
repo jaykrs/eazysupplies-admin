@@ -90,7 +90,7 @@ export async function POST(request) {
         asset = await prisma.assets.create({  data: {
        name : filename,
         type : "invoice",
-        path: folderPath,
+        path: "/invoice/"+filename,
         author: userId?.toString(),
         tag: filename
       }, });

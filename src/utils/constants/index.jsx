@@ -114,12 +114,13 @@ export const OrderEmailTemp = `
             <thead>
                 <tr>
                     <th>Product</th>
-                    <th>Quantity</th>
-                    <th>Price(₹)</th>
+                    <th>Qty</th>
+                    <th>Price</th>
                     <th>Dis(%)</th>
+                    <th>Dis(amt)</th>
                     <th>Tax(%)</th>
                     <th>Tax(amt)</th>
-                    <th>Total(₹)</th>
+                    <th>Sum</th>
                 </tr>
             </thead>
 
@@ -139,7 +140,7 @@ export const OrderEmailTemp = `
             </tbody> -->
             <tbody>
             @ProductBody
-            <tr><td></td><td></td><td></td><td></td><td></td><td>Total Amount(₹) : </td><td>@totalOrderAmount</td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td><td></td><td>Total(₹):</td><td>@totalOrderAmount</td></tr>
             </tbody>
         </table>
 
