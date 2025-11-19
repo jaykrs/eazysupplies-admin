@@ -98,15 +98,18 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
           "dimension": values.dimension,
           "tax": Number(values.tax),
           "supplier": supplierStr,
-          "pkgUnit": values.pkgUnit,
+          "pkgUnit": values.pkgUnit.toString(),
           "mrp": values.mrp,
           "unitRate": values.unitRate,
           "status": values.status,
           "keyword": values.keyword.toString(),
           "mrp": values.mrp,
+          "caseRate" : Number(values.price),
          // "images": values.images,
           "selfLife": values.selfLife,
           "pkgGwt": values.pkgGwt,
+          "productImage" : values.productImage,
+          "productIcon" : values.productImage,
           "mfDate": ConvertIntoIso8601(values.mfDate),
           "expDate": ConvertIntoIso8601(values.expDate)
         }, { withCredentials: true });
@@ -135,8 +138,11 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
           "status": Boolean(values.status),
           "keyword": values.keyword.toString(),
           "mrp": Number(values.mrp),
+          "caseRate" : Number(values.price),
          // "images": values.images,
           "selfLife": Number(values.selfLife),
+          "productImage" : values.productImage,
+          "productIcon" : values.productImage,
           "pkgGwt": values.pkgGwt,
           //"pkgCnt": values.pkgCnt,
           ...(mfDate && {"mfDate": mfDate}),
@@ -192,6 +198,7 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
                     : [])
                   : [],
                 images: [],
+                productImage : Object.keys(productData).length > 0 ? productData?.productImage : "",
                 selfLife: Object.keys(productData).length > 0 ? productData?.selfLife : "",
                 pkgGwt: Object.keys(productData).length > 0 ? productData?.pkgGwt : "",
                 mfDate: Object.keys(productData).length > 0 ? productData?.mfDate : "",
@@ -266,7 +273,7 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
                     <SimpleInputField nameList={[{ name: "mfDate", title: "Manufacture Date", placeholder: t("Enter self life"), type: "datetime-local", require: "true", }]} />
                     <SimpleInputField nameList={[{ name: "expDate", title: "Expiry Date", placeholder: t("Enter self life"), type: "datetime-local", require: "true", }]} />
                     <CheckBoxField name="status" title="Status" />
-
+                    <SimpleInputField nameList={[{ name: "productImage", title: "Product Image", placeholder: t("Enter Product Image"), type: "text", require: "true", }]} />
                     <FileImageUpload
                       name="images"
                       multiple={true}
