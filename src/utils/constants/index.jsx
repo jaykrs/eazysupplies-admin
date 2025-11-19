@@ -115,8 +115,11 @@ export const OrderEmailTemp = `
                 <tr>
                     <th>Product</th>
                     <th>Quantity</th>
-                    <th>Price</th>
-                    <th>Total</th>
+                    <th>Price(₹)</th>
+                    <th>Dis(%)</th>
+                    <th>Tax(%)</th>
+                    <th>Tax(amt)</th>
+                    <th>Total(₹)</th>
                 </tr>
             </thead>
 
@@ -136,15 +139,16 @@ export const OrderEmailTemp = `
             </tbody> -->
             <tbody>
             @ProductBody
+            <tr><td></td><td></td><td></td><td></td><td></td><td>Total Amount(₹) : </td><td>@totalOrderAmount</td></tr>
             </tbody>
         </table>
 
-        <p><strong>Subtotal:</strong> @SubTotal</p>
+    <!--    <p><strong>Subtotal:</strong> @SubTotal</p>
         <p><strong>Tax:</strong> @tax</p>
 
-        <p class="total"><strong>Total:</strong> @Total</p>
+        <p class="total"><strong>Total:</strong> @Total</p> -->
 
-        <p>
+        <p> 
             Your order is being processed. You will receive a tracking number once it ships.
             If you have any questions, contact us at
             <a href="mailto:support@eazysupplies.com">support@eazysupplies.com</a>.

@@ -46,14 +46,14 @@ function getFiles(dir, base = "") {
 export async function POST(request) {
     try {
         const body = await request.json();
-        const { html, orderId } = body;
+        const { html, orderId, userId } = body;
 
         if (!html) {
             return NextResponse.json({ error: "HTML content is required." }, { status: 400 });
         }
 
         // Filename for PDF
-        const filename = `invoice${orderId}.pdf`;
+        const filename = `performa-invoice${orderId}.pdf`;
 
         // Launch Puppeteer
         const browser = await puppeteer.launch({
@@ -84,10 +84,21 @@ export async function POST(request) {
 
         // Write file and **overwrite if exists** (default behavior)
         fs.writeFileSync(filePath, pdfBuffer); // ← overwrites automatically
-
+        let asset = await prisma.assets.findFirst({where : {"name" : filename}});
+        console.log(userId);
+        if(!asset) {
+        asset = await prisma.assets.create({  data: {
+       name : filename,
+        type : "invoice",
+        path: folderPath,
+        author: userId?.toString(),
+        tag: filename
+      }, });
+    }
         return NextResponse.json({
             message: "PDF generated & saved successfully",
             path: filePath,
+            assetId : asset.id
         });
 
     } catch (error) {
