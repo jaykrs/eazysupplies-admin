@@ -12,7 +12,19 @@ export async function POST(request) {
 }
 
 export async function PUT(request) {
-  const body = await request.json();
-  const { id, ...rest } = body;
-  return NextResponse.json(await prisma.shipping.update({ where: { id }, data: rest }));
+  try {
+    const body = await request.json();
+    const { id, orderId } = body;
+    console.log("assets", body.assets);
+    return NextResponse.json(await prisma.shipping.update({
+      where: { id, orderId }, data: {
+        status: body.status,
+        assets: body.assets,
+        deliveryAgent: body.deliveryAgent
+      }
+    }));
+  } catch (err) {
+    console.log('..........err', err);
+    return NextResponse.json({ msg: "Internal server error" }, { status: 500 });
+  }
 }

@@ -108,7 +108,7 @@ export async function POST(request) {
       const formData = await request.formData();
       const file = formData.get("file");
       if (!file || typeof file === "string") {
-        return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+        return NextResponse.json({ error: "No file uploaded" }, { status: 400 }); 
       }
       
       const dir = type === 1 ? path.join(process.env.FILE_PATH, "/uploads") : path.join(process.env.FILE_PATH, "/private");
@@ -139,7 +139,7 @@ export async function POST(request) {
         assetId : asset ? asset.id : ""
       });
     } catch (error) {
-      console.error("File upload error:", error);
+      console.log("File upload error:", error);
       return NextResponse.json({ error: "Upload failed" }, { status: 500 });
     }
 }

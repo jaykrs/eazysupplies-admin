@@ -222,6 +222,7 @@ model Shipping {
   order     Order   @relation(fields: [orderId], references: [id])
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime?     @updatedAt @map("updated_at")
+  assets String?
 }
 
 model Payment {

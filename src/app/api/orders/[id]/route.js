@@ -4,11 +4,13 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 // 📌 GET /api/orders/[id]
-export async function GET(_, { params }) {
+
+export async function GET(request, { params }) {
   try {
-    const id = Number(params.id);
-    const order = await prisma.order.findUnique({
-      where: { id },
+    const id = (await params).id;
+
+    const order = await prisma.order.findFirst({
+      where: { id: Number(id) },
       include: {
         user: true,
         items: { include: { product: true } },
@@ -16,17 +18,39 @@ export async function GET(_, { params }) {
         payment: true,
       },
     });
-
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
     return NextResponse.json(order);
   } catch (error) {
-    console.error("GET /orders/[id] error:", error);
     return NextResponse.json({ error: "Failed to fetch order" }, { status: 500 });
   }
 }
+
+// export async function GET(_, { params }) {
+//   try {
+//     const id = Number( await params?.id);
+//     const order = await prisma.order.findUnique({
+//       where: { id },
+//       include: {
+//         user: true,
+//         items: { include: { product: true } },
+//         shipping: true,
+//         payment: true,
+//       },
+//     });
+
+//     if (!order) {
+//       return NextResponse.json({ error: "Order not found" }, { status: 404 });
+//     }
+
+//     return NextResponse.json(order);
+//   } catch (error) {
+//     console.error("GET /orders/[id] error:", error);
+//     return NextResponse.json({ error: "Failed to fetch order" }, { status: 500 });
+//   }
+// }
 
 // 📌 PUT /api/orders/[id]
 export async function PUT(request, { params }) {
@@ -50,7 +74,7 @@ export async function PUT(request, { params }) {
         shipping: true,
         payment: true,
       },
-    });
+    }); 
 
     return NextResponse.json(order);
   } catch (error) {

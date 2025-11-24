@@ -161,3 +161,9 @@ export const OrderEmailTemp = `
 </html>
 
 `
+
+export const PaymentMethod = [
+    {name:"CREDIT_PAYMENT", id:"CREDIT_PAYMENT"},
+    {name:"ADV_PAYMENT", id:"ADV_PAYMENT"},
+    {name:"ONLINE", id:"ONLINE"}
+]

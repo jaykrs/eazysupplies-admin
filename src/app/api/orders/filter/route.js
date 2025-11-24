@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import { authenticate } from "../../utils/jwt";
+import { authenticate, verifyAdmin } from "../../utils/jwt";
 import { MESSAGES } from "../../utils/statusConstant";
 import { error } from "console";
+import { unauthorized } from "next/navigation";
 
 const prisma = new PrismaClient();
 
@@ -42,8 +43,25 @@ export async function GET(request) {
             },
         });
         const tax = await prisma.tax.findMany();
-        return NextResponse.json({ data: orders, tax }, { status: 200 });
+        const deliveryAgent = await prisma.deliveryAgent.findMany();
+        return NextResponse.json({ data: orders, tax , deliveryAgent}, { status: 200 });
     } catch (err) {
+        return NextResponse.json({ error: MESSAGES.SERVER_ERROR }, { status: 500 });
+    }
+}
+
+export async function PUT(request) {
+    const { searchParams } = new URL(request.url);
+    const id = Number(searchParams.get("id"));
+    const {status} = await request.json();
+    try {
+        if (verifyAdmin()) {
+            let orderUpdate = prisma.order.update({ where: { id: id }, data: { status: status } })
+            return NextResponse.json({ msg: "Order status: " + status + " updated successfully!" }, {status:200});
+        }
+        return unauthorized();
+    } catch (err) {
+        console.log('...........err', err);
         return NextResponse.json({ error: MESSAGES.SERVER_ERROR }, { status: 500 });
     }
 }

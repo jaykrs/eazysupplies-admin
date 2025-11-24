@@ -70,8 +70,8 @@ export async function PUT(request) {
     const userId = Number(searchParams.get("userId"));
     const paymentStatus = searchParams.get("paymentStatus");
 
-    const validStatuses = ["offline", "cod", "online"];
-
+  //  const validStatuses = ["offline", "cod", "online"];
+const validStatuses = ["ONLINE", "ADV_PAYMENT", "CREDIT_PAYMENT"];
     // user updating their payment status
     if (
       id &&
@@ -89,16 +89,23 @@ export async function PUT(request) {
     // admin update via request body
     if (verifyAdmin(request)) {
       const body = await request.json();
-      const { id: bodyId, ...rest } = body;
+      console.log('...........body', body);
       const updated = await prisma.payment.update({
-        where: { id: bodyId },
-        data: rest,
+        where: { id: Number(body.id) },
+        data: {
+          orderId: Number(body.orderId),
+          amount: Number(body.amount),
+          method: body.method,
+          status: body.status,
+          transectionid: body.transactionid? body.transectionid : ""
+        },
       });
       return NextResponse.json({ data: updated }, { status: 200 });
     }
 
     return unauthorized();
   } catch (err) {
+    console.log('............err', err);
     return handleError(err);
   }
 }

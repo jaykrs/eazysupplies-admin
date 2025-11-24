@@ -7,6 +7,13 @@ import Btn from "@/elements/buttons/Btn";
 import { useRouter } from "next/navigation";
 import { OrderEmailTemp } from "../../utils/constants/index";
 import { dateFormat } from "@/utils/customFunctions/DateFormat";
+import FileImageUpload from "../inputFields/FileImageUpload";
+import { Card, CardBody, Col, Form, Row } from "reactstrap";
+import { Formik } from "formik";
+import { YupObject } from "@/utils/validation/ValidationSchemas";
+import { t } from "i18next";
+import FormBtn from "@/elements/buttons/FormBtn";
+import TableWrapper from "../../utils/hoc/TableWrapper";
 
 const OrdersView = ({ id }) => {
     const route = useRouter();
@@ -20,7 +27,14 @@ const OrdersView = ({ id }) => {
         orderItemPrice: 0,
         refreshState: false,
         shippingModel: false,
-        shippingDetails: {}
+        shippingDetails: {},
+        shippingProductModel: false,
+        shippingProductDetails: {},
+        loading: false,
+        deliveryAgent: [],
+        invoicePdf: "",
+        transportReport: "",
+        deliveryAgentId: 0
     });
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [taxData, setTaxData] = useState();
@@ -44,24 +58,15 @@ const OrdersView = ({ id }) => {
     }, [state.refreshState])
 
     const handleView = (el) => {
-        console.log('...........product details', el);
         handleStateChange('productItemDetails', el);
     }
 
     const fetchProduct = async () => {
         let res = await axios.get('/api/orders/filter?userId=' + id, { withCredentials: true });
-        // if (res.status == 200) {
-        //     handleStateChange('Orders', res.data.data);
-        //     if (Object.keys(state.editOrderItem).length > 0) {
-        //         const filterData = res.data.data.filter(el => el.id === state.editOrderItem?.orderId);
-        //         handleStateChange('productItemDetails', filterData[0]);
-        //         handleStateChange('editOrderItem', {});
-        //     }
-        // }
-
         if (res.status == 200) {
             handleStateChange('Orders', res.data.data);
             setTaxData(res.data.tax);
+            handleStateChange("deliveryAgent", res.data.deliveryAgent);
 
             const currentProductId = state.productItemDetails?.id;
 
@@ -117,6 +122,34 @@ const OrdersView = ({ id }) => {
             console.error('error', err);
         }
     };
+    function generateProductDiscount(product, ordId) {
+        let jsonData = product.jsonData;
+        let _dd = [];
+        if (!jsonData) {
+            _dd = [{ discountPercentage: 0, discountAmount: 0, taxId: 0, taxAmount: 0, taxpercent: 0, totalPrice: 0 }];
+            let _taxId = Number(product?.tax);
+            let _taxpercent = taxData.filter((elm) => Number(elm.id) == _taxId);
+            _taxpercent = _taxpercent[0].value;
+            let _taxAmt = Number(product?.price) * Number(_taxpercent) / 100;
+            _dd[0].taxAmount = _taxAmt;
+            _dd[0].taxpercent = _taxpercent;
+            _dd[0].totalPrice = Number(product?.price) + _taxAmt;
+            return _dd[0];
+        }
+        else {
+            _dd = jsonData.filter(el => el.orderId == ordId);
+            if (_dd.length > 0) {
+                let _taxId = Number(product?.tax);
+                let _taxpercent = taxData.filter((elm) => Number(elm.id) == _taxId);
+                _taxpercent = _taxpercent[0].value;
+                let _taxAmt = Number(_dd[0].sellingPrice) * Number(_taxpercent) / 100;
+                _dd[0].taxAmount = _taxAmt;
+                _dd[0].taxpercent = _taxpercent;
+                _dd[0].totalPrice = Number(_dd[0].sellingPrice) + _taxAmt;
+                return _dd[0];
+            }
+        }
+    }
     const handleHtmlToPdf = async (id) => {
         function generateProductRows(products) {
             return products.map(p => `
@@ -124,69 +157,101 @@ const OrdersView = ({ id }) => {
       <td>${p?.product?.name}</td>
       <td>${p?.quantity}</td>
       <td>₹${p?.product?.price.toFixed(2)}</td>
-      <td>${generateProductDiscount(p.product ,id)?.discountPercentage}</td>
-      <td>${(Number(generateProductDiscount(p.product ,id)?.discountAmount) * Number(p?.quantity)).toFixed(2)}</td>
-      <td>${generateProductDiscount(p.product ,id)?.taxpercent}</td>
-      <td>${(Number(generateProductDiscount(p.product ,id)?.taxAmount) * Number(p?.quantity)).toFixed(2)}</td>
-      <td>${Number(generateProductDiscount(p.product ,id)?.totalPrice * Number(p?.quantity)).toFixed(2)}</td>
+      <td>${generateProductDiscount(p.product, id)?.discountPercentage}</td>
+      <td>${(Number(generateProductDiscount(p.product, id)?.discountAmount) * Number(p?.quantity)).toFixed(2)}</td>
+      <td>${generateProductDiscount(p.product, id)?.taxpercent}</td>
+      <td>${(Number(generateProductDiscount(p.product, id)?.taxAmount) * Number(p?.quantity)).toFixed(2)}</td>
+      <td>${Number(generateProductDiscount(p.product, id)?.totalPrice * Number(p?.quantity)).toFixed(2)}</td>
     </tr>
   `).join("");
         }
-        
-        function generateProductDiscount(product, ordId ) {
-            let jsonData = product.jsonData;
-            console.log(".. taxData", taxData);
-            if(!jsonData) return {discountPercentage : 0, discountAmount : 0, taxAmount : 0, totalPrice : 0, taxpercent: 0};
-            else {
-                let _dd = jsonData.filter(el => el.orderId == ordId);
-                if(_dd.length > 0){
-                    let _taxId = Number(product?.tax);
-                    let _taxpercent = taxData.filter((elm) => Number(elm.id) == _taxId);
-                    console.log("...._taxpercent",_taxId, _taxpercent[0]);
-                    _taxpercent = _taxpercent[0].value;
-                    console.log("...._taxpercent",_taxId, _taxpercent);
-                    let _taxAmt = Number(_dd[0].sellingPrice) * Number(_taxpercent)/100 ;
-                    _dd[0].taxAmount = _taxAmt;
-                    _dd[0].taxpercent = _taxpercent;
-                    _dd[0].totalPrice = Number(_dd[0].sellingPrice) + _taxAmt; 
-                    console.log(_dd[0]);
-                    return _dd[0];
-            }
-        }
-        }
-        
+
         let OrderTemp = OrderEmailTemp;
-        //  let formatedDate = dateFormat?.dateFormatInMonthYearNameFormat(state?.productItemDetails?.createdAt);
         let shippingAdds = state.productItemDetails?.shipping.address + ', ' + state.productItemDetails?.shipping?.city + ', ' + state.productItemDetails?.shipping?.country;
         let subTotal = 0, Total = 0, tax = 0;
         for (const el of state.productItemDetails?.items) {
-           Total += Number(generateProductDiscount(el.product,id).totalPrice * Number(el.quantity));   
-        //    subTotal += Number(el?.product?.price);
-        //    const taxFilter = taxData.filter(e => Number(e.id) == Number(el?.product?.tax));
-        //    tax += taxFilter?.length > 0 ? Number(taxFilter[0].value) : 0;
+            Total += Number(generateProductDiscount(el.product, id).totalPrice * Number(el.quantity));
         }
-    //    let taxAmount = subTotal * tax / 100;
         const productRows = generateProductRows(state.productItemDetails?.items);
-
-        console.log('.........productRows',productRows);
-        console.log('.........userId',state?.productItemDetails?.user?.id);
-         const userId = state?.productItemDetails?.user?.id;
+        const userId = state?.productItemDetails?.user?.id;
         OrderTemp = OrderTemp.replace('@Order', id);
         OrderTemp = OrderTemp.replace('@OrderDate', state?.productItemDetails?.createdAt.slice(0, -14));
         OrderTemp = OrderTemp.replace('@ShippingAddress', shippingAdds);
         OrderTemp = OrderTemp.replace('@PaymentStatus', state.productItemDetails?.payment?.status);
-    //    OrderTemp = OrderTemp.replace('@SubTotal', subTotal.toFixed(2));
-    //    OrderTemp = OrderTemp.replace('@tax', taxAmount);
-    //    OrderTemp = OrderTemp.replace('@Total', (Number(subTotal) + Number(taxAmount)).toFixed(2));
         OrderTemp = OrderTemp.replace('@ProductBody', productRows);
-        OrderTemp = OrderTemp.replace('@totalOrderAmount',Total.toFixed(2));
+        OrderTemp = OrderTemp.replace('@totalOrderAmount', Total.toFixed(2));
         const res = await axios.post('/api/file/htmlToPdf', {
             orderId: Number(id),
             userId: userId,
             html: OrderTemp
         }, { withCredentials: true });
     }
-    console.log('...................taxData', taxData);
+
+    const handlePayment = (id) => {
+        let Total = 0;
+        for (const el of state.productItemDetails?.items) {
+            Total += Number(generateProductDiscount(el.product, id).totalPrice * Number(el.quantity));
+        }
+        route.push('/payment/create?id=' + state.productItemDetails?.id + "&amt=" + Total + "&status=" + state.productItemDetails?.status);
+    }
+
+    const handleShipping = (id) => {
+        handleStateChange('shippingProductModel', true);
+    }
+    const handleShippingSubmit = async () => {
+        console.log('............deliveryAgent', state.deliveryAgentId, state.invoicePdf, state.transportReport);
+        if (state.deliveryAgentId == 0 || state.invoicePdf == "" || state.transportReport == "") {
+            alert("All fields are mandatory! ");
+        } else {
+            let formData = new FormData();
+            formData.append("file", state.invoicePdf);
+            const invoicePdfRes = await axios.post(
+                "/api/file?type=1",
+                formData,
+                {
+                    headers: { "Content-Type": "multipart/form-data" },
+                    withCredentials: true
+                }
+            );
+            if (invoicePdfRes.status === 200) {
+                formData = new FormData();
+                formData.append("file", state.transportReport);
+                const reportRes = await axios.post(
+                    "/api/file?type=1",
+                    formData,
+                    {
+                        headers: { "Content-Type": "multipart/form-data" },
+                        withCredentials: true
+                    }
+                );
+                if (reportRes.status === 200) {
+                    console.log('.......both upload success', invoicePdfRes?.data?.assetId, reportRes?.data?.assetId);
+                    const invoiceAssetId = invoicePdfRes.data.assetId;
+                    const reportAssetId = reportRes.data.assetId;
+                    const updateShipping = await axios.put(
+                        "/api/shippings",
+                        {
+                            id: Number(state.productItemDetails?.shipping?.id),
+                            assets: `${"invoicePdf: " + invoicePdfRes?.data?.assetId},${"transportReport:" + reportRes?.data?.assetId}`,
+                            deliveryAgent: state.deliveryAgentId,
+                            status: "SHIPPED",
+                            orderId: Number(state.productItemDetails?.id)
+                        },
+                        { withCredentials: true }
+                    );
+                    if (updateShipping.status === 200) {
+                        alert("Shipping process started successfully!");
+                    } else {
+                        alert("Failed to upload transport report, please try again!");
+                    }
+                }
+            } else {
+                alert("Failed to upload invoice pdf, please try again!");
+            }
+        }
+    }
+    console.log("state.productItemDetails",state.deliveryAgentId, state.deliveryAgent, state.productItemDetails);
+
     return (
         <>
             <div>
@@ -221,6 +286,7 @@ const OrdersView = ({ id }) => {
                                             }}>Shipping</button>
                                         </div>
                                         <h5 className="card-title">Items: {el?.items.length}</h5>
+                                        <p className="card-text">Approved: {el?.approved ? "YES" : "NO"}</p>
                                         <p className="card-text">Status: {el?.status}</p>
                                         <p className="card-text">Total Price(RS): {totalPrice.toFixed(2)}</p>
                                         <p className="card-text">Orders On: {el?.createdAt
@@ -243,66 +309,136 @@ const OrdersView = ({ id }) => {
                         {
                             Object.keys(state.productItemDetails).length > 0 &&
                             <div className="d-flex justify-content-end gap-3 pr-3">
-                                {state.productItemDetails?.payment?.status !== "PENDING" && <button type="button" className="btn btn-info">Download Invoice</button>}
-                                {state.productItemDetails?.payment?.status == "PENDING" && (state.productItemDetails?.status).toUpperCase() === "APPROVED" && <button type="button" onClick={() => route.push('/payment/create')} className="btn btn-info">Pay</button>}
+                                {state.productItemDetails?.approved && state.productItemDetails?.status.toUpperCase() === "PAID" && <button type="button" onClick={() => handleShipping(state.productItemDetails?.id)} className="btn btn-info">Shipping</button>}
+                                {state.productItemDetails?.payment?.status == "PENDING" && state.productItemDetails?.approved && <button type="button" onClick={() => handlePayment(state.productItemDetails?.id)} className="btn btn-info">Pay</button>}
 
-                                {(state.productItemDetails?.approved && (state.productItemDetails?.status).toUpperCase() === "APPROVED") ? <button type="button" className="btn btn-success" disabled title="disabled" >Approved</button> : (state.productItemDetails?.status).toUpperCase() === "PENDING" ? <button type="button" className="btn btn-success" onClick={() => updateOrderStatus(state.productItemDetails?.id, "APPROVED")} >Approve</button> : ''}
-                                {(state.productItemDetails?.status).toUpperCase() === "REJECTED" ? <button type="button" className="btn btn-danger" disabled >Rejected</button> : (state.productItemDetails?.status).toUpperCase() === "PENDING" ? <button type="button" className="btn btn-danger" onClick={() => updateOrderStatus(state.productItemDetails?.id, "REJECTED")} >Reject</button> : ''}
-                                {(state.productItemDetails?.approved && (state.productItemDetails?.status).toUpperCase() === "APPROVED") ? <button type="button" className="btn btn-success" title="invoice" onClick={() => handleHtmlToPdf(state.productItemDetails?.id)} >Download Invoice </button> : ''}
+                                {state.productItemDetails?.approved ? <button type="button" className="btn btn-success" disabled title="disabled" >Approved</button> : (state.productItemDetails?.status).toUpperCase() === "PENDING" ? <button type="button" className="btn btn-success" onClick={() => updateOrderStatus(state.productItemDetails?.id, "APPROVED")} >Approve</button> : ''}
+                                {(state.productItemDetails?.status).toUpperCase() === "REJECTED" ? <button type="button" className="btn btn-danger" disabled >Rejected</button> : (state.productItemDetails?.status).toUpperCase() === "PENDING" && !state.productItemDetails?.approved ? <button type="button" className="btn btn-danger" onClick={() => updateOrderStatus(state.productItemDetails?.id, "REJECTED")} >Reject</button> : ''}
+                                {(state.productItemDetails?.approved && ["COMPLETED", "SHIPPED", "PAID"].includes(state.productItemDetails?.status.toUpperCase())) ? <button type="button" className="btn btn-success" title="invoice" onClick={() => handleHtmlToPdf(state.productItemDetails?.id)} >Download Invoice </button> : ''}
                             </div>
                         }
                     </div>
 
-                    {Object.keys(state.productItemDetails).length > 0 ? (
-                        state.productItemDetails?.items?.map((el, index) => {
-                            const jsonData = Array.isArray(el?.product?.jsonData) ? el?.product?.jsonData : [];
-                            const filterJsonData = jsonData.length > 0 ? jsonData.filter(element => el.orderId == element.orderId && state.productItemDetails?.userId == element.userId) : [];
-                            const taxId = Number(el?.product?.tax);
-                            const taxFilter = taxData.filter((el) => Number(el.id) == taxId);
-                            const taxAmount = filterJsonData.length > 0 ? (Number(filterJsonData[0]?.sellingPrice) * Number(el?.quantity) * (Number(taxFilter[0]?.value) / 100)).toFixed(2) : (Number(el?.price) * Number(el?.quantity) * (Number(taxFilter[0]?.value) / 100)).toFixed(2);
-                            const Subtotal = filterJsonData.length > 0 ? (Number(filterJsonData[0]?.sellingPrice) * Number(el?.quantity)) : (Number(el?.product?.price) * Number(el?.quantity));
+                    {state.productItemDetails?.items?.length > 0 ? (
+                        state.productItemDetails.items.map((el, index) => {
+                            const quantity = Number(el?.quantity || 0);
+                            const price = Number(el?.product?.price || 0);
+
+                            const amtDetails = generateProductDiscount(el?.product, el.orderId) || {};
+
+                            const {
+                                discountPercentage = 0,
+                                discountAmount = 0,
+                                taxpercent = 0,
+                                taxAmount = 0,
+                                totalPrice = price - discountAmount + taxAmount
+                            } = amtDetails;
+
                             return (
-                                <div key={index} className="card mb-3" style={{ width: "100%" }}>
-                                    <div className="card-body">
-                                        <h5 className="card-title">Product Name: {el?.product?.name}</h5>
-                                        <div>
-                                            <p className="card-text">Quantity: {Number(el?.quantity)}</p>
-                                            {
-                                                Object.keys(state.editOrderItem).length == 0 ? '' : el.id === state.editOrderItem?.id ? <input type="number" placeholder="Enter Quantity" name="quantity" value={state.orderItemQty} onChange={(e) => handleStateChange('orderItemQty', e.target.value)} /> : ''
-                                            }
+                                <div key={index} className="card shadow-sm mb-4 border-0">
+                                    <div className="card-body p-4">
 
-                                        </div>
-                                        <div>
-                                            <p className="card-text">price/quantity(RS): {Number(el?.product?.price)}</p>
-                                            <p className="card-text">discount(%): {filterJsonData.length > 0 ? Number(filterJsonData[0]?.discountPercentage) : 0}</p>
-                                            <p className="card-text"> Selling price/quantity(RS): {filterJsonData.length > 0 ? Number(filterJsonData[0]?.sellingPrice) : Number(el?.product?.price)}</p>
-                                            {
-                                                Object.keys(state.editOrderItem).length == 0 ? '' : el.id === state.editOrderItem?.id ? <input type="number" placeholder="Enter price" name="price" value={state.orderItemPrice} onChange={(e) => handleStateChange('orderItemPrice', e.target.value)} /> : ''
-                                            }
+                                        {/* Header */}
+                                        <div className="d-flex justify-content-between align-items-center mb-3">
+                                            <h4 className="fw-bold text-primary m-0">{el?.product?.name}</h4>
+                                            <span className="badge bg-secondary">Order #{el?.orderId}</span>
                                         </div>
 
-                                        <p className="card-text">Orders On: {el?.createdAt
-                                            ? new Date(el?.createdAt).toLocaleDateString()
-                                            : "-"}</p>
-                                        <p className="card-text">Updated On: {el?.updatedAt
-                                            ? new Date(el?.updatedAt).toLocaleDateString()
-                                            : "-"}</p>
-                                        <h6>Subtotal(RS): {Subtotal.toFixed(2)}</h6>
-                                        <h6>Tax(RS): {taxAmount}</h6>
-                                        <div className="w-100 d-flex justify-content-between">
-                                            <h3>Total(RS): {(Number(taxAmount) + Number(Subtotal)).toFixed(2)}</h3>
-                                            {
-                                                (!state.productItemDetails?.approved && (state.productItemDetails?.status).toUpperCase() === "PENDING") && (Object.keys(state.editOrderItem).length == 0 ? <a href="#" className="btn btn-primary btn-sm" onClick={() => orderItemEdit(el)} >Edit</a> : el.id === state.editOrderItem?.id ? <a href="#" className="btn btn-primary btn-sm" onClick={() => handleOrderItemUpdate()} >Update</a> : <a href="#" className="btn btn-primary btn-sm" onClick={() => orderItemEdit(el)} >Edit</a>)
-                                            }
-                                            {/* <a href="#" className="btn btn-primary btn-sm" onClick={() => handleStateChange('editOrderItem', el)} >Edit</a> */}
+                                        {/* Dates */}
+                                        <div className="d-flex gap-2 text-muted small mb-4">
+                                            <div>
+                                                <strong>Ordered:</strong>{" "}
+                                                {el?.createdAt ? new Date(el.createdAt).toLocaleDateString() : "-"}
+                                            </div>
+                                            <div>
+                                                <strong>Updated:</strong>{" "}
+                                                {el?.updatedAt ? new Date(el.updatedAt).toLocaleDateString() : "-"}
+                                            </div>
+                                            <div>
+                                                <strong>Payment:</strong>{" "}
+                                                {state.productItemDetails?.payment?.status.toUpperCase()}
+                                            </div>
+                                            <div>
+                                                <strong>Shipping:</strong>{" "}
+                                                {state.productItemDetails?.shipping?.status.toUpperCase()}
+                                            </div>
+                                            <div>
+                                                <strong>Delivery Agent:</strong>{" "}
+                                                {state.productItemDetails?.deliveryAgent ? state.productItemDetails?.deliveryAgent : ""}
+                                            </div>
+                                        </div>
+
+                                        {/* Content Section */}
+                                        <div className="row g-3">
+
+                                            {/* Left Column */}
+                                            <div className="col-md-6">
+                                                <div className="p-3 rounded">
+                                                    <p><strong>Price per unit:</strong> ₹{price}</p>
+                                                    <p><strong>Quantity:</strong> {quantity}</p>
+
+                                                    {state.editOrderItem?.id === el.id && (
+                                                        <input
+                                                            type="number"
+                                                            className="form-control mt-2"
+                                                            placeholder="Enter Quantity"
+                                                            value={state.orderItemQty}
+                                                            onChange={(e) =>
+                                                                handleStateChange("orderItemQty", e.target.value)
+                                                            }
+                                                        />
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Right Column */}
+                                            <div className="col-md-6">
+                                                <div className="p-3 rounded ">
+                                                    <p><strong>Discount:</strong> {discountPercentage}%</p>
+                                                    <p><strong>Discount Amount:</strong> ₹{(discountAmount * quantity).toFixed(2)}</p>
+
+                                                    <p><strong>Tax:</strong> {taxpercent}%</p>
+                                                    <p><strong>Tax Amount:</strong> ₹{(taxAmount * quantity).toFixed(2)}</p>
+
+                                                    <p><strong>Subtotal:</strong> ₹{((price - discountAmount) * quantity).toFixed(2)}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Footer */}
+                                        <div className="d-flex justify-content-between align-items-center mt-4">
+                                            <h3 className="fw-bold text-success">
+                                                Total: ₹{(quantity * totalPrice).toFixed(2)}
+                                            </h3>
+
+                                            {/* Edit Button */}
+                                            {/* Uncomment if needed */}
+                                            {!state.productItemDetails?.approved && state.productItemDetails?.status.toUpperCase() === "PENDING" &&
+                                                (state.editOrderItem?.id !== el.id ? (
+                                                    <button
+                                                        className="btn btn-outline-primary btn-sm"
+                                                        onClick={() => orderItemEdit(el)}
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        className="btn btn-primary btn-sm"
+                                                        onClick={handleOrderItemUpdate}
+                                                    >
+                                                        Update
+                                                    </button>
+                                                ))}
                                         </div>
                                     </div>
                                 </div>
                             );
                         })
                     ) : (
-                        <p></p>
+                        <p className="text-center text-muted py-5">No order items found.</p>
                     )}
+
+
                 </div>
             </div>
             <ShowModal
@@ -331,6 +467,77 @@ const OrdersView = ({ id }) => {
                         : <p>No Shipping address available</p>
                 }
                 {/* </div> */}
+            </ShowModal>
+            <ShowModal
+                open={state.shippingProductModel}
+                close={false}
+                buttons={
+                    <>
+                        <Btn title="Close" onClick={() => {
+                            setState(prev => {
+                                return { ...prev, ["shippingProductModel"]: false, ["shippingProductDetails"]: {} }
+                            })
+                        }} className="btn-md btn-outline fw-bold" />
+                        <Btn title="Save" className="btn-theme btn-md fw-bold" onClick={handleShippingSubmit} />
+                    </>
+                }
+            >
+                <div className="p-3">
+                    <select
+                        className="form-select"
+                        name="deliveryAgent"
+                        value={state.deliveryAgentId}
+                        onChange={(e) =>
+                            handleStateChange("deliveryAgentId", Number(e.target.value))
+                        }
+                    >
+                        <option value="" defaultChecked>
+                            Select delivery agent
+                        </option>
+
+                        {state.deliveryAgent?.map((el, i) => (
+                            <option key={"agent" + i} value={el.id}>
+                                {el.name}
+                            </option>
+                        ))}
+                    </select>
+
+                    {/* Invoice PDF */}
+                    <div className="mb-3">
+                        <label htmlFor="invoicePdf" className="form-label fw-semibold">
+                            Invoice PDF
+                        </label>
+
+                        <input
+                            type="file"
+                            name="invoicePdf"
+                            id="invoicePdf"
+                            className="form-control"
+                            accept="application/pdf"
+                            onChange={(e) =>
+                                handleStateChange("invoicePdf", e.target.files[0])
+                            }
+                        />
+                    </div>
+
+                    {/* Transport Report */}
+                    <div className="mb-3">
+                        <label htmlFor="transportReport" className="form-label fw-semibold">
+                            Transport Report
+                        </label>
+
+                        <input
+                            type="file"
+                            name="transportReport"
+                            id="transportReport"
+                            className="form-control"
+                            onChange={(e) =>
+                                handleStateChange("transportReport", e.target.files[0])
+                            }
+                        />
+                    </div>
+
+                </div>
             </ShowModal>
         </>
     )

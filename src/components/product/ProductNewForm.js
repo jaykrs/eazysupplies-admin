@@ -79,9 +79,7 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
       const tagStr = (values.tags).toString();
       const supplierStr = (values.supplier).toString();
       const mfDate = values.mfDate? ConvertIntoIso8601(values.mfDate) : null;
-      const expDate = values.expDate? ConvertIntoIso8601(values.expDate) : null
-
-      console.log("ConvertIntoIso8601(values.mfDate)", ConvertIntoIso8601(values.mfDate));
+      const expDate = values.expDate? ConvertIntoIso8601(values.expDate) : null;
 
       if (updateId) {
         const res = await axios.put('/api/products', {
