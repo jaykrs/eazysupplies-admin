@@ -34,7 +34,9 @@ const OrdersView = ({ id }) => {
         deliveryAgent: [],
         invoicePdf: "",
         transportReport: "",
-        deliveryAgentId: 0
+        deliveryAgentId: 0,
+        deliveryModel: false,
+        deliveryFile: ""
     });
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [taxData, setTaxData] = useState();
@@ -199,7 +201,6 @@ const OrdersView = ({ id }) => {
         handleStateChange('shippingProductModel', true);
     }
     const handleShippingSubmit = async () => {
-        console.log('............deliveryAgent', state.deliveryAgentId, state.invoicePdf, state.transportReport);
         if (state.deliveryAgentId == 0 || state.invoicePdf == "" || state.transportReport == "") {
             alert("All fields are mandatory! ");
         } else {
@@ -225,7 +226,6 @@ const OrdersView = ({ id }) => {
                     }
                 );
                 if (reportRes.status === 200) {
-                    console.log('.......both upload success', invoicePdfRes?.data?.assetId, reportRes?.data?.assetId);
                     const invoiceAssetId = invoicePdfRes.data.assetId;
                     const reportAssetId = reportRes.data.assetId;
                     const updateShipping = await axios.put(
@@ -241,6 +241,8 @@ const OrdersView = ({ id }) => {
                     );
                     if (updateShipping.status === 200) {
                         alert("Shipping process started successfully!");
+                        handleStateChange('shippingProductModel', false);
+                        fetchProduct();
                     } else {
                         alert("Failed to upload transport report, please try again!");
                     }
@@ -250,7 +252,40 @@ const OrdersView = ({ id }) => {
             }
         }
     }
-    console.log("state.productItemDetails",state.deliveryAgentId, state.deliveryAgent, state.productItemDetails);
+
+    const handleDelivery = (id) => {
+        handleStateChange("deliveryModel", true);
+    }
+
+    const handleDeliverySubmit = async () => {
+        if (state.deliveryFile == "") {
+            alert("Please upload file to complete delivery!");
+        } else {
+            let formData = new FormData();
+            formData.append("file", state.deliveryFile);
+            const deliveredFile = await axios.post(
+                "/api/file?type=1",
+                formData,
+                {
+                    headers: { "Content-Type": "multipart/form-data" },
+                    withCredentials: true
+                }
+            );
+
+            if (deliveredFile.status == 200) {
+                const orders = await axios.put('/api/orders/filter?id=' + Number(state.productItemDetails?.id), {
+                    "status": "COMPLETED",
+                    "delivered": true,
+                    "deliveryAgentAssets": deliveredFile?.data?.assetId
+                }, { withCredentials: true });
+                if (orders.status == 200) {
+                    alert('Order: ' + state.productItemDetails?.id + " completed successfully!");
+                    handleStateChange("deliveryModel", false);
+                    fetchProduct();
+                }
+            }
+        }
+    }
 
     return (
         <>
@@ -309,6 +344,7 @@ const OrdersView = ({ id }) => {
                         {
                             Object.keys(state.productItemDetails).length > 0 &&
                             <div className="d-flex justify-content-end gap-3 pr-3">
+                                {state.productItemDetails?.approved && state.productItemDetails?.status.toUpperCase() === "SHIPPED" && state.productItemDetails?.shipping?.status.toUpperCase() === "SHIPPED" && <button type="button" onClick={() => handleDelivery(state.productItemDetails?.id)} className="btn btn-info">Delivery</button>}
                                 {state.productItemDetails?.approved && state.productItemDetails?.status.toUpperCase() === "PAID" && <button type="button" onClick={() => handleShipping(state.productItemDetails?.id)} className="btn btn-info">Shipping</button>}
                                 {state.productItemDetails?.payment?.status == "PENDING" && state.productItemDetails?.approved && <button type="button" onClick={() => handlePayment(state.productItemDetails?.id)} className="btn btn-info">Pay</button>}
 
@@ -325,7 +361,7 @@ const OrdersView = ({ id }) => {
                             const price = Number(el?.product?.price || 0);
 
                             const amtDetails = generateProductDiscount(el?.product, el.orderId) || {};
-
+                            const deliveryAgentFilter = state.deliveryAgent?.filter(el => el.id == Number(state.productItemDetails?.deliveryAgent));
                             const {
                                 discountPercentage = 0,
                                 discountAmount = 0,
@@ -363,8 +399,7 @@ const OrdersView = ({ id }) => {
                                                 {state.productItemDetails?.shipping?.status.toUpperCase()}
                                             </div>
                                             <div>
-                                                <strong>Delivery Agent:</strong>{" "}
-                                                {state.productItemDetails?.deliveryAgent ? state.productItemDetails?.deliveryAgent : ""}
+                                                <strong>Delivery Agent: {deliveryAgentFilter.length > 0 ? deliveryAgentFilter[0]?.name : "NA"}</strong>{" "}
                                             </div>
                                         </div>
 
@@ -475,7 +510,7 @@ const OrdersView = ({ id }) => {
                     <>
                         <Btn title="Close" onClick={() => {
                             setState(prev => {
-                                return { ...prev, ["shippingProductModel"]: false, ["shippingProductDetails"]: {} }
+                                return { ...prev, ["shippingProductModel"]: false, ["shippingProductDetails"]: "" }
                             })
                         }} className="btn-md btn-outline fw-bold" />
                         <Btn title="Save" className="btn-theme btn-md fw-bold" onClick={handleShippingSubmit} />
@@ -533,6 +568,39 @@ const OrdersView = ({ id }) => {
                             className="form-control"
                             onChange={(e) =>
                                 handleStateChange("transportReport", e.target.files[0])
+                            }
+                        />
+                    </div>
+
+                </div>
+            </ShowModal>
+            <ShowModal
+                open={state.deliveryModel}
+                close={false}
+                buttons={
+                    <>
+                        <Btn title="Close" onClick={() => {
+                            setState(prev => {
+                                return { ...prev, ["deliveryModel"]: false, ["deliveryFile"]: "" }
+                            })
+                        }} className="btn-md btn-outline fw-bold" />
+                        <Btn title="Save" className="btn-theme btn-md fw-bold" onClick={handleDeliverySubmit} />
+                    </>
+                }
+            >
+                <div className="p-3">
+                    <div className="mb-3">
+                        <label htmlFor="deliveryFile" className="form-label fw-semibold">
+                            Delivered file
+                        </label>
+
+                        <input
+                            type="file"
+                            name="deliveryFile"
+                            id="deliveryFile"
+                            className="form-control"
+                            onChange={(e) =>
+                                handleStateChange("deliveryFile", e.target.files[0])
                             }
                         />
                     </div>
