@@ -15,6 +15,8 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const id = Number(searchParams.get('productId'));
+    const catId = Number(searchParams.get('categoryId'));
+    const barId = Number(searchParams.get('brandId'));
     let res;
     if (id) {
       const res = await prisma.product.findUnique({
@@ -25,9 +27,13 @@ export async function GET(request) {
       })
       return NextResponse.json({ data: res ? res : [] }, { status: 200 });
     }
-    
-    const products = await prisma.product.findMany({
-      include: { category: true, brand: true },
+
+    const products = catId ? await prisma.product.findMany({
+      include: { category: true, brand: true }, where: { categoryId: catId }
+    }) : barId ? await prisma.product.findMany({
+      include: { category: true, brand: true }, where: { brandId: barId }
+    }) : await prisma.product.findMany({
+      include: { category: true, brand: true }
     });
     const tax = await prisma.tax.findMany();
 

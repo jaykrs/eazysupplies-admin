@@ -286,8 +286,6 @@ const OrdersView = ({ id }) => {
             }
         }
     }  
-
-    
     return (
         <>
             <div>
