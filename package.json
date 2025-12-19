@@ -40,7 +40,7 @@
     "node-mailjet": "^6.0.11",
     "path": "^0.12.7",
     "puppeteer": "^24.30.0",
-    "react": "^19.0.0",
+    "react": "^19.0.3",
     "react-apexcharts": "^1.7.0",
     "react-cookie": "^7.2.2",
     "react-date-range": "^1.4.0",
