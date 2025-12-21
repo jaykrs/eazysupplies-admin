@@ -16,7 +16,7 @@ const unauthorized = () =>
 // 🟢 GET — get all or by userId or id
 export async function GET(request) {
   try {
-    if (!authenticate(request)) return unauthorized();
+    if (! await authenticate(request)) return unauthorized();
 
     const { searchParams } = new URL(request.url);
     const id = Number(searchParams.get("id"));
