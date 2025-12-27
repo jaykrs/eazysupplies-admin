@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { parseAuthCookie, verifyJwt } from "../../utils/jwt";
-import { sendEmail, sendWhatsApp,createNotification } from "../../utils/emailUtils";
+import { sendEmail, sendWhatsApp, createNotification } from "../../utils/emailUtils";
 import { hashSync } from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
 
@@ -15,8 +15,8 @@ const MESSAGES = {
   USER_EXISTS: (email) => `User already exists with ${email}`,
   USER_CREATED: "User created successfully",
   SERVER_ERROR: "Internal Server Error",
-  USER_WELCOME_plainTextMessage : "Hi $userName \n\n Welcome to $brandName!\n\nWe're excited to partner with you on $brandName, your trusted B2B ecommerce platform for streamlining transactions, managing inventory, and connecting with suppliers. Here's a quick guide to get started:\n\n1. **Set Up Your Business Profile**: Go to your account settings to add company details, tax information, and payment methods.\n2. **Explore the Product Catalog**: Browse our extensive catalog of wholesale products and add items to your cart.\n3. **Manage Orders and Invoices**: Use the dashboard to place orders, track shipments, and access invoices.\n\nTo activate your account, click here: $platformUrl/api/auth/login?action=activateUser&email=$userEmail&otp=$otp\n\nIf you have any questions, our support team is here to help at support@$brandName.\n\nLet's grow your business together!\nThe $brandName Team",
-  USER_WELCOME_htmlMessage : "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Welcome Message</title>\n    <style>\n        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f9f9f9; padding: 20px; }\n        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }\n        h1 { color: #007bff; }\n        ul { padding-left: 20px; }\n        .footer { margin-top: 20px; font-size: 0.9em; color: #666; }\n    </style>\n</head>\n<body>\n    <div class=\"container\">\n  <h1>Hi $userName!</h1>  \n    <h1>Welcome to $brandName!</h1>\n        <p>We're excited to partner with you on $brandName, your trusted B2B ecommerce platform for streamlining transactions, managing inventory, and connecting with suppliers. Here's a quick guide to get started:</p>\n        <ol>\n            <li><strong>Set Up Your Business Profile</strong>: Go to your account settings to add company details, tax information, and payment methods.</li>\n            <li><strong>Explore the Product Catalog</strong>: Browse our extensive catalog of wholesale products and add items to your cart.</li>\n            <li><strong>Manage Orders and Invoices</strong>: Use the dashboard to place orders, track shipments, and access invoices.</li>\n        </ol>\n        <p>To activate your account, <a href=\"$platformUrl/api/auth/login?action=activateUser&email=$userEmail&otp=$otp\">click here</a>.</p>\n        <p>If you have any questions, our support team is here to help at <a href=\"mailto:support@$brandName\">support@$brandName</a>.</p>\n        <p>Let's grow your business together!</p>\n        <div class=\"footer\">The $brandName Team</div>\n    </div>\n</body>\n</html>",
+  USER_WELCOME_plainTextMessage: "Hi $userName \n\n Welcome to $brandName!\n\nWe're excited to partner with you on $brandName, your trusted B2B ecommerce platform for streamlining transactions, managing inventory, and connecting with suppliers. Here's a quick guide to get started:\n\n1. **Set Up Your Business Profile**: Go to your account settings to add company details, tax information, and payment methods.\n2. **Explore the Product Catalog**: Browse our extensive catalog of wholesale products and add items to your cart.\n3. **Manage Orders and Invoices**: Use the dashboard to place orders, track shipments, and access invoices.\n\nTo activate your account, click here: $platformUrl/api/auth/login?action=activateUser&email=$userEmail&otp=$otp\n\nIf you have any questions, our support team is here to help at support@$brandName.\n\nLet's grow your business together!\nThe $brandName Team",
+  USER_WELCOME_htmlMessage: "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Welcome Message</title>\n    <style>\n        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f9f9f9; padding: 20px; }\n        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }\n        h1 { color: #007bff; }\n        ul { padding-left: 20px; }\n        .footer { margin-top: 20px; font-size: 0.9em; color: #666; }\n    </style>\n</head>\n<body>\n    <div class=\"container\">\n  <h1>Hi $userName!</h1>  \n    <h1>Welcome to $brandName!</h1>\n        <p>We're excited to partner with you on $brandName, your trusted B2B ecommerce platform for streamlining transactions, managing inventory, and connecting with suppliers. Here's a quick guide to get started:</p>\n        <ol>\n            <li><strong>Set Up Your Business Profile</strong>: Go to your account settings to add company details, tax information, and payment methods.</li>\n            <li><strong>Explore the Product Catalog</strong>: Browse our extensive catalog of wholesale products and add items to your cart.</li>\n            <li><strong>Manage Orders and Invoices</strong>: Use the dashboard to place orders, track shipments, and access invoices.</li>\n        </ol>\n        <p>To activate your account, <a href=\"$platformUrl/api/auth/login?action=activateUser&email=$userEmail&otp=$otp\">click here</a>.</p>\n        <p>If you have any questions, our support team is here to help at <a href=\"mailto:support@$brandName\">support@$brandName</a>.</p>\n        <p>Let's grow your business together!</p>\n        <div class=\"footer\">The $brandName Team</div>\n    </div>\n</body>\n</html>",
 };
 
 /**
@@ -39,6 +39,20 @@ export async function GET(request) {
   if (!payload) {
     return NextResponse.json({ error: MESSAGES.UNAUTHORIZED }, { status: 401 });
   }
+  const { searchParams } = new URL(request.url);
+  const getOnlyProfile = Number(searchParams.get('getOnlyProfile'));
+
+  if (getOnlyProfile) {
+    const res = await prisma.user.findUnique({
+      where: { email: payload.email }
+    });
+
+    return NextResponse.json(
+      {  data: res},
+      { status: 200 }
+    );
+  }
+
   const userSelect = {
     id: true,
     name: true,
@@ -74,9 +88,6 @@ export async function GET(request) {
   );
 }
 
-/**
- * POST handler - creates a new user
- */
 export async function POST(request) {
   try {
     const body = await request.json();
@@ -94,9 +105,9 @@ export async function POST(request) {
 
     // Check if user already exists (matching all identifiers)
     let existingUser;
-   if(email) existingUser = await prisma.user.findUnique({ where: { email } }); 
-   if(gstn) existingUser = await prisma.user.findFirst({ where: { gstn } }); 
-   if(phone) existingUser = await prisma.user.findFirst({ where: { phone } });
+    if (email) existingUser = await prisma.user.findUnique({ where: { email } });
+    if (gstn) existingUser = await prisma.user.findFirst({ where: { gstn } });
+    if (phone) existingUser = await prisma.user.findFirst({ where: { phone } });
 
     if (existingUser) {
       return NextResponse.json(
@@ -128,7 +139,7 @@ export async function POST(request) {
         roleId: role.id,
       },
     });
-    if(newUser) {
+    if (newUser) {
       const emailsub = "Welcome easysupply.com";
       let userName = newUser.name;
       let userEmail = newUser.email;
@@ -137,10 +148,10 @@ export async function POST(request) {
       htmlmsg = htmlmsg.replaceAll("$userName", userName).replaceAll("$userEmail", userEmail).replaceAll("$otp", otp).replaceAll("$platformUrl", process.env.PLATFORM_URL).replaceAll("$brandName", process.env.BRAND_NAME);
       plainmsg = plainmsg.replaceAll("$userName", userName).replaceAll("$userEmail", userEmail).replaceAll("$otp", otp).replaceAll("$platformUrl", process.env.PLATFORM_URL).replaceAll("$brandName", process.env.BRAND_NAME);
       sendEmail(newUser.email, emailsub, htmlmsg);
-      sendWhatsApp(newUser.countryCode+newUser.phone, "text",plainmsg);
-      createNotification(emailsub,newUser.id.toString() ,plainmsg);
+      sendWhatsApp(newUser.countryCode + newUser.phone, "text", plainmsg);
+      createNotification(emailsub, newUser.id.toString(), plainmsg);
     }
-      
+
     return NextResponse.json(
       {
         message: MESSAGES.USER_CREATED,

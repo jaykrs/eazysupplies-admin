@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import { verifyAdmin } from "../utils/jwt";
+import { verifyAdmin,authenticate } from "../utils/jwt";
+import { MESSAGES } from "../utils/statusConstant";
 
 const prisma = new PrismaClient();
 // 📌 GET /api/orders?page=1&limit=10&sortBy=createdAt&order=desc&status=PENDING
@@ -52,9 +53,12 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { userId, items, shipping, payment, jsonData } = body;
-
-    if (!userId || !items?.length) {
+    const { items, shipping, payment, jsonData } = body;
+    const payload = await authenticate(request);
+      if (!payload) {
+        return NextResponse.json({ error: MESSAGES.UNAUTHORIZED }, { status: 401 });
+      }
+    if (!payload.userId || !items?.length) {
       return NextResponse.json(
         { error: "userId and at least one item are required" },
         { status: 400 }
@@ -62,17 +66,17 @@ export async function POST(request) {
     }
 
     // ✅ Check if user exists
-    const _user = await prisma.user.findUnique({ where: { id: userId } });
+    const _user = await prisma.user.findUnique({ where: { id: payload.userId } });
     if (!_user) {
       return NextResponse.json(
-        { error: `User with ID ${userId} does not exist` },
+        { error: `Invalid user` },
         { status: 404 }
       );
     }
 
     const order = await prisma.order.create({
       data: {
-        userId,
+        userId: payload.userId,
         jsonData,
         items: {
           create: items.map((item) => ({
