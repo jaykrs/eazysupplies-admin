@@ -2,9 +2,7 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { authenticate, verifyAdmin } from "../../utils/jwt";
 import { MESSAGES } from "../../utils/statusConstant";
-import { error } from "console";
-import { unauthorized } from "next/navigation";
-
+const prisma = new PrismaClient();
 export async function GET(request) {
     try {
         const payload = await authenticate(request);
