@@ -14,12 +14,8 @@ export async function GET(request) {
                 userId: payload?.userId,
             },
             include: {
-                user: true,
-                items: {
-                    include: {
-                        product: true, // 👈 this includes product details inside each item
-                    },
-                },
+               // user: true,
+                items: true,
                 shipping: true,
                 payment: true,
             },
