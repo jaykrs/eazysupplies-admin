@@ -18,6 +18,7 @@ export async function GET(request) {
                 items: true,
                 shipping: true,
                 payment: true,
+                items: { include: { product: true } },
             },
             orderBy: {
                 createdAt: 'desc',
