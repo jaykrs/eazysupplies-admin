@@ -35,6 +35,7 @@ export async function GET(request) {
                     if (product && !uniqueProductsMap.has(product.id)) {
                         uniqueProductsMap.set(product.id, product);
                     }
+                    item.productName= product.name;
                     delete item.product;
                 });
             }
