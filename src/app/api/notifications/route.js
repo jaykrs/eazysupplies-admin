@@ -46,6 +46,26 @@ export async function GET(request) {
   }
 }
 
+export async function PUT(request) {
+  const payload = await authenticate(request);
+  if (!payload) return unauthorized();
+  try {
+     const { searchParams } = new URL(request.url);
+    const id = Number(searchParams.get("id"));
+    if(!id){
+      return NextResponse.json({msg:"Method not allowed!"}, {status: 404});
+    }
+    let notification = await prisma.notification.findUnique({where: {id: Number(id)}});
+    if(!notification){
+      return NextResponse.json({msg:"Data not found!"}, {status: 404});
+    }
+    notification = await prisma.notification.update({ where: {id: Number(id)}, data: {readStatus : true} });
+    return NextResponse.json(notification, { status: 200 });
+  } catch (err) {
+    return handleError(err);
+  }
+}
+
 // POST – create new notification
 export async function POST(request) {
   if (!authenticate(request)) return unauthorized();
