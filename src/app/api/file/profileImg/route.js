@@ -7,6 +7,7 @@ import { authenticate, verifyAdmin, getUserId } from "../../utils/jwt";
 const prisma = new PrismaClient();
 
 export async function POST(request) {
+    console.log('......profile image upload started');
     const payload = await authenticate(request);
     if (!payload) return unauthorized();
     if (!payload.userId) {
