@@ -4,10 +4,10 @@ import path from "path";
 import { writeFile } from "fs/promises";
 import { PrismaClient } from "@prisma/client";
 import { authenticate, verifyAdmin, getUserId } from "../../utils/jwt";
+import { unauthorized } from "next/navigation";
 const prisma = new PrismaClient();
 
 export async function POST(request) {
-    console.log('......profile image upload started');
     const payload = await authenticate(request);
     if (!payload) return unauthorized();
     if (!payload.userId) {
@@ -62,3 +62,12 @@ export async function POST(request) {
         return NextResponse.json({ error: "Upload failed" }, { status: 500 });
     }
 }
+
+export async function PUT(request) {
+    const payload = await authenticate(request);
+    if (!payload) return unauthorized();
+    if (!payload.userId) return NextResponse.json({ msg: "Invalid user" });
+    const user = await prisma.user.update({ where: { id: payload.userId }, data: { profileImagepath: null } });
+    return NextResponse.json({ msg: "Profile updated successfully!" });
+}
+
