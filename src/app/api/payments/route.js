@@ -22,6 +22,7 @@ export async function GET(request) {
     const id = Number(searchParams.get("paymentId"));
     const userId = Number(searchParams.get("userId"));
     const orderId = Number(searchParams.get("orderId"));
+    const withCookies = searchParams.get('withCookies');
 
     let result;
 
@@ -38,6 +39,11 @@ export async function GET(request) {
     } else if (orderId) {
       result = await prisma.payment.findUnique({
         where: { orderId },
+        include: { user: true, order: true },
+      });
+    } else if (withCookies) {
+      result = await prisma.payment.findMany({
+        where: { userId: isUser.userId },
         include: { user: true, order: true },
       });
     } else {
@@ -70,13 +76,13 @@ export async function PUT(request) {
     const userId = Number(searchParams.get("userId"));
     const paymentStatus = searchParams.get("paymentStatus");
 
-  //  const validStatuses = ["offline", "cod", "online"];
-const validStatuses = ["ONLINE", "ADV_PAYMENT", "CREDIT_PAYMENT"];
+    //  const validStatuses = ["offline", "cod", "online"];
+    const validStatuses = ["ONLINE", "ADV_PAYMENT", "CREDIT_PAYMENT"];
     // user updating their payment status
     if (
       id &&
       userId &&
-     await authenticate(request) &&
+      await authenticate(request) &&
       validStatuses.includes(paymentStatus)
     ) {
       const updated = await prisma.payment.update({
@@ -97,7 +103,7 @@ const validStatuses = ["ONLINE", "ADV_PAYMENT", "CREDIT_PAYMENT"];
           amount: Number(body.amount),
           method: body.method,
           status: body.status,
-          transectionid: body.transactionid? body.transectionid : ""
+          transectionid: body.transactionid ? body.transectionid : ""
         },
       });
       return NextResponse.json({ data: updated }, { status: 200 });
