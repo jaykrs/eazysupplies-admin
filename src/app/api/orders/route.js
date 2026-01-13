@@ -99,7 +99,7 @@ export async function POST(request) {
 
     return NextResponse.json(order, { status: 201 });
   } catch (error) {
-    console.error("POST /orders error:", error);
+    console.log("POST /orders error:", error);
     return NextResponse.json({ error: "Failed to create order" }, { status: 500 });
   }
 }
