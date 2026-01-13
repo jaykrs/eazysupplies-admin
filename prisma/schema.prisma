@@ -258,6 +258,7 @@ model Address {
   zipcode   String
   city      String
   address   String
+  state      String? @default("NA")
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime?     @updatedAt @map("updated_at")
 }
