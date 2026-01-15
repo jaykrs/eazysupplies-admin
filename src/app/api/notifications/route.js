@@ -1,3 +1,29 @@
+/**
+ * Notifications API Route Handler
+ * 
+ * Provides RESTful API endpoints for notification management with authentication.
+ * Handles CRUD operations for user notifications including marking as read/unread.
+ * 
+ * Key Features:
+ * - JWT authentication for secure access
+ * - Support for user-specific and broadcast notifications
+ * - Case-insensitive field mapping (uppercase frontend ↔ lowercase database)
+ * - Comprehensive error handling with environment-specific details
+ * - Real-time notification status updates
+ * - Backward compatibility with multiple field naming conventions
+ * 
+ * API Endpoints:
+ * - GET /api/notifications - Fetch user notifications, optional mark-as-read by ID
+ * - POST /api/notifications - Create new notification
+ * - PUT /api/notifications - Mark notification as read
+ * 
+ * Authentication: JWT token required for all endpoints
+ * Data Mapping: Automatically maps between frontend (PascalCase) and backend (camelCase)
+ * 
+ * @module NotificationsAPI
+ * @author Simran Samir
+ * @version 1.0.0
+ */
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { authenticate } from "../utils/jwt";
