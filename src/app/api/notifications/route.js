@@ -1,79 +1,176 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import { authenticate } from "../utils/jwt"; // adjust import path if needed
-import { MESSAGES } from "../utils/statusConstant";       // adjust import path if needed
+import { authenticate } from "../utils/jwt";
+import { MESSAGES } from "../utils/statusConstant";
 
 const prisma = new PrismaClient();
 
 const handleError = (error) => {
-  console.error(error);
-  return NextResponse.json({ error: MESSAGES.SERVER_ERROR }, { status: 500 });
+  console.error("Server Error:", error);
+  return NextResponse.json({ 
+    error: MESSAGES.SERVER_ERROR,
+    details: process.env.NODE_ENV === 'development' ? error.message : undefined 
+  }, { status: 500 });
 };
 
 const unauthorized = () =>
-  NextResponse.json({ error: MESSAGES.UNAUTHORIZED }, { status: 400 });
+  NextResponse.json({ error: MESSAGES.UNAUTHORIZED }, { status: 401 });
 
-// GET – fetch all notifications
+// GET – fetch notifications
 export async function GET(request) {
-  const payload = await authenticate(request);
-  if (!payload) return unauthorized();
-  const { searchParams } = new URL(request.url);
-  // const userId = Number(searchParams.get("userId"));
-  const id = Number(searchParams.get("id"));
-  let notifications;
   try {
+    const payload = await authenticate(request);
+    if (!payload) return unauthorized();
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    console.log("GET /api/notifications - User ID:", payload.userId);
+
+    // If ID is provided, mark as read
     if (id) {
-      notifications = await prisma.notification.update({
+      const notification = await prisma.notification.update({
         where: { id: Number(id) },
         data: { readStatus: true }
-      })
-    }
-    else if (payload?.userId) {
-      notifications = await prisma.notification.findMany({
-        where: {
-          recepient: {
-            contains: payload?.userId.toString(),
-          },
-        },
-      }, {
-        orderBy:[ { createdAt: "desc" }, {id: "desc"}],
+      });
+      
+      return NextResponse.json({ 
+        success: true,
+        data: notification 
       });
     }
-    return NextResponse.json({ notifications });
-  } catch (err) {
-    console.log('err', err);
-    return handleError(err);
-  }
-}
 
-export async function PUT(request) {
-  const payload = await authenticate(request);
-  if (!payload) return unauthorized();
-  try {
-     const { searchParams } = new URL(request.url);
-    const id = Number(searchParams.get("id"));
-    if(!id){
-      return NextResponse.json({msg:"Method not allowed!"}, {status: 404});
-    }
-    let notification = await prisma.notification.findUnique({where: {id: Number(id)}});
-    if(!notification){
-      return NextResponse.json({msg:"Data not found!"}, {status: 404});
-    }
-    notification = await prisma.notification.update({ where: {id: Number(id)}, data: {readStatus : true} });
-    return NextResponse.json(notification, { status: 200 });
+    // Fetch notifications for the user
+    const notifications = await prisma.notification.findMany({
+      where: {
+        OR: [
+          { recepient: { contains: payload.userId?.toString() || "" } },
+          { recepient: "all" }
+        ]
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    console.log(`Found ${notifications.length} notifications`);
+
+    // Transform data to include uppercase aliases for frontend
+    const transformedNotifications = notifications.map(notification => ({
+      ...notification,
+      // Add uppercase aliases for frontend compatibility
+      Name: notification.name,
+      Type: notification.type,
+      Recipient: notification.recepient,
+      Remarks: notification.remarks,
+      CreatedOn: notification.createdAt,
+      UpdatedOn: notification.updatedAt
+    }));
+
+    return NextResponse.json({ 
+      notifications: transformedNotifications
+    });
+    
   } catch (err) {
+    console.error("GET Error:", err);
     return handleError(err);
   }
 }
 
 // POST – create new notification
 export async function POST(request) {
-  if (!authenticate(request)) return unauthorized();
   try {
+    const payload = await authenticate(request);
+    if (!payload) return unauthorized();
+
     const body = await request.json();
-    const notification = await prisma.notification.create({ data: body });
-    return NextResponse.json(notification, { status: 201 });
+    console.log("Received POST body:", body);
+    
+    // Map incoming data (accept both uppercase and lowercase)
+    const notificationData = {
+      // Map from uppercase (frontend) to lowercase (database)
+      name: body.Name || body.name || "Notification",
+      type: body.Type || body.type || "General",
+      recepient: body.Recipient || body.recipient || body.recepient || "all",
+      remarks: body.Remarks || body.remarks || "",
+      readStatus: body.readStatus || false,
+      sentStatus: body.sentStatus || false,
+      data: body.data || null,
+      attachment: body.attachment || null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    console.log("Mapped data for database:", notificationData);
+
+    const notification = await prisma.notification.create({
+      data: notificationData
+    });
+
+    // Return transformed response with uppercase aliases
+    const responseData = {
+      ...notification,
+      // Add uppercase aliases for frontend
+      Name: notification.name,
+      Type: notification.type,
+      Recipient: notification.recepient,
+      Remarks: notification.remarks,
+      CreatedOn: notification.createdAt,
+      UpdatedOn: notification.updatedAt
+    };
+
+    return NextResponse.json({ 
+      success: true, 
+      data: responseData,
+      message: "Notification created successfully" 
+    }, { status: 201 });
+    
   } catch (err) {
+    console.error("POST Error:", err);
+    return handleError(err);
+  }
+}
+
+// PUT – mark as read
+export async function PUT(request) {
+  try {
+    const payload = await authenticate(request);
+    if (!payload) return unauthorized();
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, message: "Notification ID is required" }, 
+        { status: 400 }
+      );
+    }
+
+    const updatedNotification = await prisma.notification.update({
+      where: { id: Number(id) },
+      data: { 
+        readStatus: true,
+        updatedAt: new Date()
+      }
+    });
+
+    // Transform response
+    const responseData = {
+      ...updatedNotification,
+      Name: updatedNotification.name,
+      Type: updatedNotification.type,
+      Recipient: updatedNotification.recepient,
+      Remarks: updatedNotification.remarks,
+      CreatedOn: updatedNotification.createdAt,
+      UpdatedOn: updatedNotification.updatedAt
+    };
+
+    return NextResponse.json({ 
+      success: true, 
+      data: responseData 
+    }, { status: 200 });
+    
+  } catch (err) {
+    console.error("PUT Error:", err);
     return handleError(err);
   }
 }
