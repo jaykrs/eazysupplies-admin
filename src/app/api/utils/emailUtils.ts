@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import Mailjet from 'node-mailjet';
-
+ import axios from 'axios';
 const prisma = new PrismaClient();
 
 export async function sendEmail(recepient: string, subject: string, body: string) {
@@ -14,7 +14,7 @@ const from = process.env.MAIL_FROM;
     const result = await mailjet.post('send', { version: 'v3.1' }).request({
       Messages: [
         {
-          From: { Email: from, Name: 'Jayant admin' },
+          From: { Email: from, Name: 'Earthling Support' },
           To: [{ Email: recepient }],
           Subject: subject,
           TextPart: body || '',
@@ -62,31 +62,61 @@ export async function createNotification( name : string, recepient : string, rem
 }
 // utils/sendMessage.ts
 
-export async function sendWhatsApp(receiver: string, mtype: string, text: string) {
-  const apiKey = "28784ec98d3a2be2b31b0f08da853c35718c"; // ideally move this to env var
-  const baseUrl = "https://demo.synbus.in/api/send-message";
+export async function sendWhatsAppOTP(receivername: string,receiverphone: string, otp: string) {
 
-  const url = new URL(baseUrl);
-  url.searchParams.append("apikey", apiKey);
-  url.searchParams.append("receiver", receiver);
-  url.searchParams.append("mtype", mtype);
-  url.searchParams.append("text", text);
-
-  try {
-    const response = await fetch(url.toString(), {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-      cache: "no-store", // optional to prevent caching
-    });
-
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
+let data = JSON.stringify({
+  "recipient": {
+    "name": receivername,
+    "to": receiverphone
+  },
+  "whatsapp": {
+    "type": "template",
+    "template": {
+      "name": "otp",
+      "components": [
+        {
+          "type": "body",
+          "parameters": [
+            {
+              "type": "text",
+              "text": '"'+otp+'"'
+            }
+          ]
+        },
+        {
+          "type": "button",
+          "sub_type": "url",
+          "index": "0",
+          "parameters": [
+            {
+              "type": "text",
+              "text": '"'+otp+'"'
+            }
+          ]
+        }
+      ]
     }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error sending message:", error);
-    throw error;
   }
+});
+console.log(data);
+let config = {
+  method: 'post',
+  maxBodyLength: Infinity,
+  url: process.env.META_URL,
+  headers: { 
+    'x-api-key': process.env.META_X_API_KEY, 
+    'x-api-secret': process.env.META_X_API_SECRET, 
+    'Content-Type': 'application/json'
+  },
+  data : data
+};
+console.log(config);
+axios.request(config)
+.then((response) => {
+  console.log(response);
+  console.log(JSON.stringify(response.data));
+})
+.catch((error) => {
+  console.log(error);
+});
 }

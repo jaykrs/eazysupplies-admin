@@ -23,7 +23,7 @@ model User {
   profileImagepath String?
   lastLoginDt    DateTime?
   countryCode String    @default("+91")
-  phone     String
+  phone     String    @unique
   role      Role      @relation(fields: [roleId], references: [id])
   orders    Order[]
   cart      Cart?

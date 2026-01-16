@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { compare } from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
-
+import { sendWhatsAppOTP } from "../../utils/emailUtils";
+ 
 const prisma = new PrismaClient();
 
 /**
@@ -13,6 +14,9 @@ const MESSAGES = {
   USER_NOT_FOUND: "User does not exist",
   USER_INACTIVE: "User is not active",
   INVALID_PASSWORD: "Incorrect password",
+  MISSING_CRED:"Password or OTP Required",
+  INVALID_OTP: "Incorrect OTP",
+  GENERATE_OTP: "OTP SENT",
   LOGIN_SUCCESS: "Login successful",
   SERVER_ERROR: "Internal server error",
   USER_ACTIVATED: "User Activated",
@@ -27,10 +31,10 @@ const MESSAGES = {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { email, password, gstn, phone } = body;
+    const { email, password, gstn, phone, otp } = body;
     let flag = false;
     // Validate input
-    if (!password || (!email && !phone && !gstn)) {
+    if ((!password && !otp) || (!email && !phone && !gstn)) {
   return NextResponse.json(
     { error: MESSAGES.REQUIRED_FIELDS },
     { status: 400 }
@@ -56,11 +60,13 @@ if (!user) {
       return NextResponse.json({ error: MESSAGES.USER_INACTIVE }, { status: 401 });
     }
 
+    if(!password && !otp)
+      return NextResponse.json({ error: MESSAGES.MISSING_CRED }, { status: 401 });
     // Validate password
-    const isPasswordValid = await compare(password, user.password);
-    if (!isPasswordValid) {
+    const isloginValid = password ? await compare(password, user.password) : otp && otp == user.otp;
+    if (!isloginValid) {
       return NextResponse.json({ error: MESSAGES.INVALID_PASSWORD }, { status: 401 });
-    }
+    } 
 
     // Generate JWT
     const token = jwt.sign(
@@ -133,6 +139,25 @@ export async function GET(request) {
       return NextResponse.json({
         message: MESSAGES.FORGOT_PASSWORD_SENT,
         email: user.email,
+      });
+    }
+    if (action === "generateotp") {
+      const phone = searchParams.get("phone");
+      if (!phone) {
+        return NextResponse.json({ error: "phone is required" }, { status: 400 });
+      }
+
+      const user = await prisma.user.findUnique({ where: { phone } });
+      if (!user) {
+        return NextResponse.json({ error: MESSAGES.USER_NOT_FOUND }, { status: 404 });
+      }
+      // Generate a temporary token (simulate)
+     await sendWhatsAppOTP(user.name, user.countryCode+user.phone, user.otp);
+      // Here you would normally send email with token otp
+      // For now, just return token in response
+      return NextResponse.json({
+        message: MESSAGES.GENERATE_OTP,
+        phone: user.phone,
       });
     }
     //Requires userId as query param: /api/user?action=activateUser&email=test@test.com&otp=134d
