@@ -147,7 +147,7 @@ export async function POST(request) {
       let plainmsg = MESSAGES.USER_WELCOME_plainTextMessage;
       htmlmsg = htmlmsg.replaceAll("$userName", userName).replaceAll("$userEmail", userEmail).replaceAll("$otp", otp).replaceAll("$platformUrl", process.env.PLATFORM_URL).replaceAll("$brandName", process.env.BRAND_NAME);
       plainmsg = plainmsg.replaceAll("$userName", userName).replaceAll("$userEmail", userEmail).replaceAll("$otp", otp).replaceAll("$platformUrl", process.env.PLATFORM_URL).replaceAll("$brandName", process.env.BRAND_NAME);
-      sendEmail(newUser.email, emailsub, htmlmsg);
+      await sendEmail(newUser.email, emailsub, htmlmsg);
       sendWhatsApp(newUser.countryCode + newUser.phone, "text", plainmsg);
       createNotification(emailsub, newUser.id.toString(), plainmsg);
     }

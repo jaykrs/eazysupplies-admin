@@ -39,9 +39,9 @@ const from = process.env.MAIL_FROM;
         }
       ]
     });
-    console.error(result);
+    console.log(result);
 } catch (err) {
-    console.error(err);
+    console.log(err);
 }
 }
 
