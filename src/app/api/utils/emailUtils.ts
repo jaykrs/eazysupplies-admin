@@ -172,7 +172,7 @@ export function generateOrderSummaryHTML(order: PrismaOrder, userName : string):
     <div style="max-width:420px;font-family:Arial,Helvetica,sans-serif;border:1px solid #e5e7eb;border-radius:8px;padding:14px;background:#ffffff">
 
       <h3 style="margin:0 0 10px;font-size:16px;color:#111827">
-        🧾Thanks ${userName} here is your Earthling Order Summary
+        🧾Thanks ${userName} ! <br/> Here is your Earthling Order Summary
       </h3>
 
       <p style="margin:0 0 8px;font-size:13px;color:#374151">

@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import { verifyAdmin,authenticate } from "../utils/jwt";
 import { MESSAGES } from "../utils/statusConstant";
 import { generateOrderSummaryHTML, sendEmail } from "../utils/emailUtils";
+import { createNotification } from "../utils/emailUtils";
 
 const prisma = new PrismaClient();
 // 📌 GET /api/orders?page=1&limit=10&sortBy=createdAt&order=desc&status=PENDING
