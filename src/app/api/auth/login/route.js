@@ -70,7 +70,7 @@ if (!user) {
 
     // Generate JWT
     const token = jwt.sign(
-      { userId: user.id, email: user.email },
+      { userId: user.id, email: user.email , name: user.name},
       process.env.JWT_SECRET || "default_secret", // fallback in dev
       { expiresIn: parseInt(process.env.JWT_EXPIRES_IN || "86400", 10) }
     );

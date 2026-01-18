@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { verifyAdmin,authenticate } from "../utils/jwt";
 import { MESSAGES } from "../utils/statusConstant";
+import { generateOrderSummaryHTML, sendEmail } from "../utils/emailUtils";
 
 const prisma = new PrismaClient();
 // 📌 GET /api/orders?page=1&limit=10&sortBy=createdAt&order=desc&status=PENDING
@@ -96,7 +97,10 @@ export async function POST(request) {
         payment: true,
       },
     });
-
+    const orderhtml = generateOrderSummaryHTML(order, payload.name);
+    await sendEmail(payload.email, "Order Created with "+ order.id, orderhtml);
+    await createNotification("Order Created with "+ order.id, payload.userId.toString(), orderhtml);
+    console.log(orderhtml);
     return NextResponse.json(order, { status: 201 });
   } catch (error) {
     console.log("POST /orders error:", error);
@@ -194,15 +198,18 @@ export async function PUT(request) {
 
         let result = await prisma.order.update({ where: { id }, data: { status, approved } })
         const notification = await prisma.notification.create({ data: {
-          name:'Order approved',
+          name:'Order ' + id + ' approved',
           type: "notification",
-          remarks: "Order no " + id + " approved by Admin",
+          remarks: "Order Number " + id + " approved by Admin, Please proceed for payment",
           recepient: result?.userId.toString()
         } });
         return NextResponse.json(result);
         // return NextResponse.json({ offer, Products, filterProduct });
       }
-
+    const orderhtml = generateOrderSummaryHTML(result, result?.user?.name);
+    await sendEmail(payload.email, "Order Created with "+ result.id, orderhtml);
+  //  await createNotification("Order Created with "+ order.id, payload.userId.toString(), orderhtml);
+    console.log(orderhtml);
       return NextResponse.json('updated');
     }
   } catch (Error) {

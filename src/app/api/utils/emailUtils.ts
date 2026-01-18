@@ -1,7 +1,24 @@
-import { PrismaClient } from '@prisma/client';
+import { Order, PrismaClient } from '@prisma/client';
 import Mailjet from 'node-mailjet';
  import axios from 'axios';
 const prisma = new PrismaClient();
+
+type PrismaOrder = {
+  id: number;
+  status: string;
+  items: {
+    quantity: number;
+    price: number;
+    product: {
+      name: string;
+    };
+  }[];
+  payment?: {
+    mode?: string;
+    status?: string;
+  } | null;
+};
+
 
 export async function sendEmail(recepient: string, subject: string, body: string) {
 const apiKey = process.env.MAILJET_API_KEY;
@@ -26,6 +43,10 @@ const from = process.env.MAIL_FROM;
 } catch (err) {
     console.error(err);
 }
+}
+
+export function sendWhatsApp(recepient: string, subject: string, body: string) {
+
 }
 
 export function sendSms(recepient: string, subject: string, body: string) {
@@ -120,3 +141,68 @@ axios.request(config)
   console.log(error);
 });
 }
+
+
+
+export function generateOrderSummaryHTML(order: PrismaOrder, userName : string): string {
+  const itemsHtml = order.items
+    .map((item) => {
+      const lineTotal = item.price * item.quantity;
+
+      return `
+        <tr>
+          <td style="padding:4px 0;color:#374151">
+            ${item.product.name}
+            <span style="color:#6b7280">× ${item.quantity}</span>
+          </td>
+          <td align="right" style="padding:4px 0;color:#374151">
+            ₹${lineTotal.toFixed(2)}
+          </td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  const totalAmount = order.items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+
+  return `
+    <div style="max-width:420px;font-family:Arial,Helvetica,sans-serif;border:1px solid #e5e7eb;border-radius:8px;padding:14px;background:#ffffff">
+
+      <h3 style="margin:0 0 10px;font-size:16px;color:#111827">
+        🧾Thanks ${userName} here is your Earthling Order Summary
+      </h3>
+
+      <p style="margin:0 0 8px;font-size:13px;color:#374151">
+        Order ID: <strong>#${order.id}</strong>
+      </p>
+      
+      <div style="border-top:1px solid #e5e7eb;margin:10px 0"></div>
+
+      <table width="100%" cellpadding="0" cellspacing="0" style="font-size:13px">
+        ${itemsHtml}
+      </table>
+
+      <div style="border-top:1px dashed #e5e7eb;margin:10px 0"></div>
+
+      <table width="100%" cellpadding="0" cellspacing="0" style="font-size:14px">
+        <tr>
+          <td style="color:#111827"><strong>Total</strong></td>
+          <td align="right" style="color:#111827">
+            <strong>₹${totalAmount.toFixed(2)}</strong>
+          </td>
+        </tr>
+      </table>
+
+      <p style="margin:12px 0 0;font-size:12px;color:#6b7280">
+        Order Status: ${order.status}<br />
+        Payment: ${order.payment?.mode || "—"} (${order.payment?.status || "—"})
+      </p>
+
+    </div>
+  `;
+}
+
+
