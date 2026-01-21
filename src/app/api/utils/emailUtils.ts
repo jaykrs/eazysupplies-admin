@@ -1,6 +1,6 @@
 import { Order, PrismaClient } from '@prisma/client';
 import Mailjet from 'node-mailjet';
- import axios from 'axios';
+import axios from 'axios';
 const prisma = new PrismaClient();
 
 type PrismaOrder = {
@@ -21,9 +21,9 @@ type PrismaOrder = {
 
 
 export async function sendEmail(recepient: string, subject: string, body: string) {
-const apiKey = process.env.MAILJET_API_KEY;
-const apiSecret = process.env.MAILJET_API_SECRET;
-const from = process.env.MAIL_FROM;
+  const apiKey = process.env.MAILJET_API_KEY;
+  const apiSecret = process.env.MAILJET_API_SECRET;
+  const from = process.env.MAIL_FROM;
 
   try {
     const mailjet = Mailjet.apiConnect(apiKey, apiSecret);
@@ -40,9 +40,9 @@ const from = process.env.MAIL_FROM;
       ]
     });
     console.log(result);
-} catch (err) {
+  } catch (err) {
     console.log(err);
-}
+  }
 }
 
 export function sendWhatsApp(recepient: string, subject: string, body: string) {
@@ -60,8 +60,8 @@ export function sendSms(recepient: string, subject: string, body: string) {
  * @param {string} [params.remarks] - Optional remarks or message.
  * @returns {Promise<Object>} Created notification record.
  */
-export async function createNotification( name : string, recepient : string, remarks = "" ): Promise<object> {
-  console.log(name , recepient , remarks);
+export async function createNotification(name: string, recepient: string, remarks = ""): Promise<object> {
+  console.log(name, recepient, remarks);
   try {
     if (!name || !recepient) {
       throw new Error("Both 'name' and 'recepient' are required.");
@@ -83,68 +83,189 @@ export async function createNotification( name : string, recepient : string, rem
 }
 // utils/sendMessage.ts
 
-export async function sendWhatsAppOTP(receivername: string,receiverphone: string, otp: string) {
+export async function sendWhatsAppOTP(receivername: string, receiverphone: string, otp: string) {
 
-let data = JSON.stringify({
-  "recipient": {
-    "name": receivername,
-    "to": receiverphone
-  },
-  "whatsapp": {
-    "type": "template",
-    "template": {
-      "name": "otp",
-      "components": [
-        {
-          "type": "body",
-          "parameters": [
-            {
-              "type": "text",
-              "text": '"'+otp+'"'
-            }
-          ]
-        },
-        {
-          "type": "button",
-          "sub_type": "url",
-          "index": "0",
-          "parameters": [
-            {
-              "type": "text",
-              "text": '"'+otp+'"'
-            }
-          ]
-        }
-      ]
+  let data = JSON.stringify({
+    "recipient": {
+      "name": receivername,
+      "to": receiverphone
+    },
+    "whatsapp": {
+      "type": "template",
+      "template": {
+        "name": "otp",
+        "components": [
+          {
+            "type": "body",
+            "parameters": [
+              {
+                "type": "text",
+                "text": '"' + otp + '"'
+              }
+            ]
+          },
+          {
+            "type": "button",
+            "sub_type": "url",
+            "index": "0",
+            "parameters": [
+              {
+                "type": "text",
+                "text": '"' + otp + '"'
+              }
+            ]
+          }
+        ]
+      }
     }
-  }
-});
-console.log(data);
-let config = {
-  method: 'post',
-  maxBodyLength: Infinity,
-  url: process.env.META_URL,
-  headers: { 
-    'x-api-key': process.env.META_X_API_KEY, 
-    'x-api-secret': process.env.META_X_API_SECRET, 
-    'Content-Type': 'application/json'
-  },
-  data : data
-};
-console.log(config);
-axios.request(config)
-.then((response) => {
-  console.log(response);
-  console.log(JSON.stringify(response.data));
-})
-.catch((error) => {
-  console.log(error);
-});
+  });
+  console.log(data);
+  let config = {
+    method: 'post',
+    maxBodyLength: Infinity,
+    url: process.env.META_URL,
+    headers: {
+      'x-api-key': process.env.META_X_API_KEY,
+      'x-api-secret': process.env.META_X_API_SECRET,
+      'Content-Type': 'application/json'
+    },
+    data: data
+  };
+  console.log(config);
+  axios.request(config)
+    .then((response) => {
+      console.log(response);
+      console.log(JSON.stringify(response.data));
+    })
+    .catch((error) => {
+      console.log(error);
+    });
 }
 
+export async function sendWhatsAppUserReg(receivername: string, receiverphone: string, receiveremail: string, receivergst: string) {
+  var axios = require('axios');
+  var supportemail = process.env.MAIL_FROM;
+  var data = JSON.stringify({
+    "recipient": {
+      "name": receivername,
+      "to": receiverphone
+    },
+    "whatsapp": {
+      "type": "template",
+      "template": {
+        "name": "reg_confirm_cpy_2",
+        "components": [
+          {
+            "type": "body",
+            "parameters": [
+              {
+                "type": "text",
+                "text": '"' + receivername + '"'
+              },
+              {
+                "type": "text",
+                "text": '"' + receiveremail + '"' + '" OR "' + '"' + receivergst + '"'
+              },
+              {
+                "type": "text",
+                "text": '"' + receiveremail + '"'
+              },
+              {
+                "type": "text",
+                "text": "Earthling Consumer Products Private"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  });
 
+  var config = {
+    method: 'post',
+    url: process.env.META_URL,
+    headers: {
+      'x-api-key': process.env.META_X_API_KEY,
+      'x-api-secret': process.env.META_X_API_SECRET,
+      'Content-Type': 'application/json'
+    },
+    data: data
+  };
 
-export function generateOrderSummaryHTML(order: PrismaOrder, userName : string): string {
+  axios(config)
+    .then(function (response) {
+      console.log(JSON.stringify(response.data));
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+
+}
+
+export async function sendWhatsAppOrderCreate(receivername: string, receiverphone: string, orderid: string, productlist: string, productsummery : string) {
+  var axios = require('axios');
+  var data = JSON.stringify({
+    "recipient": {
+      "name": receivername,
+      "to": receiverphone
+    },
+    "whatsapp": {
+      "type": "template",
+      "template": {
+        "name": "order_confirmation_1",
+        "components": [
+          {
+            "type": "body",
+            "parameters": [
+              {
+                "type": "text",
+                "text": '"' + receivername + '"'
+              },
+              {
+                "type": "text",
+                "text": '"' + "#" + '"'+'"' + orderid + '"'
+              },
+              {
+                "type": "text",
+                "text": '"' + productlist + '"'
+              },
+              {
+                "type": "text",
+                "text": '"' + productsummery + '"'
+              },
+              {
+                "type": "text",
+                "text": "Earthling Consumer Products Private"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  });
+
+  var config = {
+    method: 'post',
+    url: process.env.META_URL,
+    headers: {
+      'x-api-key': process.env.META_X_API_KEY,
+      'x-api-secret': process.env.META_X_API_SECRET,
+      'Content-Type': 'application/json',
+    },
+    data: data
+  };
+
+  axios(config)
+    .then(function (response) {
+      console.log(JSON.stringify(response.data));
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+
+}
+
+export function generateOrderSummaryHTML(order: PrismaOrder, userName: string): string {
   const itemsHtml = order.items
     .map((item) => {
       const lineTotal = item.price * item.quantity;

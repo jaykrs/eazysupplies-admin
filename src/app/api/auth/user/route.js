@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { parseAuthCookie, verifyJwt } from "../../utils/jwt";
-import { sendEmail, sendWhatsApp, createNotification } from "../../utils/emailUtils";
+import { sendEmail, sendWhatsApp, createNotification,sendWhatsAppUserReg } from "../../utils/emailUtils";
 import { hashSync } from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
 
@@ -148,6 +148,7 @@ export async function POST(request) {
       htmlmsg = htmlmsg.replaceAll("$userName", userName).replaceAll("$userEmail", userEmail).replaceAll("$otp", otp).replaceAll("$platformUrl", process.env.PLATFORM_URL).replaceAll("$brandName", process.env.BRAND_NAME);
       plainmsg = plainmsg.replaceAll("$userName", userName).replaceAll("$userEmail", userEmail).replaceAll("$otp", otp).replaceAll("$platformUrl", process.env.PLATFORM_URL).replaceAll("$brandName", process.env.BRAND_NAME);
       await sendEmail(newUser.email, emailsub, htmlmsg);
+      await sendWhatsAppUserReg(userName,newUser.countryCode + newUser.phone,userEmail,newUser.gstn );
       sendWhatsApp(newUser.countryCode + newUser.phone, "text", plainmsg);
       createNotification(emailsub, newUser.id.toString(), plainmsg);
     }
