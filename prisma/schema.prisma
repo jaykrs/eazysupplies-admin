@@ -317,3 +317,10 @@ model offers {
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime?     @updatedAt @map("updated_at")
 }
+
+model payment_txn_counter {
+  id         BigInt   @id @default(autoincrement())
+  created_at DateTime @default(now())
+
+  @@map("payment_txn_counter")
+}
