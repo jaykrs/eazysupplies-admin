@@ -108,7 +108,7 @@ const itemsText = order.items
 
     const orderhtml = generateOrderSummaryHTML(order, payload.name);
     await sendEmail(payload.email, "Order Created with "+ order.id, orderhtml);
-    await sendWhatsAppOrderCreate (order?.user?.name, order?.user?.countryCode + order?.user?.phone, order.id, "Status : Created", itemsHtml);
+    await sendWhatsAppOrderCreate (order?.user?.name, order?.user?.countryCode + order?.user?.phone, order.id, "Status : Created", itemsText);
     await createNotification("Order Created with "+ order.id, payload.userId.toString(), orderhtml);
     console.log(orderhtml);
     return NextResponse.json(order, { status: 201 });
