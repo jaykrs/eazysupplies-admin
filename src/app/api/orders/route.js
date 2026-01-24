@@ -104,16 +104,7 @@ export async function POST(request) {
       const lineTotal = item.price * item.quantity;
 
       return `
-        <tr>
-          <td style="padding:4px 0;color:#374151">
-            ${item.product.name}
-            <span style="color:#6b7280">× ${item.quantity}</span>
-          </td>
-          <td align="right" style="padding:4px 0;color:#374151">
-            ₹${lineTotal.toFixed(2)}
-          </td>
-        </tr>
-      `;
+            ${item.product.name} × ${item.quantity} = ₹${lineTotal.toFixed(2)}`;
     })
     .join("");
 

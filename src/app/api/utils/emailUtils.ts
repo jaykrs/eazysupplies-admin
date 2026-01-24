@@ -143,9 +143,8 @@ export async function sendWhatsAppOTP(receivername: string, receiverphone: strin
 }
 
 export async function sendWhatsAppUserReg(receivername: string, receiverphone: string, receiveremail: string, receivergst: string) {
-  var axios = require('axios');
-  var supportemail = process.env.MAIL_FROM;
-  var data = JSON.stringify({
+  const supportemail = process.env.MAIL_FROM;
+  const _data = JSON.stringify({
     "recipient": {
       "name": receivername,
       "to": receiverphone
@@ -180,7 +179,7 @@ export async function sendWhatsAppUserReg(receivername: string, receiverphone: s
       }
     }
   });
-
+console.log(sendWhatsAppUserReg, _data);
   var config = {
     method: 'post',
     url: process.env.META_URL,
@@ -189,7 +188,7 @@ export async function sendWhatsAppUserReg(receivername: string, receiverphone: s
       'x-api-secret': process.env.META_X_API_SECRET,
       'Content-Type': 'application/json'
     },
-    data: data
+    data: _data
   };
 
   axios(config)
@@ -203,9 +202,9 @@ export async function sendWhatsAppUserReg(receivername: string, receiverphone: s
 }
 
 export async function sendWhatsAppOrderCreate(receivername: string, receiverphone: string, orderid: string, productlist: string, productsummery : string) {
-  var axios = require('axios');
+  
 
-  var data = JSON.stringify({
+  const _datao = JSON.stringify({
     "recipient": {
       "name": receivername,
       "to": receiverphone
@@ -244,7 +243,7 @@ export async function sendWhatsAppOrderCreate(receivername: string, receiverphon
       }
     }
   });
-
+console.log(_datao);
   var config = {
     method: 'post',
     url: process.env.META_URL,
@@ -253,7 +252,7 @@ export async function sendWhatsAppOrderCreate(receivername: string, receiverphon
       'x-api-secret': process.env.META_X_API_SECRET,
       'Content-Type': 'application/json',
     },
-    data: data
+    data: _datao
   };
 
   axios(config)
