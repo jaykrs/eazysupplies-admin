@@ -99,14 +99,12 @@ export async function POST(request) {
       },
     });
 
-    const itemsHtml = order.items
-    .map((item) => {
-      const lineTotal = item.price * item.quantity;
-
-      return `
-            ${item.product.name} × ${item.quantity} = ₹${lineTotal.toFixed(2)}`;
-    })
-    .join("");
+const itemsText = order.items
+  .map((item) => {
+    const lineTotal = item.price * item.quantity;
+    return `${item.product.name} × ${item.quantity} = ₹${lineTotal.toFixed(2)}`;
+  })
+  .join('\n');
 
     const orderhtml = generateOrderSummaryHTML(order, payload.name);
     await sendEmail(payload.email, "Order Created with "+ order.id, orderhtml);
