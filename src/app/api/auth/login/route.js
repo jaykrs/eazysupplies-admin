@@ -178,11 +178,92 @@ export async function GET(request) {
 
       // Activate user
       if (otp > 0 && user.otp == otp) {
+        const accountActivationHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Account Activation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eeeeee;
+        }
+        .content {
+            padding: 20px 0;
+            line-height: 1.5;
+            color: #333333;
+        }
+        .button-container {
+            text-align: center;
+            padding-top: 20px;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #eeeeee;
+            font-size: 12px;
+            color: #999999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome to easysupplies.com!</h1>
+        </div>
+        <div class="content">
+            <p>Hello `+ email + `,</p>
+             <p>Thank you for registering an account with <strong>Easy Supplies</strong>. We are thrilled to have you join our community!</p>
+            <p>Your account is now active, and you can start exploring our catalog of product and home supplies immediately.</p>
+        </div>
+        <div class="button-container">
+            <a href="https://easysupplies.com" class="button">easysupplies.com</a>
+        </div>
+        <div class="content">
+            <p>If you have any questions or need assistance with your first order, our support team is ready to help.</p>
+            <p>https://easysupplies.com</p>
+        </div>
+        <div class="footer">
+            <p>&copy; 2026 Earthling. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
+`;
         await prisma.user.update({
           where: { id: parseInt(user.id) },
           data: { status: true },
         });
-        return NextResponse.json({ message: MESSAGES.USER_ACTIVATED }, { status: 200 });
+        return new NextResponse(accountActivationHtml, {
+          status: 200,
+          headers: {
+            'Content-Type': 'text/html',
+          },
+      })
       }
       return NextResponse.json({ message: MESSAGES.USER_ACTIVATION_FAILED });
     }

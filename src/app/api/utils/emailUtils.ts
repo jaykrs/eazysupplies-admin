@@ -204,6 +204,7 @@ export async function sendWhatsAppUserReg(receivername: string, receiverphone: s
 
 export async function sendWhatsAppOrderCreate(receivername: string, receiverphone: string, orderid: string, productlist: string, productsummery : string) {
   var axios = require('axios');
+
   var data = JSON.stringify({
     "recipient": {
       "name": receivername,
@@ -235,7 +236,7 @@ export async function sendWhatsAppOrderCreate(receivername: string, receiverphon
               },
               {
                 "type": "text",
-                "text": "Earthling Consumer Products Private"
+                "text": "Earthling Consumer Products Private Ltd"
               }
             ]
           }
