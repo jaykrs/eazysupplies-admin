@@ -88,7 +88,7 @@ export async function sendWhatsAppOTP(receivername: string, receiverphone: strin
   let data = JSON.stringify({
     "recipient": {
       "name": receivername,
-      "to": receiverphone
+      "to": normalizeIndianMobile(receiverphone)
     },
     "whatsapp": {
       "type": "template",
@@ -142,12 +142,42 @@ export async function sendWhatsAppOTP(receivername: string, receiverphone: strin
     });
 }
 
+function normalizeIndianMobile(mobile) {
+  if (!mobile) return null;
+
+  // Remove spaces, dashes, brackets
+  let cleaned = mobile.replace(/[\s\-()]/g, '');
+
+  // Handle 0091 prefix
+  if (cleaned.startsWith('0091')) {
+    cleaned = cleaned.slice(4);
+  }
+
+  // Handle +91 prefix
+  if (cleaned.startsWith('+91')) {
+    cleaned = cleaned.slice(3);
+  }
+
+  // Handle 91 prefix
+  if (cleaned.startsWith('91')) {
+    cleaned = cleaned.slice(2);
+  }
+
+  // Validate 10-digit Indian mobile number (starts with 6–9)
+  if (!/^[6-9]\d{9}$/.test(cleaned)) {
+    return null;
+  }
+
+  return `+91${cleaned}`;
+}
+
+
 export async function sendWhatsAppUserReg(receivername: string, receiverphone: string, receiveremail: string, receivergst: string) {
   const supportemail = process.env.MAIL_FROM;
   const _data = JSON.stringify({
     "recipient": {
       "name": receivername,
-      "to": receiverphone
+      "to": normalizeIndianMobile(receiverphone)
     },
     "whatsapp": {
       "type": "template",
@@ -207,7 +237,7 @@ export async function sendWhatsAppOrderCreate(receivername: string, receiverphon
   const _datao = JSON.stringify({
     "recipient": {
       "name": receivername,
-      "to": receiverphone
+      "to": normalizeIndianMobile(receiverphone)
     },
     "whatsapp": {
       "type": "template",
@@ -219,19 +249,19 @@ export async function sendWhatsAppOrderCreate(receivername: string, receiverphon
             "parameters": [
               {
                 "type": "text",
-                "text": '"' + receivername + '"'
+                "text": receivername
               },
               {
                 "type": "text",
-                "text": '"' + "#" + '"'+'"' + orderid + '"'
+                "text":  "#" + orderid
               },
               {
                 "type": "text",
-                "text": '"' + productlist + '"'
+                "text": productlist
               },
               {
                 "type": "text",
-                "text": '"' + productsummery + '"'
+                "text": productsummery
               },
               {
                 "type": "text",
