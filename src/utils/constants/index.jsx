@@ -163,7 +163,16 @@ export const OrderEmailTemp = `
 `
 
 export const PaymentMethod = [
-    {name:"CREDIT_PAYMENT", id:"CREDIT_PAYMENT"},
-    {name:"ADV_PAYMENT", id:"ADV_PAYMENT"},
-    {name:"ONLINE", id:"ONLINE"}
+    {name:"Net Banking", id:"NB"},
+    {name:"Debit Card", id:"DC"},
+    {name:"Credit card", id:"CC"},
+    {name:"Net Banking", id:"NB"},
+    {name:"UPI(Unified Payments Interface)", id:"UPI"},
+    {name:"Offline", id:"OFF"}
+]
+
+export const PaymentStatus = [
+    {name:"PENDING", id:"PENDING"},
+    {name:"SUCCESS", id:"SUCCESS"},
+    {name:"FAILED", id:"FAILED"}
 ]

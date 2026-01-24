@@ -152,6 +152,7 @@ const OrdersView = ({ id }) => {
             }
         }
     }
+
     const handleHtmlToPdf = async (id) => {
         function generateProductRows(products) {
             return products.map(p => `
@@ -285,7 +286,7 @@ const OrdersView = ({ id }) => {
                 }
             }
         }
-    }  
+    }
     return (
         <>
             <div>
@@ -309,11 +310,11 @@ const OrdersView = ({ id }) => {
                                 0
                             );
                             return (
-                                <div key={index} className="card mb-3" style={{ width: "100%" }}>
+                                <div key={index} className="card mb-3" style={{ width: "100%", backgroundColor: el.id === state.productItemDetails?.id ? '#0c303d' :'', color:el.id === state.productItemDetails?.id ?'#fff':'' }}>
                                     <div className="card-body">
                                         <div className="d-flex justify-content-between">
                                             <h5 className="card-title">Order ID: {el?.id}</h5>
-                                            <button className="btn btn-outline-primary cursor-pointer" style={{ width: "70px", color: "#1921e8" }} onClick={() => {
+                                            <button className="btn btn-outline-primary cursor-pointer" style={{ width: "70px", color: el.id === state.productItemDetails?.id ?'#e8840d': "#1921e8" }} onClick={() => {
                                                 setState(prev => {
                                                     return { ...prev, ["shippingModel"]: true, ["shippingDetails"]: el?.shipping }
                                                 })
@@ -340,12 +341,13 @@ const OrdersView = ({ id }) => {
                 <div className="flex-grow-1 p-3">
                     <div className="w-100 d-flex justify-content-between mb-2">
                         <div><h4>Order Items Details</h4></div>
+                        <p>Order ID: {state.productItemDetails?.id}</p>
                         {
                             Object.keys(state.productItemDetails).length > 0 &&
                             <div className="d-flex justify-content-end gap-3 pr-3">
                                 {state.productItemDetails?.approved && state.productItemDetails?.status.toUpperCase() === "SHIPPED" && state.productItemDetails?.shipping?.status.toUpperCase() === "SHIPPED" && <button type="button" onClick={() => handleDelivery(state.productItemDetails?.id)} className="btn btn-info">Delivery</button>}
                                 {state.productItemDetails?.approved && state.productItemDetails?.status.toUpperCase() === "PAID" && <button type="button" onClick={() => handleShipping(state.productItemDetails?.id)} className="btn btn-info">Shipping</button>}
-                                {state.productItemDetails?.payment?.status == "PENDING" && state.productItemDetails?.approved && <button type="button" onClick={() => handlePayment(state.productItemDetails?.id)} className="btn btn-info">Pay</button>}
+                                {(state.productItemDetails?.payment == null || state.productItemDetails?.payment?.status == "PENDING") && state.productItemDetails?.approved && <button type="button" onClick={() => handlePayment(state.productItemDetails?.id)} className="btn btn-info">Payment Request</button>}
 
                                 {state.productItemDetails?.approved ? <button type="button" className="btn btn-success" disabled title="disabled" >Approved</button> : (state.productItemDetails?.status).toUpperCase() === "PENDING" ? <button type="button" className="btn btn-success" onClick={() => updateOrderStatus(state.productItemDetails?.id, "APPROVED")} >Approve</button> : ''}
                                 {(state.productItemDetails?.status).toUpperCase() === "REJECTED" ? <button type="button" className="btn btn-danger" disabled >Rejected</button> : (state.productItemDetails?.status).toUpperCase() === "PENDING" && !state.productItemDetails?.approved ? <button type="button" className="btn btn-danger" onClick={() => updateOrderStatus(state.productItemDetails?.id, "REJECTED")} >Reject</button> : ''}

@@ -63,3 +63,40 @@ async function findUserById(userId: number) {
     })
 }
 
+export async function generateTransactionId(): Promise<string> {
+  return prisma.$transaction(async (tx) => {
+    await tx.$executeRawUnsafe(`
+      INSERT INTO payment_txn_counter () VALUES ()
+    `);
+
+    const result = await tx.$queryRaw<
+      { transaction_id: string }[]
+    >`
+      SELECT
+        CONCAT(
+          DATE_FORMAT(NOW(), '%Y%m%d'),
+          LPAD(LAST_INSERT_ID(), 4, '0')
+        ) AS transaction_id
+    `;
+
+    return "earthling" + result[0].transaction_id;
+  });
+}
+
+
+// export async function generateTransactionId(): Promise<string> {
+//   return prisma.$transaction(async (tx) => {
+//     await tx.$executeRawUnsafe(`
+//       INSERT INTO payment_txn_counter () VALUES ()
+//     `);
+//     const result = await tx.$queryRawUnsafe<{ transaction_id: string }[]>(`
+//       SELECT
+//         CONCAT(
+//           DATE_FORMAT(NOW(), '%Y%m%d'),
+//           LPAD(LAST_INSERT_ID(), 4, '0')
+//         ) AS transaction_id
+//     `);
+//     return result[0].transaction_id;
+//   });
+// }
+

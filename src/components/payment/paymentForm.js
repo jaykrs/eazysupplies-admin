@@ -10,7 +10,7 @@ import SimpleInputField from "../inputFields/SimpleInputField";
 import { formatString } from "../../lib/format-number";
 import axios from "axios";
 import SearchableSelectInput from "../inputFields/SearchableSelectInput";
-import { PaymentMethod } from "../../utils/constants";
+import { PaymentMethod, PaymentStatus } from "../../utils/constants";
 import { useSearchParams } from "next/navigation";
 const PaymentForm = ({ updateId, buttonName, model }) => {
     const { t } = useTranslation("common");
@@ -42,7 +42,10 @@ const PaymentForm = ({ updateId, buttonName, model }) => {
     if (updateId && isLoading) return <Loader />;
 
     const handleSubmit = async (values) => {
-       
+       if(values.status === "SUCCESS"){
+        alert('transaction Id is required to complete the payment with status SUCCESS!');
+        return;
+       }
         try {
             setIsLoading(true);
             if (buttonName == "Update") {
@@ -50,7 +53,8 @@ const PaymentForm = ({ updateId, buttonName, model }) => {
                     "orderId": Number(values.order),
                     "amount": Number(values.amount),
                     "method": values.method,
-                    "transectionid": values.transectionid
+                    "transectionid": values.transectionid,
+                    "status": values.status
                 }, { withCredentials: true });
 
                 if (res.status == 200) {
@@ -71,14 +75,43 @@ const PaymentForm = ({ updateId, buttonName, model }) => {
                             "amount": Number(values.amount),
                             "method": values.method,
                             "transactionid": values.transactionid,
-                            "status": "SUCCESS"
+                            "status": values.status
                         }, { withCredentials: true });
 
-                        if (res.status == 200) {
+                        if (res.status == 200 && values.status === "SUCCESS") {
                             const orders = await axios.put('/api/orders/filter?id=' + Number(values.order), {
                                 "status": "PAID",
                             }, { withCredentials: true });
                             if (orders.status == 200) {
+                                alert('Payment: ' + values.amount + " added successfully!");
+                                router.push("/payment");
+                            }
+                        }else{
+                            if (res.status == 200) {
+                                alert('Payment: ' + values.amount + " added successfully!");
+                                router.push("/payment");
+                            }
+                        }
+                    }else{
+                        const res = await axios.post('/api/payments', {
+                            //"id": Number(orderDetails?.data?.payment?.id),
+                            "orderId": Number(values.order),
+                            "amount": Number(values.amount),
+                            "method": values.method,
+                           // "transectionid": values.transactionid,
+                            "status": values.status
+                        }, { withCredentials: true });
+
+                        if (res.status == 200 && values.status === "SUCCESS") {
+                            const orders = await axios.put('/api/orders/filter?id=' + Number(values.order), {
+                                "status": "PAID",
+                            }, { withCredentials: true });
+                            if (orders.status == 200) {
+                                alert('Payment: ' + values.amount + " added successfully!");
+                                router.push("/payment");
+                            }
+                        }else{
+                            if (res.status == 200) {
                                 alert('Payment: ' + values.amount + " added successfully!");
                                 router.push("/payment");
                             }
@@ -90,6 +123,7 @@ const PaymentForm = ({ updateId, buttonName, model }) => {
             }
             setIsLoading(false);
         } catch (err) {
+            console.log('error', err);
             alert('something went wrong');
         }
     }
@@ -102,11 +136,13 @@ const PaymentForm = ({ updateId, buttonName, model }) => {
                     amount: updateId ? Number(data?.amount) || 0 : Number(amt) > 0 ? Number(amt) : 0,
                     transactionid: updateId ? data?.transactionid || "" : "",
                     order: updateId ? Number(data?.order?.id) || 0 : Number(id) > 0 ? Number(id) : 0,
+                    status: updateId ? data.status || "" : ""
                 }}
                 validationSchema={YupObject({
                     method: nameSchema,
                     amount: numberSchema,
                     order: numberSchema,
+                    status: nameSchema
                    // transactionid: nameSchema
                 })}
                 onSubmit={(values) => {
@@ -137,6 +173,22 @@ const PaymentForm = ({ updateId, buttonName, model }) => {
                                     { name: "amount", title: "Amount", type: "number", placeholder: t("enter amount"), disabled: "true" },
                                     { name: "transactionid", title: "Transaction Id", placeholder: t("enter transaction Id") },
                                     { name: "order", title: "Order Id", type: "number", rows: "3", placeholder: t(""), disabled: "true" },
+                                ]}
+                            />
+                            <SearchableSelectInput
+                                nameList={[
+                                    {
+                                        name: "status",
+                                        title: "Status",
+                                        require: "true",
+                                        inputprops: {
+                                            name: "status",
+                                            id: "status",
+                                            options: PaymentStatus.length > 0 ? PaymentStatus : [],
+                                            close: false,
+                                            isMulti: false
+                                        },
+                                    },
                                 ]}
                             />
 
