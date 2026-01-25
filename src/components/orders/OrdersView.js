@@ -46,6 +46,7 @@ const OrdersView = ({ id }) => {
             return { ...prev, [name]: value }
         })
     }
+
     useEffect(() => {
         const initial = document.body.classList.contains("dark-only");
         setIsDarkMode(initial);
@@ -151,6 +152,34 @@ const OrdersView = ({ id }) => {
                 return _dd[0];
             }
         }
+    }
+
+    function generateProductTotalPrice(order) {
+        let total = 0;
+        for (let data of order.items) {
+            let jsonData = data.product.jsonData;
+            if (!jsonData) {
+                let _taxId = Number(data.product?.tax);
+                let _taxpercent = taxData.filter((elm) => Number(elm.id) == _taxId);
+                _taxpercent = _taxpercent[0].value;
+                let _taxAmt = Number(data.product?.price) * Number(_taxpercent) / 100;
+                total += (Number(data.product?.price) + _taxAmt) * data.quantity;
+            }
+            else {
+                _dd = jsonData.filter(el => el.orderId == ordId);
+                if (_dd.length > 0) {
+                    let _taxId = Number(data.product?.tax);
+                    let _taxpercent = taxData.filter((elm) => Number(elm.id) == _taxId);
+                    _taxpercent = _taxpercent[0].value;
+                    let _taxAmt = Number(_dd[0].sellingPrice) * Number(_taxpercent) / 100;
+                    _dd[0].taxAmount = _taxAmt;
+                    _dd[0].taxpercent = _taxpercent;
+                    _dd[0].totalPrice = Number(_dd[0].sellingPrice) + _taxAmt;
+                    total += (Number(_dd[0].sellingPrice) + _taxAmt) * data.quantity;
+                }
+            }
+        }
+        return total;
     }
 
     const handleHtmlToPdf = async (id) => {
@@ -310,11 +339,11 @@ const OrdersView = ({ id }) => {
                                 0
                             );
                             return (
-                                <div key={index} className="card mb-3" style={{ width: "100%", backgroundColor: el.id === state.productItemDetails?.id ? '#0c303d' :'', color:el.id === state.productItemDetails?.id ?'#fff':'' }}>
+                                <div key={index} className="card mb-3" style={{ width: "100%", backgroundColor: el.id === state.productItemDetails?.id ? '#0c303d' : '', color: el.id === state.productItemDetails?.id ? '#fff' : '' }}>
                                     <div className="card-body">
                                         <div className="d-flex justify-content-between">
                                             <h5 className="card-title">Order ID: {el?.id}</h5>
-                                            <button className="btn btn-outline-primary cursor-pointer" style={{ width: "70px", color: el.id === state.productItemDetails?.id ?'#e8840d': "#1921e8" }} onClick={() => {
+                                            <button className="btn btn-outline-primary cursor-pointer" style={{ width: "70px", color: el.id === state.productItemDetails?.id ? '#e8840d' : "#1921e8" }} onClick={() => {
                                                 setState(prev => {
                                                     return { ...prev, ["shippingModel"]: true, ["shippingDetails"]: el?.shipping }
                                                 })
@@ -323,7 +352,7 @@ const OrdersView = ({ id }) => {
                                         <h5 className="card-title">Items: {el?.items.length}</h5>
                                         <p className="card-text">Approved: {el?.approved ? "YES" : "NO"}</p>
                                         <p className="card-text">Status: {el?.status}</p>
-                                        <p className="card-text">Total Price(RS): {totalPrice.toFixed(2)}</p>
+                                        <p className="card-text">Total Price(RS): {generateProductTotalPrice(el)?.toFixed(2)}</p>
                                         <p className="card-text">Orders On: {el?.createdAt
                                             ? new Date(el?.createdAt).toLocaleDateString()
                                             : "-"}</p>
