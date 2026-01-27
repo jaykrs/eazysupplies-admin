@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { verifyAdmin,authenticate } from "../utils/jwt";
 import { MESSAGES } from "../utils/statusConstant";
-import { generateOrderSummaryHTML, sendEmail, sendWhatsAppOrderCreate } from "../utils/emailUtils";
+import { generateOrderSummaryHTML,generateApprovedOrderSummaryHTML, sendEmail, sendWhatsAppOrderCreate } from "../utils/emailUtils";
 import { createNotification } from "../utils/emailUtils";
 
 const prisma = new PrismaClient();
@@ -206,7 +206,7 @@ export async function PUT(request) {
           });
         }
 
-        let result = await prisma.order.update({ where: { id }, data: { status, approved } })
+        let result = await prisma.order.update({ where: { id }, data: { status, approved } });
         const notification = await prisma.notification.create({ data: {
           name:'Order ' + id + ' approved',
           type: "notification",
@@ -216,9 +216,15 @@ export async function PUT(request) {
         return NextResponse.json(result);
         // return NextResponse.json({ offer, Products, filterProduct });
       }
-    const orderhtml = generateOrderSummaryHTML(result, result?.user?.name);
-    await sendEmail(payload.email, "Order Created with "+ result.id, orderhtml);
-  //  await createNotification("Order Created with "+ order.id, payload.userId.toString(), orderhtml);
+ const itemsTextapproved = order.items
+  .map((item) => {
+    return `${item.product.name} X ${item.quantity}`;
+  })
+  .join('\n');
+    const orderhtml = generateApprovedOrderSummaryHTML(result, result?.user?.name);
+    await sendEmail(payload.email, "Order Approved with "+ result.id, orderhtml);
+    await createNotification("Order Approved with "+ order.id, payload.userId.toString(), orderhtml);
+    await sendWhatsAppOrderCreate (order?.user?.name, order?.user?.countryCode + order?.user?.phone, order.id, "Status : Approved", itemsTextapproved);
     console.log(orderhtml);
       return NextResponse.json('updated');
     }

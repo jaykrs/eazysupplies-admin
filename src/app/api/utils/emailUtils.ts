@@ -357,3 +357,68 @@ export function generateOrderSummaryHTML(order: PrismaOrder, userName: string): 
 }
 
 
+function getApprovedProductListDetails (order : PrismaOrder) {
+let approvedProductList = [];
+  for(let data of order.items) {
+approvedProductList.push({
+  name : data.product.name,
+  quantity : data.quantity,
+})
+  }
+  return approvedProductList;
+}
+
+export function generateApprovedOrderSummaryHTML(order: PrismaOrder, userName: string): string {
+  
+  const itemsHtml = order.items
+    .map((item) => {
+      return `
+        <tr>
+          <td style="padding:4px 0;color:#374151">
+            ${item.product.name}
+            <span style="color:#6b7280">X ${item.quantity}</span>
+          </td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  
+
+  return `
+    <div style="max-width:420px;font-family:Arial,Helvetica,sans-serif;border:1px solid #e5e7eb;border-radius:8px;padding:14px;background:#ffffff">
+
+      <h3 style="margin:0 0 10px;font-size:16px;color:#111827">
+        🧾Thanks ${userName} ! <br/> Here is your Earthling Order Summary
+      </h3>
+
+      <p style="margin:0 0 8px;font-size:13px;color:#374151">
+        Order ID: <strong>#${order.id}</strong>
+      </p>
+      
+      <div style="border-top:1px solid #e5e7eb;margin:10px 0"></div>
+
+      <table width="100%" cellpadding="0" cellspacing="0" style="font-size:13px">
+        ${itemsHtml}
+      </table>
+
+      <div style="border-top:1px dashed #e5e7eb;margin:10px 0"></div>
+
+      <table width="100%" cellpadding="0" cellspacing="0" style="font-size:14px">
+        <tr>
+          <td style="color:#111827"><strong>Detail price with invoice</strong></td>
+          <td align="right" style="color:#111827">
+            <a href=""><strong>Invoice Link</strong></a>
+          </td>
+        </tr>
+      </table>
+
+      <p style="margin:12px 0 0;font-size:12px;color:#6b7280">
+        Order Status: ${order.status}<br />
+        Payment: ${order.payment?.mode || "—"} (${order.payment?.status || "—"})
+      </p>
+
+    </div>
+  `;
+}
+
