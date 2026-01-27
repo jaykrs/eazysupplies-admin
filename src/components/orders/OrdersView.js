@@ -166,7 +166,7 @@ const OrdersView = ({ id }) => {
                 total += (Number(data.product?.price) + _taxAmt) * data.quantity;
             }
             else {
-                _dd = jsonData.filter(el => el.orderId == ordId);
+               let _dd = jsonData.filter(el => el.orderId == order.id);
                 if (_dd.length > 0) {
                     let _taxId = Number(data.product?.tax);
                     let _taxpercent = taxData.filter((elm) => Number(elm.id) == _taxId);
