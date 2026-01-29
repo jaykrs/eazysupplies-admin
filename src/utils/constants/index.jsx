@@ -104,6 +104,7 @@ export const OrderEmailTemp = `
         <p>Thank you for your order with eazysupplies.com! Here are the details of your purchase:</p>
 
         <p><strong>Order Number:</strong> @Order</p>
+        <p><strong>Order Status:</strong> @OrderStatus</p>
         <p><strong>Order Date:</strong> @OrderDate</p>
         <p><strong>Shipping Address:</strong> @ShippingAddress</p>
         <p><strong>Payment Status:</strong> @PaymentStatus</p>
@@ -166,7 +167,6 @@ export const PaymentMethod = [
     {name:"Net Banking", id:"NB"},
     {name:"Debit Card", id:"DC"},
     {name:"Credit card", id:"CC"},
-    {name:"Net Banking", id:"NB"},
     {name:"UPI(Unified Payments Interface)", id:"UPI"},
     {name:"Offline", id:"OFF"}
 ]

@@ -172,9 +172,6 @@ const OrdersView = ({ id }) => {
                     let _taxpercent = taxData.filter((elm) => Number(elm.id) == _taxId);
                     _taxpercent = _taxpercent[0].value;
                     let _taxAmt = Number(_dd[0].sellingPrice) * Number(_taxpercent) / 100;
-                    _dd[0].taxAmount = _taxAmt;
-                    _dd[0].taxpercent = _taxpercent;
-                    _dd[0].totalPrice = Number(_dd[0].sellingPrice) + _taxAmt;
                     total += (Number(_dd[0].sellingPrice) + _taxAmt) * data.quantity;
                 }
             }
