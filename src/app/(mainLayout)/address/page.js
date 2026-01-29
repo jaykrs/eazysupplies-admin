@@ -218,7 +218,7 @@ const AllAddress = () => {
                 </div>
             </div>
 
-            <div>
+            <div >
                 Address list
             </div>
             <div style={{ maxHeight: "400px", overflowY: "auto", overflowX: "auto" }}>
