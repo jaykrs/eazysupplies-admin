@@ -11,7 +11,7 @@ const prisma = new PrismaClient();
 const MESSAGES = {
     UNAUTHORIZED: "Unauthorized",
     MISSING_FIELDS: "Missing required fields.",
-    USER_EXISTS: (email) => `User already exists with ${email}`,
+    USER_EXISTS: (email) => `User already exists with either phone / gstn or ${email}`,
     USER_CREATED: "User created successfully",
     SERVER_ERROR: "Internal Server Error"
 };
@@ -60,19 +60,24 @@ export async function POST(request) {
             const {
                 name,
                 email,
+                gstn,
                 password,
                 countryCode,
                 phone,
                 role
             } = body;
-            if (!name || !email || !password || !phone || !countryCode || !role) {
+            if (!name || !email || !password || !phone || !countryCode || !role || !gstn) {
                 return NextResponse.json(
                     { error: MESSAGES.MISSING_FIELDS },
                     { status: 400 }
                 );
             }
-            const existingUser = await prisma.user.findUnique({ where: { email } });
-            if (existingUser) {
+            
+              let existingUser,existingUser1,existingUser2;
+                if (email) existingUser = await prisma.user.findUnique({ where: { email } });
+                if (gstn) existingUser1 = await prisma.user.findFirst({ where: { gstn } });
+                if (phone) existingUser2 = await prisma.user.findFirst({ where: { phone } });
+            if (existingUser || existingUser1 || existingUser2) {
                 return NextResponse.json(
                     { error: MESSAGES.USER_EXISTS(email) },
                     { status: 409 }
@@ -83,7 +88,7 @@ export async function POST(request) {
             if (!userRole) {
                 return NextResponse.json({ error: role + " not exist, please contact to admin!" }, { status: 401 });
             }
-            let random = 123456;
+            let random = Math.floor(100000 + Math.random() * 900000);
             const newUser = await prisma.user.create({
                 data: {
                     name,
@@ -92,6 +97,7 @@ export async function POST(request) {
                     countryCode,
                     phone: `${phone}`,
                     status: false,
+                    gstn,
                     roleId: userRole.id,
                     otp: random
                 },
@@ -117,8 +123,18 @@ export async function PUT(request) {
     try {
         if (verifyAdmin(request)) {
             const body = await request.json();
-            const { id, ...rest } = body;
-            let prod = await prisma.product.update({ where: { id }, data: rest });
+            const { id,role,name, email, gstn,phone} = body;
+            let userRole = await prisma.role.findUnique({ where: { name: role } });
+            if (!userRole) {
+                return NextResponse.json({ error: role + " not exist, please contact to admin!" }, { status: 401 });
+            }
+            let prod = await prisma.user.update({ where: { id }, data: {
+                name,
+                email,
+                gstn,
+                phone,
+                roleId: userRole.id
+            } });
             return NextResponse.json(prod);
         } else {
             return NextResponse.json({ error: MESSAGES.UNAUTHORIZED }, { status: 401 });

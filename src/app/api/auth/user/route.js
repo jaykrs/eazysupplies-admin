@@ -12,7 +12,7 @@ const prisma = new PrismaClient();
 const MESSAGES = {
   UNAUTHORIZED: "Unauthorized",
   MISSING_FIELDS: "Missing required fields.",
-  USER_EXISTS: (email) => `User already exists with ${email}`,
+  USER_EXISTS: (email) => `User already exists with gstor phone or email`,
   USER_CREATED: "User created successfully",
   SERVER_ERROR: "Internal Server Error",
   USER_WELCOME_plainTextMessage: "Hi $userName \n\n Welcome to $brandName!\n\nWe're excited to partner with you on $brandName, your trusted B2B ecommerce platform for streamlining transactions, managing inventory, and connecting with suppliers. Here's a quick guide to get started:\n\n1. **Set Up Your Business Profile**: Go to your account settings to add company details, tax information, and payment methods.\n2. **Explore the Product Catalog**: Browse our extensive catalog of wholesale products and add items to your cart.\n3. **Manage Orders and Invoices**: Use the dashboard to place orders, track shipments, and access invoices.\n\nTo activate your account, click here: $platformUrl/api/auth/login?action=activateUser&email=$userEmail&otp=$otp\n\nIf you have any questions, our support team is here to help at support@$brandName.\n\nLet's grow your business together!\nThe $brandName Team",
@@ -104,12 +104,12 @@ export async function POST(request) {
     }
 
     // Check if user already exists (matching all identifiers)
-    let existingUser;
+    let existingUser,existingUser1,existingUser2;
     if (email) existingUser = await prisma.user.findUnique({ where: { email } });
     if (gstn) existingUser = await prisma.user.findFirst({ where: { gstn } });
     if (phone) existingUser = await prisma.user.findFirst({ where: { phone } });
 
-    if (existingUser) {
+    if (existingUser || existingUser1 || existingUser2) {
       return NextResponse.json(
         { error: MESSAGES.USER_EXISTS },
         { status: 409 }

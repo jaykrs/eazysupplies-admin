@@ -33,9 +33,9 @@ const UserForm = ({ updateId, buttonName, type, title }) => {
 
   const loadProductData = async () => {
     setIsLoading(true);
-    const product = await axios.get('/api/auth/user_auth?userId=' + updateId);
-    if (product.status == 200) {
-      setStateData(product?.data?.data);
+    const response = await axios.get('/api/auth/user_auth?userId=' + updateId);
+    if (response.status == 200) {
+      setStateData(response?.data?.data);
     }
     setIsLoading(false);
   }
@@ -50,12 +50,14 @@ const UserForm = ({ updateId, buttonName, type, title }) => {
   if (updateId && isLoading) return <Loader />;
   const handleSubmit = async (values) => {
     try {
+      console.log("uid",updateId);
       if (updateId) {
-        const res = await axios.put('/api/auth/user_auth/userId=' + updateId, {
+        const res = await axios.put('/api/auth/user_auth', {
+          "id" : Number(updateId),
+          "gstn" : values.gstn,
           "name": values.name,
-          "password": values.password,
-          "countryCode": values.country_code,
-          "phone": values.phone,
+          "email" : values.email,
+          "phone": values.phone.toString(),
           "role": values.role
         }, { withCredentials: true });
 
@@ -64,12 +66,14 @@ const UserForm = ({ updateId, buttonName, type, title }) => {
           router.push("/user");
         }
       } else {
+        if(!values.password && values.password?.length > 8) alert('Password is empty or less than 8 Character'); 
         const res = await axios.post('/api/auth/user_auth', {
           "name": values.name,
           "email": values.email,
           "password": values.password,
-          "countryCode": values.country_code,
-          "phone": values.phone,
+          "gstn": values.gstn,
+          "phone": values.phone.toString(),
+          "countryCode" : "91",
           "role": values.role
         }, { withCredentials: true });
 
@@ -100,8 +104,7 @@ const UserForm = ({ updateId, buttonName, type, title }) => {
               initialValues={{
                 name: Object.keys(stateData).length > 0 ? stateData?.name : "",
                 email: Object.keys(stateData).length > 0 ? stateData?.email : "",
-                password: "",
-                country_code: Object.keys(stateData).length > 0 ? stateData?.countryCode : "91",
+                gstn: Object.keys(stateData).length > 0 ? stateData?.gstn : "",
                 phone: Object.keys(stateData).length > 0 ? stateData?.phone : "",
                 role: Object.keys(stateData).length > 0 ? stateData?.role?.name : ""
 
@@ -109,9 +112,9 @@ const UserForm = ({ updateId, buttonName, type, title }) => {
               validationSchema={YupObject({
                 name: nameSchema,
                 email: emailSchema,
-                password: passwordSchema,
                 phone: phoneSchema,
-                role: nameSchema
+                role: nameSchema,
+                gstn: nameSchema
               })}
               onSubmit={(values, helpers) => {
                 handleSubmit(values);
@@ -125,27 +128,26 @@ const UserForm = ({ updateId, buttonName, type, title }) => {
                         {
                           name: "name",
                           title: "Name",
-                          placeholder: t("Enter role Name"),
+                          placeholder: t("Enter Name"),
                           require: "true",
                         },
                         {
                           name: "email",
                           title: "Email",
-                          placeholder: t("Enter your email"),
+                          placeholder: t("Enter email"),
                           require: "true"
                         },
-                        {
-                          name: "password",
-                          title: "Password",
-                          placeholder: t("Enter password"),
-                          require: "true",
-                          type: "password"
-                        },
+                         {
+                           name: "gstn",
+                           title: "Gstn",
+                           placeholder: t("Enter Gstn"),
+                           require: "true"
+                         },
                       ]}
                     />
                     <Row>
                       <Col sm="3" className="">Phone</Col>
-                      <Col sm="3">
+                      {/* <Col sm="3">
                         <SearchableSelectInput
                           nameList={[
                             {
@@ -159,12 +161,16 @@ const UserForm = ({ updateId, buttonName, type, title }) => {
                             },
                           ]}
                         />
-                      </Col>
+                      </Col> */}
                       <Col sm="6">
                         <SimpleInputField nameList={[{ name: "phone", type: "number", placeholder: "EnterPhoneNumber", require: "true", nolabel: "true", }]} />
                       </Col>
                     </Row>
-
+                      {!updateId &&  <Row><Col sm="3" className="">Password</Col> 
+                      <Col sm="6">
+                        <SimpleInputField nameList={[{ name: "password", type: "password", placeholder: "Enter Password", require: "true", nolabel: "true", }]} />
+                      </Col></Row>
+                      }
                     <SearchableSelectInput
                       nameList={[
                         {

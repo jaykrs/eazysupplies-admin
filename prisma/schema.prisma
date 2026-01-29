@@ -34,7 +34,7 @@ model User {
   createdBy Int?  
   wishlist       String?
   favorite       String?
-  gstn           String?
+  gstn           String @unique
   bankDetails  String?     
 }
 
@@ -173,7 +173,8 @@ model Order {
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime?     @updatedAt @map("updated_at")
   deliveryAgent    Int?
-  jsonData Json? 
+  jsonData Json?
+  invoicepath String? 
   deliveryAgentAssets String?
 }
 
