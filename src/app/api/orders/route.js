@@ -110,7 +110,6 @@ const itemsText = order.items
     await sendEmail(payload.email, "Order Created with "+ order.id, orderhtml);
     await sendWhatsAppOrderCreate (order?.user?.name, order?.user?.countryCode + order?.user?.phone, order.id, "Status : Created", itemsText);
     await createNotification("Order Created with "+ order.id, payload.userId.toString(), orderhtml);
-    console.log(orderhtml);
     return NextResponse.json(order, { status: 201 });
   } catch (error) {
     console.log("POST /orders error:", error);
@@ -123,8 +122,8 @@ export async function PUT(request) {
     if (verifyAdmin(request)) {
       const body = await request.json();
       const { id, status, approved = false } = body;
-
       if (approved) {
+        console.log("approved inside",approved);
         let filterProduct, offer, jsonData = [], jsonFound = false;
         let orders = await prisma.order.findUnique({
           where: {
@@ -211,22 +210,28 @@ export async function PUT(request) {
           name:'Order ' + id + ' approved',
           type: "notification",
           remarks: "Order Number " + id + " approved by Admin, Please proceed for payment",
-          recepient: result?.userId.toString()
+          recepient: orders?.userId.toString()
         } });
-        return NextResponse.json(result);
+        //return NextResponse.json(result);
         // return NextResponse.json({ offer, Products, filterProduct });
+      const itemsTextapproved = orders.items
+        .map((item) => {
+          return `${item.product.name} X ${item.quantity}`;
+        })
+      .join('\n');
+      const orderhtml = generateApprovedOrderSummaryHTML(orders,Number(orders.userId), orders?.user?.name);
+      await sendEmail(orders?.user?.email, "Order Approved with "+ result.id, orderhtml);
+      await createNotification("Order Approved with "+ orders.id, orders?.userId?.toString(), orderhtml);
+      await sendWhatsAppOrderCreate (orders?.user?.name, orders?.user?.countryCode + orders?.user?.phone, orders.id, "Status : Approved", itemsTextapproved);   
+      const pdfurl = process.env.API_PROD_URL+`file/htmlToPdf?orderId=${orders.id}`;
+      console.log(pdfurl);
+      const response = await fetch(pdfurl);
+      if (!response.ok) {
+        throw new Error('Failed to fetch external data');
+      }  
       }
- const itemsTextapproved = order.items
-  .map((item) => {
-    return `${item.product.name} X ${item.quantity}`;
-  })
-  .join('\n');
-    const orderhtml = generateApprovedOrderSummaryHTML(result, result?.user?.name);
-    await sendEmail(payload.email, "Order Approved with "+ result.id, orderhtml);
-    await createNotification("Order Approved with "+ order.id, payload.userId.toString(), orderhtml);
-    await sendWhatsAppOrderCreate (order?.user?.name, order?.user?.countryCode + order?.user?.phone, order.id, "Status : Approved", itemsTextapproved);
-    console.log(orderhtml);
-      return NextResponse.json('updated');
+     
+    return NextResponse.json("approved");
     }
   } catch (Error) {
     console.log(Error);

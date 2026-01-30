@@ -273,7 +273,7 @@ export async function sendWhatsAppOrderCreate(receivername: string, receiverphon
       }
     }
   });
-console.log(_datao);
+console.log("datao",_datao);
   var config = {
     method: 'post',
     url: process.env.META_URL,
@@ -368,8 +368,8 @@ approvedProductList.push({
   return approvedProductList;
 }
 
-export function generateApprovedOrderSummaryHTML(order: PrismaOrder, userName: string): string {
-  
+export function generateApprovedOrderSummaryHTML(order: PrismaOrder,userId: number, userName: string): string {
+  const baseurl = process.env.API_PROD_URL;
   const itemsHtml = order.items
     .map((item) => {
       return `
@@ -415,6 +415,7 @@ export function generateApprovedOrderSummaryHTML(order: PrismaOrder, userName: s
 
       <p style="margin:12px 0 0;font-size:12px;color:#6b7280">
         Order Status: ${order.status}<br />
+        <a href="${baseurl}/file?userId=${userId}&file=performa-invoice${order.id}.pdf" target="_blank">Invoice</a><br />
         Payment: ${order.payment?.mode || "—"} (${order.payment?.status || "—"})
       </p>
 
