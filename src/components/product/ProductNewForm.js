@@ -275,6 +275,7 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
                     <FileImageUpload
                       name="images"
                       multiple={true}
+                       style={{display:'none'}}
                       selectedFiles={values.images || []}
                       setSelectedFiles={(files) => setFieldValue("images", files)}
                       helperText="Upload image"
