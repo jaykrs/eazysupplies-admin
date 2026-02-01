@@ -57,7 +57,7 @@ export async function PUT(request) {
     try {
         if (verifyAdmin()) {
             if (deliveryAgentAssets && delivered) {
-                let orderUpdate = await prisma.order.update({ where: { id: id }, data: { status: status } })
+                let orderUpdate = await prisma.order.update({ where: { id: id }, data: { status: status,deliveryAgentAssets:deliveryAgentAssets } })
                 return NextResponse.json({ msg: "Order: " + id + " " + status + " successfully!" }, { status: 200 });
             }
             let orderUpdate = await prisma.order.update({ where: { id: id }, data: { status: status } })

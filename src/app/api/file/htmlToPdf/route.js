@@ -169,6 +169,7 @@ export async function GET(request) {
                 },
             });
         }
+        let orderUpdate = await prisma.order.update({where:{ id: Number(id) },data: {invoicepath: `${filePath}`}});
         return NextResponse.json({
             message: "PDF generated & saved successfully",
             path: filePath,

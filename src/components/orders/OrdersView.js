@@ -6,14 +6,7 @@ import ShowModal from "@/elements/alerts&Modals/Modal";
 import Btn from "@/elements/buttons/Btn";
 import { useRouter } from "next/navigation";
 import { OrderEmailTemp } from "../../utils/constants/index";
-import { dateFormat } from "@/utils/customFunctions/DateFormat";
-import FileImageUpload from "../inputFields/FileImageUpload";
-import { Card, CardBody, Col, Form, Row } from "reactstrap";
-import { Formik } from "formik";
-import { YupObject } from "@/utils/validation/ValidationSchemas";
-import { t } from "i18next";
-import FormBtn from "@/elements/buttons/FormBtn";
-import TableWrapper from "../../utils/hoc/TableWrapper";
+import {uploadFiles} from "../../utils/customFunctions/fileUpload";
 
 const OrdersView = ({ id }) => {
     const route = useRouter();
@@ -179,7 +172,7 @@ const OrdersView = ({ id }) => {
         return total;
     }
 
-    const handleHtmlToPdf = async (id) => {
+    const handleHtmlToPdf1 = async (id) => {
         function generateProductRows(products) {
             return products.map(p => `
     <tr>
@@ -214,14 +207,26 @@ const OrdersView = ({ id }) => {
             userId: userId,
             html: OrderTemp
         }, { withCredentials: true });
+
+    }
+
+    const handleHtmlToPdf = async (id) => {
+        const res = await axios.get('/api/file/htmlToPdf?orderId=' + id, {
+        }, { withCredentials: true });
+        console.log('response', res);
+        if(res.status == 200){
+         alert(res.data?.message);
+         window.open(res?.data?.path, "_blank");
+        }
+        
     }
 
     const handlePayment = (id) => {
-        let Total = 0;
-        for (const el of state.productItemDetails?.items) {
-            Total += Number(generateProductDiscount(el.product, id).totalPrice * Number(el.quantity));
-        }
-        route.push('/payment/create?id=' + state.productItemDetails?.id + "&amt=" + Total + "&status=" + state.productItemDetails?.status);
+        // let Total = 0;
+        // for (const el of state.productItemDetails?.items) {
+        //     Total += Number(generateProductDiscount(el.product, id).totalPrice * Number(el.quantity));
+        // }
+        route.push('/payment/edit/' + id);
     }
 
     const handleShipping = (id) => {
@@ -303,7 +308,7 @@ const OrdersView = ({ id }) => {
                 const orders = await axios.put('/api/orders/filter?id=' + Number(state.productItemDetails?.id), {
                     "status": "COMPLETED",
                     "delivered": true,
-                    "deliveryAgentAssets": deliveredFile?.data?.assetId
+                    "deliveryAgentAssets": `${deliveredFile?.data?.assetId}`
                 }, { withCredentials: true });
                 if (orders.status == 200) {
                     alert('Order: ' + state.productItemDetails?.id + " completed successfully!");
@@ -373,11 +378,11 @@ const OrdersView = ({ id }) => {
                             <div className="d-flex justify-content-end gap-3 pr-3">
                                 {state.productItemDetails?.approved && state.productItemDetails?.status.toUpperCase() === "SHIPPED" && state.productItemDetails?.shipping?.status.toUpperCase() === "SHIPPED" && <button type="button" onClick={() => handleDelivery(state.productItemDetails?.id)} className="btn btn-info">Delivery</button>}
                                 {state.productItemDetails?.approved && state.productItemDetails?.status.toUpperCase() === "PAID" && <button type="button" onClick={() => handleShipping(state.productItemDetails?.id)} className="btn btn-info">Shipping</button>}
-                                {(state.productItemDetails?.payment == null || state.productItemDetails?.payment?.status == "PENDING") && state.productItemDetails?.approved && <button type="button" onClick={() => handlePayment(state.productItemDetails?.id)} className="btn btn-info">Payment Request</button>}
+                                {state.productItemDetails?.status.toUpperCase() === "APPROVED" && state.productItemDetails?.payment?.method == "OFF" && state.productItemDetails?.approved && <button type="button" onClick={() => handlePayment(state.productItemDetails?.payment?.id)} className="btn btn-info">Payment Offline</button>}
 
                                 {state.productItemDetails?.approved ? <button type="button" className="btn btn-success" disabled title="disabled" >Approved</button> : (state.productItemDetails?.status).toUpperCase() === "PENDING" ? <button type="button" className="btn btn-success" onClick={() => updateOrderStatus(state.productItemDetails?.id, "APPROVED")} >Approve</button> : ''}
                                 {(state.productItemDetails?.status).toUpperCase() === "REJECTED" ? <button type="button" className="btn btn-danger" disabled >Rejected</button> : (state.productItemDetails?.status).toUpperCase() === "PENDING" && !state.productItemDetails?.approved ? <button type="button" className="btn btn-danger" onClick={() => updateOrderStatus(state.productItemDetails?.id, "REJECTED")} >Reject</button> : ''}
-                                {(state.productItemDetails?.approved && ["COMPLETED", "SHIPPED", "PAID"].includes(state.productItemDetails?.status.toUpperCase())) ? <button type="button" className="btn btn-success" title="invoice" onClick={() => handleHtmlToPdf(state.productItemDetails?.id)} >Download Invoice </button> : ''}
+                                {(state.productItemDetails?.approved && ["COMPLETED", "SHIPPED", "PAID"].includes(state.productItemDetails?.status.toUpperCase())) ? <button type="button" className="btn btn-success" title="invoice" onClick={() => handleHtmlToPdf(state.productItemDetails?.id)} >Invoice </button> : ''}
                             </div>
                         }
                     </div>

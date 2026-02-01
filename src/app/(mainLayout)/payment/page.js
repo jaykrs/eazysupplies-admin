@@ -225,10 +225,11 @@ const AllPayments = () => {
                 <table className="min-w-full border border-gray-300">
                     <thead className="bg-gray-100">
                         <tr>
-                            <th className="border px-4 py-2">Status</th>
-                            <th className="border px-4 py-2">Method</th>
+                            <th className="border px-4 py-2">Order ID</th>
                             <th className="border px-4 py-2">Transaction ID</th>
                             <th className="border px-4 py-2">Amount</th>
+                            <th className="border px-4 py-2">Method</th>
+                            <th className="border px-4 py-2">Status</th>
                             <th className="border px-4 py-2">Creted At</th>
                             <th className="border px-4 py-2">Action</th>
                         </tr>
@@ -238,10 +239,11 @@ const AllPayments = () => {
                             payments.map((payment) => {
                                 return (
                                     <tr key={payment.id}>
-                                        <td className="border px-4 py-2">{payment?.status}</td>
-                                        <td className="border px-4 py-2">{payment?.method}</td>
+                                        <td className="border px-4 py-2" >{payment?.orderId}</td>
                                         <td className="border px-4 py-2">{payment?.transectionid}</td>
                                         <td className="border px-4 py-2">{payment?.amount}</td>
+                                        <td className="border px-4 py-2">{payment?.method}</td>
+                                        <td className="border px-4 py-2">{payment?.status}</td>
                                         <td className="border px-4 py-2">
                                             {payment?.createdAt
                                                 ? new Date(payment.createdAt).toLocaleDateString()

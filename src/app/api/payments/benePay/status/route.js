@@ -16,8 +16,39 @@ export async function GET(request) {
   try {
     //const body = await request.json(); // ✅ fixed
     const { searchParams } = new URL(request.url);
-    const id = Number(searchParams.get('response'));
-     
+    const id = searchParams.get('response');
+    
+    const params = new URLSearchParams();
+    params.append("grant_type", "client_credentials");
+    params.append("client_id", process.env.ClientId);
+    params.append("client_secret", process.env.ClinetSecretId);
+
+    const authResponse = await fetch(process.env.AuthUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: params.toString(),
+    });
+
+    const authData = await authResponse.json();
+
+    const encryptResponse = await fetch(process.env.DecryptionURL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "x-api-key": process.env.X_apiKey,
+        "Authorization": authData.access_token,
+        "encKey": process.env.EncryptionKey
+      },
+      body: JSON.stringify({
+        "encryptedData": id
+      })
+    });
+
+    const encryptedData = await encryptResponse.text();
+    console.log('..........encryptedData',encryptedData);
     // if (
     //   !paymentStatusValid.includes(body.status) ||
     //   !body.orderId ||
@@ -45,11 +76,11 @@ export async function GET(request) {
     //     { status: 404 }
     //   );
     // }
-    let updatePayment = await prisma.payment.update({where: { id: 1}, data:{
-      transectionid: id
-    }})
+    // let updatePayment = await prisma.payment.update({where: { id: 1}, data:{
+    //   transectionid: id
+    // }})
     return NextResponse.json(
-      { msg: id, searchParams},
+      { encryptedData },
       { status: 200 }
     );
   } catch (err) {

@@ -75,9 +75,9 @@ export async function PUT(request) {
     const id = Number(searchParams.get("paymentId"));
     const userId = Number(searchParams.get("userId"));
     const paymentStatus = searchParams.get("paymentStatus");
-
+     const body = await request.json();
     //  const validStatuses = ["offline", "cod", "online"];
-    const validStatuses = ["ONLINE", "ADV_PAYMENT", "CREDIT_PAYMENT"];
+    const validStatuses = ["OFF", "UPI", "CC","NB"];
     // user updating their payment status
     if (
       id &&
@@ -87,31 +87,34 @@ export async function PUT(request) {
     ) {
       const updated = await prisma.payment.update({
         where: { id, userId },
-        data: { status: paymentStatus },
+        data: { status: paymentStatus,  },
       });
       return NextResponse.json({ data: updated }, { status: 200 });
     }
 
     // admin update via request body
     if (verifyAdmin(request)) {
-      const body = await request.json();
-      console.log('...........body', body);
+      console.log("file",body.file);
       const updated = await prisma.payment.update({
-        where: { id: Number(body.id) },
+        where: { id: Number(id) },
         data: {
           orderId: Number(body.orderId),
           amount: Number(body.amount),
           method: body.method,
           status: body.status,
-          transectionid: body.transactionid ? body.transectionid : ""
+          transectionid: body.transactionid ? body.transactionid.toString() : "",
+          file: body.file
         },
       });
+      if(updated.status == "SUCCESS"){
+         let order = await prisma.order.update({where :{id : Number(body.orderId)}, data: {status: "PAID"}});
+      }
       return NextResponse.json({ data: updated }, { status: 200 });
     }
 
     return unauthorized();
   } catch (err) {
-    console.log('............err', err);
-    return handleError(err);
+    console.log('............err', err?.message);
+    return NextResponse.json({ err }, { status: 500 });
   }
 }
