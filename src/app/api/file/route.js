@@ -17,7 +17,7 @@ const unauthorized = () =>
 
 const baseDir = path.join(process.env.FILE_PATH, "/uploads");
 const privateDir = path.join(process.env.FILE_PATH, "/private");
-
+const invoiceDir = path.join(process.env.FILE_PATH, "/invoice");
 // Recursively collect file info
 function getFiles(dir, base = "") {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
@@ -54,6 +54,18 @@ export async function GET(request) {
         if(authenticate(request)) {
           files = getFiles(privateDir);
         file = files.find(f => f.name === fileName);
+        if(!file) {
+          files = getFiles(invoiceDir);
+        file = files.find(f => f.name === fileName);
+        }
+        else
+          return NextResponse.json(
+            { success: false, message: "File not found" },
+            { status: 404 }
+          );
+      } if(userId) {
+          files = getFiles(invoiceDir);
+        file = files.find(f => f.name === fileName);
         if (!file)
           return NextResponse.json(
             { success: false, message: "File not found" },
@@ -87,6 +99,7 @@ export async function GET(request) {
     const files = getFiles(baseDir);
     return NextResponse.json({ success: true, files });
   } catch (error) {
+    console.log(error);
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 500 }
