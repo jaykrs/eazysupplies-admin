@@ -272,13 +272,14 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
                     <SimpleInputField nameList={[{ name: "expDate", title: "Expiry Date", placeholder: t("Enter self life"), type: "datetime-local", require: "true", }]} />
                     <CheckBoxField name="status" title="Status" />
                     <SimpleInputField nameList={[{ name: "productImage", title: "Product Image", placeholder: t("Enter Product Image"), type: "text", require: "true", }]} />
-                    <FileImageUpload
+                    {false && <FileImageUpload
                       name="images"
                       multiple={true}
+                      
                       selectedFiles={values.images || []}
                       setSelectedFiles={(files) => setFieldValue("images", files)}
                       helperText="Upload image"
-                    />
+                    />}
                     <KeywordInput name="keyword" label="Keywords" required />
 
                     <SearchableSelectInput
