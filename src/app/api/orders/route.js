@@ -223,7 +223,7 @@ export async function PUT(request) {
       await sendEmail(orders?.user?.email, "Order Approved with "+ result.id, orderhtml);
       await createNotification("Order Approved with "+ orders.id, orders?.userId?.toString(), orderhtml);
       await sendWhatsAppOrderCreate (orders?.user?.name, orders?.user?.countryCode + orders?.user?.phone, orders.id, "Status : Approved", itemsTextapproved);   
-      const pdfurl = process.env.API_PROD_URL+`file/htmlToPdf?orderId=${orders.id}`;
+      const pdfurl = `http://localhost:3000/api/`+`file/htmlToPdf?orderId=${orders.id}`;
       console.log(pdfurl);
       const response = await fetch(pdfurl);
       if (!response.ok) {
