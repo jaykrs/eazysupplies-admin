@@ -11,16 +11,15 @@ const unauthorized = () =>
   NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
 export async function POST(request) {
-  // ✅ DEBUG (remove later)
-  console.log("ASSETS API HIT");
-
   const payload = await authenticate(request);
   if (!payload) return unauthorized();
 
   const { searchParams } = new URL(request.url);
   const type = Number(searchParams.get("type"));
+  const fileNameWith = searchParams.get("fileNameWith");
+  const orderId = Number(searchParams.get("orderId"));
   const userId = payload.userId;
-
+console.log(type, fileNameWith, orderId);
   if (!userId) {
     return NextResponse.json(
       { error: "No User available" },
@@ -56,19 +55,21 @@ export async function POST(request) {
     }
 
     const savedAssets = [];
-
+   let i=1;
     for (const file of files) {
       if (!(file instanceof File)) continue;
 
       const buffer = Buffer.from(await file.arrayBuffer());
       const safeName = file.name.replace(/\s+/g, "");
-      const fileName = `${Date.now()}-${Math.random()}-${safeName}`;
+      //const fileName = `${Date.now()}-${Math.random()}-${safeName}`;
+      const extension = safeName.substring(safeName.lastIndexOf('.'));
+      const fileName = fileNameWith ? `performa-${fileNameWith}${i}-${orderId}` + extension : 'performa-' + safeName;
       const filePath = path.join(dir, fileName);
-
+      i +=1;
       await writeFile(filePath, buffer);
 
       const publicPath =
-        type === 1 ? `/uploads/${fileName}` : `/private/${fileName}`;
+        type === 1 ? `/uploads/${fileName}` : type === 2? `/invoice/${fileName}` : `/private/${fileName}`;
 
       const asset = await prisma.assets.create({
         data: {
@@ -80,7 +81,7 @@ export async function POST(request) {
         },
       });
 
-      savedAssets.push(asset);
+      savedAssets.push("https://api.eazysupplies.com/api/file?userId=" + userId + "&file=" + fileName);
     }
 
     return NextResponse.json({
@@ -88,7 +89,7 @@ export async function POST(request) {
       assets: savedAssets,
     });
   } catch (error) {
-    console.error("File upload error:", error);
+    console.log("File upload error:", error);
     return NextResponse.json(
       { error: "Upload failed" },
       { status: 500 }

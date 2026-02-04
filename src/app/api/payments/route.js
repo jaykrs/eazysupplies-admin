@@ -35,20 +35,22 @@ export async function GET(request) {
       result = await prisma.payment.findMany({
         where: { userId },
         include: { user: true, order: true },
+        orderBy: {id: "desc"}
       });
     } else if (orderId) {
       result = await prisma.payment.findUnique({
         where: { orderId },
-        include: { user: true, order: true },
+        include: { user: true, order: true }
       });
     } else if (withCookies) {
       result = await prisma.payment.findMany({
         where: { userId: isUser.userId },
         include: { user: true, order: true },
+        orderBy: {id: "desc"}
       });
     } else {
       result = await prisma.payment.findMany({
-        include: { user: true, order: true },
+        include: { user: true, order: true }, orderBy: {id: "desc"}
       });
     }
 

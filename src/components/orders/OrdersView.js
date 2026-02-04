@@ -6,11 +6,15 @@ import ShowModal from "@/elements/alerts&Modals/Modal";
 import Btn from "@/elements/buttons/Btn";
 import { useRouter } from "next/navigation";
 import { OrderEmailTemp } from "../../utils/constants/index";
-import {uploadFiles} from "../../utils/customFunctions/fileUpload";
+import { uploadFiles } from "../../utils/customFunctions/fileUpload";
+import Loader from "../commonComponent/Loader";
 
 const OrdersView = ({ id }) => {
     const route = useRouter();
     const [model, setModel] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isApprove, setIsApprove] = useState(false);
+    const [isShipping, setIsShipping] = useState(false);
     const [state, setState] = useState({
         Orders: [],
         qtyTempValue: 0,
@@ -104,6 +108,7 @@ const OrdersView = ({ id }) => {
 
     const updateOrderStatus = async (id, action) => {
         try {
+            setIsApprove(true);
             const res = await axios.put('/api/orders', {
                 id: Number(id),
                 status: action.toUpperCase(),
@@ -113,9 +118,11 @@ const OrdersView = ({ id }) => {
             if (res.status === 200) {
                 alert(`Order ${action.toUpperCase()} successfully!`);
                 handleStateChange('refreshState', true);
+                setIsApprove(false);
             }
         } catch (err) {
-            console.error('error', err);
+            console.error('error', "Something went wrong, please try again!");
+            setIsApprove(false);
         }
     };
     function generateProductDiscount(product, ordId) {
@@ -159,7 +166,7 @@ const OrdersView = ({ id }) => {
                 total += (Number(data.product?.price) + _taxAmt) * data.quantity;
             }
             else {
-               let _dd = jsonData.filter(el => el.orderId == order.id);
+                let _dd = jsonData.filter(el => el.orderId == order.id);
                 if (_dd.length > 0) {
                     let _taxId = Number(data.product?.tax);
                     let _taxpercent = taxData.filter((elm) => Number(elm.id) == _taxId);
@@ -210,15 +217,21 @@ const OrdersView = ({ id }) => {
 
     }
 
-    const handleHtmlToPdf = async (id) => {
+    const handleHtmlToPdf = async (id, popup = true) => {
+        setIsLoading(true);
         const res = await axios.get('/api/file/htmlToPdf?orderId=' + id, {
         }, { withCredentials: true });
         console.log('response', res);
-        if(res.status == 200){
-         alert(res.data?.message);
-         window.open(res?.data?.path, "_blank");
+        if (res.status == 200) {
+            if (popup) {
+                alert(res.data?.message);
+                setIsLoading(false);
+                window.open(res?.data?.path, "_blank");
+            }
+        } else {
+            setIsLoading(false);
         }
-        
+
     }
 
     const handlePayment = (id) => {
@@ -229,59 +242,75 @@ const OrdersView = ({ id }) => {
         route.push('/payment/edit/' + id);
     }
 
-    const handleShipping = (id) => {
-        handleStateChange('shippingProductModel', true);
+    const handleShipping = async (id) => {
+        if (state.productItemDetails?.invoicepath != null || state.productItemDetails?.invoicepath != '') {
+            handleStateChange('shippingProductModel', true);
+        } else {
+            await handleHtmlToPdf(id, false);
+            await fetchProduct();
+            handleStateChange('shippingProductModel', true);
+        }
     }
     const handleShippingSubmit = async () => {
-        if (state.deliveryAgentId == 0 || state.invoicePdf == "" || state.transportReport == "") {
-            alert("All fields are mandatory! ");
+        if (state.deliveryAgentId == 0) {
+            alert("Delivery Agent is mandatory!");
         } else {
-            let formData = new FormData();
-            formData.append("file", state.invoicePdf);
-            const invoicePdfRes = await axios.post(
-                "/api/file?type=1",
-                formData,
-                {
-                    headers: { "Content-Type": "multipart/form-data" },
-                    withCredentials: true
-                }
-            );
-            if (invoicePdfRes.status === 200) {
-                formData = new FormData();
+            let invoicePdfRes = "";
+            // if(state.invoicePdf != ""){}
+            // let formData = new FormData();
+            // formData.append("file", state.invoicePdf);
+            //  invoicePdfRes = await axios.post(
+            //     "/api/file/upload?type=2&namePath=transport",
+            //     formData,
+            //     {
+            //         headers: { "Content-Type": "multipart/form-data" },
+            //         withCredentials: true
+            //     }
+            // );
+            // if (invoicePdfRes.status === 200) {
+            setIsLoading(true);
+            let reportPath = '';
+            if (state.transportReport != "") {
+                let formData = new FormData();
                 formData.append("file", state.transportReport);
                 const reportRes = await axios.post(
-                    "/api/file?type=1",
+                    "/api/file/upload?type=2&namePath=transport&orderId=" + state.productItemDetails?.orderId,
                     formData,
                     {
                         headers: { "Content-Type": "multipart/form-data" },
                         withCredentials: true
                     }
                 );
-                if (reportRes.status === 200) {
-                    const invoiceAssetId = invoicePdfRes.data.assetId;
-                    const reportAssetId = reportRes.data.assetId;
-                    const updateShipping = await axios.put(
-                        "/api/shippings",
-                        {
-                            id: Number(state.productItemDetails?.shipping?.id),
-                            assets: `${"invoicePdf: " + invoicePdfRes?.data?.assetId},${"transportReport:" + reportRes?.data?.assetId}`,
-                            deliveryAgent: state.deliveryAgentId,
-                            status: "SHIPPED",
-                            orderId: Number(state.productItemDetails?.id)
-                        },
-                        { withCredentials: true }
-                    );
-                    if (updateShipping.status === 200) {
-                        alert("Shipping process started successfully!");
-                        handleStateChange('shippingProductModel', false);
-                        fetchProduct();
-                    } else {
-                        alert("Failed to upload transport report, please try again!");
-                    }
+                if (reportRes.status != 200) {
+                    alert("Failed to upload transport report, please try again!");
+                    setIsLoading(false);
+                    return;
                 }
-            } else {
-                alert("Failed to upload invoice pdf, please try again!");
+                reportPath = reportRes?.data?.url;
             }
+            const updateShipping = await axios.put(
+                "/api/shippings",
+                {
+                    id: Number(state.productItemDetails?.shipping?.id),
+                    assets: `${"invoicePdf: " + state.productItemDetails?.invoicepath},${"transportReport:" + reportPath}`,
+                    deliveryAgent: state.deliveryAgentId,
+                    status: "SHIPPED",
+                    orderId: Number(state.productItemDetails?.id)
+                },
+                { withCredentials: true }
+            );
+            if (updateShipping.status === 200) {
+                alert("Shipping process started successfully!");
+                handleStateChange('shippingProductModel', false);
+                fetchProduct();
+                setIsLoading(false);
+            } else {
+                alert("Failed to upload transport report, please try again!");
+                setIsLoading(false);
+            }
+            // } else {
+            //     alert("Failed to upload invoice pdf, please try again!");
+            // }
         }
     }
 
@@ -293,10 +322,11 @@ const OrdersView = ({ id }) => {
         if (state.deliveryFile == "") {
             alert("Please upload file to complete delivery!");
         } else {
+            setIsLoading(true);
             let formData = new FormData();
             formData.append("file", state.deliveryFile);
             const deliveredFile = await axios.post(
-                "/api/file?type=1",
+                "/api/file/upload?type=2&namePath=delivery&orderId=" + state.productItemDetails?.id,
                 formData,
                 {
                     headers: { "Content-Type": "multipart/form-data" },
@@ -308,16 +338,19 @@ const OrdersView = ({ id }) => {
                 const orders = await axios.put('/api/orders/filter?id=' + Number(state.productItemDetails?.id), {
                     "status": "COMPLETED",
                     "delivered": true,
-                    "deliveryAgentAssets": `${deliveredFile?.data?.assetId}`
+                    "deliveryAgentAssets": `${deliveredFile?.data?.url}`
                 }, { withCredentials: true });
                 if (orders.status == 200) {
                     alert('Order: ' + state.productItemDetails?.id + " completed successfully!");
                     handleStateChange("deliveryModel", false);
                     fetchProduct();
                 }
+                setIsLoading(false);
             }
         }
     }
+
+    if (isLoading) return <Loader />;
     return (
         <>
             <div>
@@ -380,9 +413,73 @@ const OrdersView = ({ id }) => {
                                 {state.productItemDetails?.approved && state.productItemDetails?.status.toUpperCase() === "PAID" && <button type="button" onClick={() => handleShipping(state.productItemDetails?.id)} className="btn btn-info">Shipping</button>}
                                 {state.productItemDetails?.status.toUpperCase() === "APPROVED" && state.productItemDetails?.payment?.method == "OFF" && state.productItemDetails?.approved && <button type="button" onClick={() => handlePayment(state.productItemDetails?.payment?.id)} className="btn btn-info">Payment Offline</button>}
 
-                                {state.productItemDetails?.approved ? <button type="button" className="btn btn-success" disabled title="disabled" >Approved</button> : (state.productItemDetails?.status).toUpperCase() === "PENDING" ? <button type="button" className="btn btn-success" onClick={() => updateOrderStatus(state.productItemDetails?.id, "APPROVED")} >Approve</button> : ''}
+                                {state.productItemDetails?.approved ? <button type="button" className="btn btn-success" disabled title="disabled" >Approved</button> : (state.productItemDetails?.status).toUpperCase() === "PENDING" ? <button type="button" className="btn btn-success" onClick={() => updateOrderStatus(state.productItemDetails?.id, "APPROVED")} disabled={isApprove} >
+                                    {isApprove ? (
+                                        <>
+                                            <span
+                                                className="spinner-border spinner-border-sm me-2"
+                                                role="status"
+                                                aria-hidden="true"
+                                            ></span>
+                                            Approving...
+                                        </>
+                                    ) : (
+                                        "Approve"
+                                    )}
+                                </button> : ''}
                                 {(state.productItemDetails?.status).toUpperCase() === "REJECTED" ? <button type="button" className="btn btn-danger" disabled >Rejected</button> : (state.productItemDetails?.status).toUpperCase() === "PENDING" && !state.productItemDetails?.approved ? <button type="button" className="btn btn-danger" onClick={() => updateOrderStatus(state.productItemDetails?.id, "REJECTED")} >Reject</button> : ''}
                                 {(state.productItemDetails?.approved && ["COMPLETED", "SHIPPED", "PAID"].includes(state.productItemDetails?.status.toUpperCase())) ? <button type="button" className="btn btn-success" title="invoice" onClick={() => handleHtmlToPdf(state.productItemDetails?.id)} >Invoice </button> : ''}
+                                {/* {state.productItemDetails?.approved && state.productItemDetails?.status.toUpperCase() === "SHIPPED" && state.productItemDetails?.shipping?.status.toUpperCase() === "SHIPPED" && <a href={state.productItemDetails?.shipping?.assets?.split(',').find(v => v.startsWith('transportReport:'))?.split('transportReport:')[1]} className="btn btn-info">Transport Report</a>} */}
+                                {state.productItemDetails?.approved &&
+                                    (state.productItemDetails?.status?.toUpperCase() === "SHIPPED" || state.productItemDetails?.status?.toUpperCase() === "COMPLETED") &&
+                                    (state.productItemDetails?.shipping?.status?.toUpperCase() === "SHIPPED") && (
+                                        <a
+                                            href={
+                                                state.productItemDetails?.shipping?.assets
+                                                    ?.split(',')
+                                                    .find(v => v.startsWith('transportReport:'))
+                                                    ?.split('transportReport:')[1]
+                                            }
+                                            className="link-primary fw-semibold text-decoration-underline"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            Transport
+                                        </a>
+                                    )}
+
+                                {state.productItemDetails?.approved &&
+                                    state.productItemDetails?.status?.toUpperCase() === "COMPLETED" &&
+                                    state.productItemDetails?.shipping?.status?.toUpperCase() === "SHIPPED" && (
+                                        <a
+                                            href={
+                                                state.productItemDetails?.shipping?.assets
+                                                    ?.split(',')
+                                                    .find(v => v.startsWith('transportReport:'))
+                                                    ?.split('transportReport:')[1]
+                                            }
+                                            className="link-primary fw-semibold text-decoration-underline"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            delivery doc
+                                        </a>
+                                    )}
+
+                                {/* <a
+                                    href={
+                                        state.productItemDetails?.shipping?.assets
+                                            ?.split(',')
+                                            .find(v => v.startsWith('transportReport:'))
+                                            ?.split('transportReport:')[1]
+                                    }
+                                    className="link-primary fw-semibold text-decoration-underline"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Delivery Doc
+                                </a> */}
+
                             </div>
                         }
                     </div>
@@ -570,12 +667,12 @@ const OrdersView = ({ id }) => {
                     </select>
 
                     {/* Invoice PDF */}
-                    <div className="mb-3">
+                    <div className="pt-3 pb-3">
                         <label htmlFor="invoicePdf" className="form-label fw-semibold">
                             Invoice PDF
                         </label>
 
-                        <input
+                        {/* <input
                             type="file"
                             name="invoicePdf"
                             id="invoicePdf"
@@ -584,7 +681,10 @@ const OrdersView = ({ id }) => {
                             onChange={(e) =>
                                 handleStateChange("invoicePdf", e.target.files[0])
                             }
-                        />
+                        /> */}
+                        <div className="d-flex justify-content-end">
+                            <a href={state.productItemDetails?.invoicepath} target="_blank" id="invoicePdf" >Invoice</a>
+                        </div>
                     </div>
 
                     {/* Transport Report */}

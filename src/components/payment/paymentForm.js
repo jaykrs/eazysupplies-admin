@@ -38,26 +38,28 @@ const PaymentForm = ({ updateId, buttonName, model }) => {
                 setIsLoading(false);
             }
         } catch (err) {
+            console.log("error", err);
             alert('something went wrong');
         }
     }
     if (updateId && isLoading) return <Loader />;
 
     const handleSubmit = async (values) => {
-        let file = values.images.length ?  await uploadFiles({files:values.images,type: 1}) : "";
-        let filePath ="";
-        if(file != ""){
-           for(let p of file.data.assets){
-            if(filePath == ""){
-                filePath = `${p.name}`
-            }else{
-                filePath += `,${p.name}`
-            }
-           }
-        }else{
+        let file = values.images.length ? await uploadFiles({ files: values.images, type: 2, orderId: data?.order?.id }) : "";
+        let filePath = "";
+        if (file != "") {
+            //    for(let p of file.data.assets){
+            //     if(filePath == ""){
+            //         filePath = `${p.name}`
+            //     }else{
+            //         filePath += `,${p.name}`
+            //     }
+            //    }
+            filePath = file?.data?.assets?.join(',');
+        } else {
             filePath = file;
         }
-        console.log("filepath",filePath);
+        console.log("filepath", filePath);
         if (values.transactionid == "" && values.status == "SUCCESS") {
             alert('transaction Id is required to complete the payment with status SUCCESS!');
             return;
@@ -78,7 +80,7 @@ const PaymentForm = ({ updateId, buttonName, model }) => {
                     alert("Payment updated successfully!");
                     router.push("/payment");
                 }
-              setIsLoading(false);
+                setIsLoading(false);
             } else {
                 if (status.toUpperCase() == "APPROVED") {
                     let orderDetails = await axios.get('/api/orders/' + Number(id), { withCredentials: true });
@@ -117,7 +119,7 @@ const PaymentForm = ({ updateId, buttonName, model }) => {
                             "orderId": Number(values.order),
                             "amount": Number(values.amount),
                             "method": values.method,
-                             "transectionid": values.transactionid,
+                            "transectionid": values.transactionid,
                             "status": values.status,
                             "file": filePath != "" ? filePath : data?.file
                         }, { withCredentials: true });
@@ -150,7 +152,7 @@ const PaymentForm = ({ updateId, buttonName, model }) => {
         }
     }
 
-    const uploadFiles = async ({ files, type = 1 }) => {
+    const uploadFiles = async ({ files, type = 2, orderId }) => {
         const formData = new FormData();
 
         files.forEach((item) => {
@@ -158,7 +160,7 @@ const PaymentForm = ({ updateId, buttonName, model }) => {
         });
 
         return await axios.post(
-            `/api/file/multifile?type=${type}`,
+            `/api/file/multifile?type=${type}&fileNameWith=payment&orderId=` + orderId,
             formData,
             {
                 withCredentials: true, // 🔥 THIS is required for cookies
@@ -241,11 +243,25 @@ const PaymentForm = ({ updateId, buttonName, model }) => {
                                 helperText="Upload image"
                             />
 
+                            {/* {
+                                data?.order?.file?.split(',').map((el, index) => (
+                                    // <a href={el} >file{index + 1}</a>
+                                    <Link href={el} className="link-primary">
+                                        file{index + 1}
+                                    </Link>
+                                ))
+                            } */}
+
                             <FormBtn buttonName={buttonName} />
                         </Form>
                     </>
                 )}
             </Formik>
+            {
+                data?.order?.file?.split(',').map((el, index) => (
+                    <a href={el} >file{index + 1}</a>
+                ))
+            }
         </>
     );
 };
