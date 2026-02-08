@@ -32,7 +32,7 @@ const OrderStatus = ({ status }) => {
               </Link>
             </Col>
             <Col xxl="4" sm="6" className="booking-status-card">
-              <Link className="booking-widget-card card" href={{ pathname: `/order`, query: { status: "processing" } }}>
+              <Link className="booking-widget-card card" href={{ pathname: `/order`, query: { status: "approved" } }}>
                 <div className="booking-widget-icon">
                   <Image height={26} width={26} src={"/assets/images/svg/note.svg"} className="img-fluid" alt="note" />
                 </div>
@@ -44,7 +44,7 @@ const OrderStatus = ({ status }) => {
               </Link>
             </Col>
             <Col xxl="4" sm="6" className="booking-status-card">
-              <Link className="booking-widget-card card" href={{ pathname: `/order`, query: { status: "cancelled" } }}>
+              <Link className="booking-widget-card card" href={{ pathname: `/order`, query: { status: "rejected" } }}>
                 <div className="booking-widget-icon">
                   <Image height={26} width={26} src={"/assets/images/svg/box-remove.svg"} className="img-fluid" alt="Box1" />
                 </div>
@@ -56,7 +56,7 @@ const OrderStatus = ({ status }) => {
               </Link>
             </Col>
             <Col xxl="4" sm="6" className="booking-status-card">
-              <Link className="booking-widget-card card" href={{ pathname: `/order`, query: { status: "shipped" } }}>
+              <Link className="booking-widget-card card" href={{ pathname: `/order`, query: { status: "paid" } }}>
                 <div className="booking-widget-icon">
                   <Image height={26} width={26} src={"/assets/images/svg/box.svg"} className="img-fluid" alt="Group" />
                 </div>
@@ -68,7 +68,7 @@ const OrderStatus = ({ status }) => {
               </Link>
             </Col>
             <Col xxl="4" sm="6" className="booking-status-card">
-              <Link className="booking-widget-card card" href={{ pathname: `/order`, query: { status: "out_for_delivery" } }}>
+              <Link className="booking-widget-card card" href={{ pathname: `/order`, query: { status: "shipped" } }}>
                 <div className="booking-widget-icon">
                   <Image height={26} width={26} src={"/assets/images/svg/group.svg"} className="img-fluid" alt="shop" />
                 </div>
@@ -80,7 +80,7 @@ const OrderStatus = ({ status }) => {
               </Link>
             </Col>
             <Col xxl="4" sm="6" className="booking-status-card">
-              <Link className="booking-widget-card card" href={{ pathname: `/order`, query: { status: "delivered" } }}>
+              <Link className="booking-widget-card card" href={{ pathname: `/order`, query: { status: "cancelled" } }}>
                 <div className="booking-widget-icon">
                   <Image height={26} width={26} src={"/assets/images/svg/shop.svg"} className="img-fluid" alt="boxRemove" />
                 </div>
@@ -92,7 +92,7 @@ const OrderStatus = ({ status }) => {
               </Link>
             </Col>
             <Col xxl="4" sm="6" className="booking-status-card">
-              <Link className="booking-widget-card card" href={{ pathname: `/order`, query: { status: "delivered" } }}>
+              <Link className="booking-widget-card card" href={{ pathname: `/order`, query: { status: "completed" } }}>
                 <div className="booking-widget-icon">
                   <Image height={26} width={26} src={"/assets/images/svg/shop.svg"} className="img-fluid" alt="boxRemove" />
                 </div>
