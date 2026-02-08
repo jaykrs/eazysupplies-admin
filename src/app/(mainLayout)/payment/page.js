@@ -250,10 +250,9 @@ const AllPayments = () => {
                                                 : "-"}
                                         </td>
                                         <td>
-                                            <div className="d-flex gap-2">
-                                                <button onClick={() => handleView(payment.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">View</button>
+                                            <div className="d-flex justify-content-center gap-2">
+                                                {/* <button onClick={() => handleView(payment.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">View</button> */}
                                                 <button onClick={() => handleEdit(payment.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">Edit</button>
-                                                <button onClick={() => handleDelete(payment.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-danger">Delete</button>
                                             </div>
                                         </td>
                                     </tr>

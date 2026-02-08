@@ -17,6 +17,28 @@ export async function GET(request) {
         const { searchParams } = new URL(request.url);
         const email = searchParams.get('email');
         const id = Number(searchParams.get('userId'));
+        const orderId = Number(searchParams.get('orderId'));
+        if (orderId) {
+            const orders = await prisma.order.findUnique({
+                where: {
+                    id: Number(orderId),
+                },
+                include: {
+                    user: true,
+                    items: {
+                        include: {
+                            product: true, // 👈 this includes product details inside each item
+                        },
+                    },
+                    shipping: true,
+                    payment: true,
+                },
+            });
+            const tax = await prisma.tax.findMany();
+            const deliveryAgent = await prisma.deliveryAgent.findMany();
+            return NextResponse.json({ data: orders, tax, deliveryAgent }, { status: 200 });
+        }
+
         if (!email && !id) {
             return NextResponse.json({ error: "userID or email is missing!" }, { status: 401 });
         }
@@ -57,7 +79,7 @@ export async function PUT(request) {
     try {
         if (verifyAdmin()) {
             if (deliveryAgentAssets && delivered) {
-                let orderUpdate = await prisma.order.update({ where: { id: id }, data: { status: status,deliveryAgentAssets:deliveryAgentAssets } })
+                let orderUpdate = await prisma.order.update({ where: { id: id }, data: { status: status, deliveryAgentAssets: deliveryAgentAssets } })
                 return NextResponse.json({ msg: "Order: " + id + " " + status + " successfully!" }, { status: 200 });
             }
             let orderUpdate = await prisma.order.update({ where: { id: id }, data: { status: status } })

@@ -8,7 +8,6 @@ import { useSearchParams } from "next/navigation";
 const AllOrders = () => {
   const searchParams = useSearchParams();
   const queryStatus = searchParams.get("status");
-  console.log('qry status 1', queryStatus);
   const route = useRouter();
   const [orders, setOrders] = useState({});
   const [refreshState, setRefeshState] = useState(false);
@@ -56,7 +55,6 @@ const AllOrders = () => {
     if (res.status == 200) {
       let filterData = res?.data?.data?.filter(el => el?.orders?.length != 0);
       setOrders(filterData);
-
     }
   }
 
@@ -66,7 +64,6 @@ const AllOrders = () => {
     if (res.status == 200) {
       let filterData = res?.data?.orders;
       setOrderList(filterData);
-
     }
   }
 
@@ -74,7 +71,7 @@ const AllOrders = () => {
     route.push('/order/details/' + id);
   }
   const handleViewOrder = async (id)=> {
-
+     route.push('/order/details/view/' + id);
   }
   const handleEditOrder = async (id)=> {
 
@@ -97,7 +94,7 @@ const AllOrders = () => {
         Orders List
       </div>
 
-      {queryStatus == null &&
+      {!queryStatus &&
         <div style={{ maxHeight: "400px", overflowY: "auto", overflowX: "auto" }}>
           <table className="min-w-full border border-gray-300">
             <thead className="bg-gray-100">
@@ -164,7 +161,6 @@ const AllOrders = () => {
                 <th className="border px-4 py-2">Total Items(no.)</th>
                 <th className="border px-4 py-2">Total Qty(no.)</th>
                 <th className="border px-4 py-2">Payment Status</th>
-                <th className="border px-4 py-2">Product</th>
                 <th className="border px-4 py-2">Ordered date</th>
                 <th className="border px-4 py-2">Action</th>
               </tr>
@@ -172,23 +168,21 @@ const AllOrders = () => {
             <tbody>
               {orderList?.length > 0 ? (
                 orderList.map((element) => {
-                 const productNameList = element?.items?.map(el=> el?.product?.name).filter(Boolean)?.join(", ");
+                // const productNameList = element?.items?.map(el=> el?.product?.name).filter(Boolean)?.join(", ");
                  const productQty = element?.items?.reduce((sum, item)=> sum + ( item?.quantity || 0), 0);
                   return (
                     <tr key={element?.id}>
                       <td className="border px-4 py-2">{element?.id}</td>
                       <td className="border px-4 py-2">{element?.status}</td>
-                      <td className="border px-4 py-2">{element?.approved}</td>
+                      <td className="border px-4 py-2">{element?.approved ? 'YES': "NO"}</td>
                       <td className="border px-4 py-2">{element?.user?.name}</td>
                       <td className="border px-4 py-2">{element?.items?.length || 0}</td>
                       <td className="border px-4 py-2">{productQty}</td>
                       <td className="border px-4 py-2">{element?.payment?.status}</td>
-                      <td className="border px-4 py-2">{productNameList || ""}</td>
                       <td className="border px-4 py-2">{element?.createdAt ? new Date(element.createdAt).toLocaleDateString() : "-"}</td>
                       <td>
-                        <div className="d-flex gap-2 px-2">
+                        <div className="d-flex justify-content-center gap-1">
                           <button onClick={() => handleViewOrder(element?.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">View</button>
-                          <button onClick={() => handleEditOrder(element?.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">Edit</button>
                         </div>
                       </td>
                     </tr>

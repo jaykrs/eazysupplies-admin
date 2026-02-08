@@ -72,7 +72,7 @@ const TopDashSection = ({ role }) => {
         <div className="card-bottom-space">
           <Row className="row-cols-xxl-5 row-cols-md-3 row-cols-sm-2 row-cols-1 g-sm-4 g-3">
             <Col className="widget-card-box">
-              <a className="widget-card card mb-0">
+              <Link href={`/brand`} className="widget-card card mb-0">
                 <div className="widget-icon">
                   <Image height={26} width={26} src={"/assets/images/svg/empty-wallet.svg"} className="img-fluid" alt="emptyWallet" />
                 </div>
@@ -80,11 +80,11 @@ const TopDashSection = ({ role }) => {
                   <h6>{t("TotalBrand")}</h6>
                   <h2>{status?.BRAND}</h2>
                 </div>
-              </a>
+              </Link>
             </Col>
             
             <Col className="widget-card-box">
-                <Link href={`/store`} className="widget-card card mb-0">
+                <Link href={`/category`} className="widget-card card mb-0">
                   <div className="widget-icon">
                     <Image height={26} width={26} src={"/assets/images/svg/shop-white.svg"} className="img-fluid" alt="shop-white" />
                   </div>

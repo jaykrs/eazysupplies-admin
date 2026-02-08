@@ -31,11 +31,11 @@ export async function PUT(request) {
 
     const updated = await prisma.payment.updateMany({
       where: {
-        orderId: body.orderId,
-        transectionid: body.transectionid,
+        orderId: body.orderId
       },
       data: {
         status: body.status,
+         transectionid: body.transectionid,
       },
     });
 
@@ -45,7 +45,7 @@ export async function PUT(request) {
         { status: 404 }
       );
     }
-
+   let order = await prisma.order.update({where: {id: Number(body?.orderId)}, data: {status: body.status}});
     return NextResponse.json(
       { msg: "Payment updated successfully" },
       { status: 200 }

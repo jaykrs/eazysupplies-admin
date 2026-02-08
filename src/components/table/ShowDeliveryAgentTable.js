@@ -121,7 +121,7 @@ const ShowDeliveryAgentTable = ({ current_page, per_page, mutate, isCheck, setIs
                                             <button onClick={() => {
                                                 handleEdit(tableData)
                                             }} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">Edit</button>
-                                            <button onClick={() => handleDelete(tableData)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-danger">Delete</button>
+                                            {/* <button onClick={() => handleDelete(tableData)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-danger">Delete</button> */}
                                         </div>
                                     </td>
                                 </>
