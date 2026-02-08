@@ -9,21 +9,50 @@ import request from "../../utils/axiosUtils";
 import { StatisticsCountAPI } from "../../utils/axiosUtils/API";
 import OrderStatus from "./OrderStatus";
 import useCustomQuery from "../../utils/hooks/useCustomQuery";
+import axios from "axios";
 
 const TopDashSection = ({ role }) => {
   const { t } = useTranslation("common");
   const [filterType, setFilterType] = useState("All Time");
   const [filterValue, setFilterValue] = useState(null);
   const { convertCurrency } = useContext(SettingContext);
+  const [userData, setUserData] = useState();
+  const [status, setStatus] = useState({
+    PENDING: 0,
+    APPROVED: 0,
+    PAID: 0,
+    SHIPPED: 0,
+    COMPLETED: 0,
+    CANCELLED: 0,
+    REJECTED: 0,
+    TOTAL: 0,
+    USER: 0,
+    PRODUCT: 0,
+    CATEGORY:0,
+    BRAND: 0,
+    NAME: "",
+    EMAIL: ""
+  });
   const router = useRouter();
 
-  const { data, refetch } = useCustomQuery([StatisticsCountAPI], () => request({ url: StatisticsCountAPI, params: { filter_by: filterValue } }, router), { refetchOnWindowFocus: false, select: (data) => data?.data });
-  useEffect(() => {
-    if (filterValue != null) {
-      refetch();
-    }
-  }, [filterValue]);
+  // const { data, refetch } = useCustomQuery([StatisticsCountAPI], () => request({ url: StatisticsCountAPI, params: { filter_by: filterValue } }, router), { refetchOnWindowFocus: false, select: (data) => data?.data });
+  // useEffect(() => {
+  //   if (filterValue != null) {
+  //     refetch();
+  //   }
+  // }, [filterValue]);
 
+  useEffect(() => {
+    getOrderStatus();
+  }, []);
+
+  const getOrderStatus = async () => {
+    let res = await axios.get("/api/orders/filter/status", { withCredentials: true });
+    if (res.status == 200) {
+      setStatus(res.data);
+    }
+    
+  }
   return (
     <section className="dashboard-tiles">
       <Container fluid={true} className="p-0">
@@ -32,12 +61,12 @@ const TopDashSection = ({ role }) => {
             <Card className="m-0">
               <Image height={162} width={497} src={"/assets/images/bg.jpg"} className="img-fluid" alt="box-time" />
               <CardBody>
-                <h2>{t("WelcomeBackAdmin")}</h2>
+                <h2>Welcome back {status?.NAME}</h2>
                 <p>{t("ManageApplication'sDataAndOperationsWithRealTimeAnalytics,UserManagementToolsAndCustomizableReports")}.</p>
               </CardBody>
             </Card>
           </Col>
-          <OrderStatus setFilterValue={setFilterValue} data={data} filterType={filterType} setFilterType={setFilterType} />
+          <OrderStatus status={status}  />
         </Row>
 
         <div className="card-bottom-space">
@@ -48,12 +77,23 @@ const TopDashSection = ({ role }) => {
                   <Image height={26} width={26} src={"/assets/images/svg/empty-wallet.svg"} className="img-fluid" alt="emptyWallet" />
                 </div>
                 <div>
-                  <h6>{t("TotalRevenue")}</h6>
-                  <h2>{convertCurrency(data?.total_revenue || 0, true)}</h2>
+                  <h6>{t("TotalBrand")}</h6>
+                  <h2>{status?.BRAND}</h2>
                 </div>
               </a>
             </Col>
-
+            
+            <Col className="widget-card-box">
+                <Link href={`/store`} className="widget-card card mb-0">
+                  <div className="widget-icon">
+                    <Image height={26} width={26} src={"/assets/images/svg/shop-white.svg"} className="img-fluid" alt="shop-white" />
+                  </div>
+                  <div>
+                    <h6>{t("TotalCategory")}</h6>
+                    <h2>{status?.CATEGORY}</h2>
+                  </div>
+                </Link>
+              </Col>
             <>
               <Col className="widget-card-box">
                 <Link href={`/product`} className="widget-card card mb-0">
@@ -62,7 +102,7 @@ const TopDashSection = ({ role }) => {
                   </div>
                   <div>
                     <h6>{t("TotalProducts")}</h6>
-                    <h2>{data?.total_products}</h2>
+                    <h2>{status?.PRODUCT}</h2>
                   </div>
                 </Link>
               </Col>
@@ -73,21 +113,11 @@ const TopDashSection = ({ role }) => {
                   </div>
                   <div>
                     <h6>{t("TotalOrders")}</h6>
-                    <h2>{data?.total_orders}</h2>
+                    <h2>{ status?.TOTAL }</h2>
                   </div>
                 </Link>
               </Col>
-              <Col className="widget-card-box">
-                <Link href={`/store`} className="widget-card card mb-0">
-                  <div className="widget-icon">
-                    <Image height={26} width={26} src={"/assets/images/svg/shop-white.svg"} className="img-fluid" alt="shop-white" />
-                  </div>
-                  <div>
-                    <h6>{t("TotalStores")}</h6>
-                    <h2>{data?.total_stores}</h2>
-                  </div>
-                </Link>
-              </Col>
+              
               <Col className="widget-card-box">
                 <Link href={`/user`} className="widget-card card">
                   <div className="widget-icon">
@@ -95,7 +125,7 @@ const TopDashSection = ({ role }) => {
                   </div>
                   <div>
                     <h6>{t("TotalUser")}</h6>
-                    <h2>{data?.total_users}</h2>
+                    <h2>{status?.USER}</h2>
                   </div>
                 </Link>
               </Col>

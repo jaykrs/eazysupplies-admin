@@ -14,7 +14,7 @@ const OrdersView = ({ id }) => {
     const [model, setModel] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isApprove, setIsApprove] = useState(false);
-    const [isShipping, setIsShipping] = useState(false);
+    const [isReject, setIsReject] = useState(false);
     const [state, setState] = useState({
         Orders: [],
         qtyTempValue: 0,
@@ -108,7 +108,7 @@ const OrdersView = ({ id }) => {
 
     const updateOrderStatus = async (id, action) => {
         try {
-            setIsApprove(true);
+            action == "APPROVED" ? setIsApprove(true) : setIsReject(true);
             const res = await axios.put('/api/orders', {
                 id: Number(id),
                 status: action.toUpperCase(),
@@ -118,11 +118,11 @@ const OrdersView = ({ id }) => {
             if (res.status === 200) {
                 alert(`Order ${action.toUpperCase()} successfully!`);
                 handleStateChange('refreshState', true);
-                setIsApprove(false);
             }
+            action == "APPROVED" ? setIsApprove(false) : setIsReject(false);
         } catch (err) {
             console.error('error', "Something went wrong, please try again!");
-            setIsApprove(false);
+            action == "APPROVED" ? setIsApprove(false) : setIsReject(false);
         }
     };
     function generateProductDiscount(product, ordId) {
@@ -274,7 +274,7 @@ const OrdersView = ({ id }) => {
                 let formData = new FormData();
                 formData.append("file", state.transportReport);
                 const reportRes = await axios.post(
-                    "/api/file/upload?type=2&namePath=transport&orderId=" + state.productItemDetails?.orderId,
+                    "/api/file/upload?type=2&namePath=transport&orderId=" + state.productItemDetails?.id,
                     formData,
                     {
                         headers: { "Content-Type": "multipart/form-data" },
@@ -427,7 +427,20 @@ const OrdersView = ({ id }) => {
                                         "Approve"
                                     )}
                                 </button> : ''}
-                                {(state.productItemDetails?.status).toUpperCase() === "REJECTED" ? <button type="button" className="btn btn-danger" disabled >Rejected</button> : (state.productItemDetails?.status).toUpperCase() === "PENDING" && !state.productItemDetails?.approved ? <button type="button" className="btn btn-danger" onClick={() => updateOrderStatus(state.productItemDetails?.id, "REJECTED")} >Reject</button> : ''}
+                                {(state.productItemDetails?.status).toUpperCase() === "REJECTED" ? <button type="button" className="btn btn-danger" disabled >Rejected</button> : (state.productItemDetails?.status).toUpperCase() === "PENDING" && !state.productItemDetails?.approved ? <button type="button" className="btn btn-danger" onClick={() => updateOrderStatus(state.productItemDetails?.id, "REJECTED")} disabled={isReject} >
+                                    {isReject ? (
+                                        <>
+                                            <span
+                                                className="spinner-border spinner-border-sm me-2"
+                                                role="status"
+                                                aria-hidden="true"
+                                            ></span>
+                                            Cancelling...
+                                        </>
+                                    ) : (
+                                        "Reject"
+                                    )}
+                                </button> : ''}
                                 {(state.productItemDetails?.approved && ["COMPLETED", "SHIPPED", "PAID"].includes(state.productItemDetails?.status.toUpperCase())) ? <button type="button" className="btn btn-success" title="invoice" onClick={() => handleHtmlToPdf(state.productItemDetails?.id)} >Invoice </button> : ''}
                                 {/* {state.productItemDetails?.approved && state.productItemDetails?.status.toUpperCase() === "SHIPPED" && state.productItemDetails?.shipping?.status.toUpperCase() === "SHIPPED" && <a href={state.productItemDetails?.shipping?.assets?.split(',').find(v => v.startsWith('transportReport:'))?.split('transportReport:')[1]} className="btn btn-info">Transport Report</a>} */}
                                 {state.productItemDetails?.approved &&

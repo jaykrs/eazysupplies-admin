@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import { verifyAdmin,authenticate } from "../utils/jwt";
+import { verifyAdmin, authenticate } from "../utils/jwt";
 import { MESSAGES } from "../utils/statusConstant";
-import { generateOrderSummaryHTML,generateApprovedOrderSummaryHTML, sendEmail, sendWhatsAppOrderCreate } from "../utils/emailUtils";
+import { generateOrderSummaryHTML, generateApprovedOrderSummaryHTML, sendEmail, sendWhatsAppOrderCreate } from "../utils/emailUtils";
 import { createNotification } from "../utils/emailUtils";
 
 const prisma = new PrismaClient();
@@ -57,9 +57,9 @@ export async function POST(request) {
     const body = await request.json();
     const { items, shipping, payment, jsonData } = body;
     const payload = await authenticate(request);
-      if (!payload) {
-        return NextResponse.json({ error: MESSAGES.UNAUTHORIZED }, { status: 401 });
-      }
+    if (!payload) {
+      return NextResponse.json({ error: MESSAGES.UNAUTHORIZED }, { status: 401 });
+    }
     if (!payload.userId || !items?.length) {
       return NextResponse.json(
         { error: "userId and at least one item are required" },
@@ -99,17 +99,17 @@ export async function POST(request) {
       },
     });
 
-const itemsText = order.items
-  .map((item) => {
-    const lineTotal = item.price * item.quantity;
-    return `${item.product.name} × ${item.quantity} = ₹${lineTotal.toFixed(2)}`;
-  })
-  .join('\n');
+    const itemsText = order.items
+      .map((item) => {
+        const lineTotal = item.price * item.quantity;
+        return `${item.product.name} × ${item.quantity} = ₹${lineTotal.toFixed(2)}`;
+      })
+      .join('\n');
 
     const orderhtml = generateOrderSummaryHTML(order, payload.name);
-    await sendEmail(payload.email, "Order Created with "+ order.id, orderhtml);
-    await sendWhatsAppOrderCreate (order?.user?.name, order?.user?.countryCode + order?.user?.phone, order.id, "Status : Created", itemsText);
-    await createNotification("Order Created with "+ order.id, payload.userId.toString(), orderhtml);
+    await sendEmail(payload.email, "Order Created with " + order.id, orderhtml);
+    await sendWhatsAppOrderCreate(order?.user?.name, order?.user?.countryCode + order?.user?.phone, order.id, "Status : Created", itemsText);
+    await createNotification("Order Created with " + order.id, payload.userId.toString(), orderhtml);
     return NextResponse.json(order, { status: 201 });
   } catch (error) {
     console.log("POST /orders error:", error);
@@ -119,11 +119,11 @@ const itemsText = order.items
 
 export async function PUT(request) {
   try {
+    const body = await request.json();
+    const { id, status, approved = false } = body;
     if (verifyAdmin(request)) {
-      const body = await request.json();
-      const { id, status, approved = false } = body;
       if (approved) {
-        console.log("approved inside",approved);
+        console.log('approve');
         let filterProduct, offer, jsonData = [], jsonFound = false;
         let orders = await prisma.order.findUnique({
           where: {
@@ -206,32 +206,37 @@ export async function PUT(request) {
         }
 
         let result = await prisma.order.update({ where: { id }, data: { status, approved } });
-        const notification = await prisma.notification.create({ data: {
-          name:'Order ' + id + ' approved',
-          type: "notification",
-          remarks: "Order Number " + id + " approved by Admin, Please proceed for payment",
-          recepient: orders?.userId.toString()
-        } });
+        const notification = await prisma.notification.create({
+          data: {
+            name: 'Order ' + id + ' approved',
+            type: "notification",
+            remarks: "Order Number " + id + " approved by Admin, Please proceed for payment",
+            recepient: orders?.userId.toString()
+          }
+        });
         //return NextResponse.json(result);
         // return NextResponse.json({ offer, Products, filterProduct });
-      const itemsTextapproved = orders.items
-        .map((item) => {
-          return `${item.product.name} X ${item.quantity}`;
-        })
-      .join('\n');
-      const orderhtml = generateApprovedOrderSummaryHTML(orders,Number(orders.userId), orders?.user?.name);
-      await sendEmail(orders?.user?.email, "Order Approved with "+ result.id, orderhtml);
-      await createNotification("Order Approved with "+ orders.id, orders?.userId?.toString(), orderhtml);
-      await sendWhatsAppOrderCreate (orders?.user?.name, orders?.user?.countryCode + orders?.user?.phone, orders.id, "Status : Approved", itemsTextapproved);   
-      const pdfurl = `http://localhost:3000/api/`+`file/htmlToPdf?orderId=${orders.id}`;
-      console.log(pdfurl);
-      const response = await fetch(pdfurl);
-      if (!response.ok) {
-        throw new Error('Failed to fetch external data');
-      }  
+        const itemsTextapproved = orders.items
+          .map((item) => {
+            return `${item.product.name} X ${item.quantity}`;
+          })
+          .join('\n');
+        const orderhtml = generateApprovedOrderSummaryHTML(orders, Number(orders.userId), orders?.user?.name);
+        await sendEmail(orders?.user?.email, "Order Approved with " + result.id, orderhtml);
+        await createNotification("Order Approved with " + orders.id, orders?.userId?.toString(), orderhtml);
+        await sendWhatsAppOrderCreate(orders?.user?.name, orders?.user?.countryCode + orders?.user?.phone, orders.id, "Status : Approved", itemsTextapproved);
+
+        return NextResponse.json("approved");
+      } else if (status == "REJECTED") {
+        const order = await prisma.order.findUnique({ where: { id: id } });
+        if (!order) {
+          return NextResponse.json({ msg: "Order details not found!" }, { status: 404 });
+        }
+        let update = await prisma.order.update({ where: { id: id }, data:{ status : status} });
+        return NextResponse.json({msg: "Rejected"}, { status: 200 });
+      } else {
+       return NextResponse.json({ msg: "Invalid method!" });
       }
-     
-    return NextResponse.json("approved");
     }
   } catch (Error) {
     console.log(Error);
