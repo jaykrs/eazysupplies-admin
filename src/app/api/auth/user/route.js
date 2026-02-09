@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { parseAuthCookie, verifyJwt } from "../../utils/jwt";
-import { sendEmail, sendWhatsApp, createNotification,sendWhatsAppUserReg } from "../../utils/emailUtils";
+import { sendEmail, sendWhatsApp, createNotification, sendWhatsAppUserReg } from "../../utils/emailUtils";
 import { hashSync } from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
 
@@ -48,7 +48,7 @@ export async function GET(request) {
     });
 
     return NextResponse.json(
-      {  data: res},
+      { data: res },
       { status: 200 }
     );
   }
@@ -93,7 +93,6 @@ export async function POST(request) {
     const body = await request.json();
     let { name, email, phone, countryCode, gstn, password } = body;
     countryCode = countryCode ? countryCode : "91";
-    console.log("Request body:", body);
 
     // Validate required fields
     if (!name || !email || !phone || !gstn || !password || !countryCode) {
@@ -104,7 +103,7 @@ export async function POST(request) {
     }
 
     // Check if user already exists (matching all identifiers)
-    let existingUser,existingUser1,existingUser2;
+    let existingUser, existingUser1, existingUser2;
     if (email) existingUser = await prisma.user.findUnique({ where: { email } });
     if (gstn) existingUser = await prisma.user.findFirst({ where: { gstn } });
     if (phone) existingUser = await prisma.user.findFirst({ where: { phone } });
@@ -139,6 +138,15 @@ export async function POST(request) {
         roleId: role.id,
       },
     });
+    let category = await prisma.category.findFirst({ where: { name: "DEFAULT" } });
+    let addOffer = await prisma.offers.create({
+      "name": "NA",
+      "discount": 0,
+      "userId": newUser?.id,
+      "tag": "",
+      "categoryId": category.id,
+      "remarks": "DEFAULT"
+    });
     if (newUser) {
       const emailsub = "Welcome easysupply.com";
       let userName = newUser.name;
@@ -148,7 +156,7 @@ export async function POST(request) {
       htmlmsg = htmlmsg.replaceAll("$userName", userName).replaceAll("$userEmail", userEmail).replaceAll("$otp", otp).replaceAll("$platformUrl", process.env.PLATFORM_URL).replaceAll("$brandName", process.env.BRAND_NAME);
       plainmsg = plainmsg.replaceAll("$userName", userName).replaceAll("$userEmail", userEmail).replaceAll("$otp", otp).replaceAll("$platformUrl", process.env.PLATFORM_URL).replaceAll("$brandName", process.env.BRAND_NAME);
       await sendEmail(newUser.email, emailsub, htmlmsg);
-      await sendWhatsAppUserReg(userName,newUser.countryCode + newUser.phone,userEmail,newUser.gstn );
+      await sendWhatsAppUserReg(userName, newUser.countryCode + newUser.phone, userEmail, newUser.gstn);
       sendWhatsApp(newUser.countryCode + newUser.phone, "text", plainmsg);
       createNotification(emailsub, newUser.id.toString(), plainmsg);
     }
