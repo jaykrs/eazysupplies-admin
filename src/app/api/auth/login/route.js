@@ -13,6 +13,7 @@ const MESSAGES = {
   REQUIRED_FIELDS: "Email | gstn | phone and password are required",
   USER_NOT_FOUND: "User does not exist",
   USER_INACTIVE: "User is not active",
+  USER_INACTIVE: "User is deleted",
   INVALID_PASSWORD: "Incorrect password",
   MISSING_CRED:"Password or OTP Required",
   INVALID_OTP: "Incorrect OTP",
@@ -58,6 +59,11 @@ if (!user) {
     // Check user status
     if (!user.status) {
       return NextResponse.json({ error: MESSAGES.USER_INACTIVE }, { status: 401 });
+    }
+
+    // Check user status
+    if (user.deleted) {
+      return NextResponse.json({ error: MESSAGES.USER_DELETED }, { status: 401 });
     }
 
     if(!password && !otp)

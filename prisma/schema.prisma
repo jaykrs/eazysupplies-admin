@@ -35,7 +35,8 @@ model User {
   wishlist       String?
   favorite       String?
   gstn           String @unique
-  bankDetails  String?     
+  bankDetails  String?
+  deleted    Boolean   @default(false)     
 }
 
 model Role {

@@ -11,6 +11,7 @@ const prisma = new PrismaClient();
 const MESSAGES = {
   REQUIRED_FIELDS: "Email and password are required",
   USER_NOT_FOUND: "User does not exist",
+  USER_INACTIVE: "User is deleted",
   USER_INACTIVE: "User is not active",
   INVALID_PASSWORD: "Incorrect password",
   LOGIN_SUCCESS: "Login successful",
@@ -50,6 +51,10 @@ export async function POST(request) {
       return NextResponse.json({ error: MESSAGES.USER_INACTIVE }, { status: 401 });
     }
 
+     // Check user status
+    if (user.deleted) {
+      return NextResponse.json({ error: MESSAGES.USER_DELETED }, { status: 401 });
+    }
     // Validate password
     const isPasswordValid = await compare(password, user.password);
     if (!isPasswordValid) {

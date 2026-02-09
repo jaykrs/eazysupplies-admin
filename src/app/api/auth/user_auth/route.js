@@ -147,3 +147,26 @@ export async function PUT(request) {
         );
     }
 }
+
+
+export async function DELETE(request) {
+    try {
+        if (verifyAdmin(request)) {
+            const { searchParams } = new URL(request.url);
+            const id = Number(searchParams.get('userId'));
+          let res;
+            if (id) {
+                res = await prisma.user.update({ where: { id }, data: {
+                deleted : true,
+            } });
+            }
+           return NextResponse.json({ data: res ? res : [] }, { status: 200 });
+        } else {
+            return NextResponse.json({ error: MESSAGES.UNAUTHORIZED }, { status: 401 });
+        }
+    }catch (e) {console.log(e);
+        return NextResponse.json(
+            { error: MESSAGES.SERVER_ERROR },
+            { status: 500 }
+        );}
+}
