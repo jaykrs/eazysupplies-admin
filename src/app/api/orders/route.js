@@ -123,7 +123,6 @@ export async function PUT(request) {
     const { id, status, approved = false } = body;
     if (verifyAdmin(request)) {
       if (approved) {
-        console.log('approve');
         let filterProduct, offer, jsonData = [], jsonFound = false;
         let orders = await prisma.order.findUnique({
           where: {

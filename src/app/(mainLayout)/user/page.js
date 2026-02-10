@@ -35,10 +35,17 @@ const AllUsers = () => {
     route.push('/user/edit/' + id);
   };
 
-  const handleDelete = () => {
-
+  const handleDelete = async (id, name) => {
+    if (confirm("Are you sure, you want to delete user: " + name)) {
+      let res = await axios.delete('/api/auth/user_auth?userId=' + id);
+      if (res.status == 200) {
+        alert("User: " + name + " is deleted successfully!");
+      } else {
+        alert("Something went wrong, please try again!");
+      }
+    }
   };
-
+  console.log('user', state);
   return (
     <>
       <div className="w-100 d-flex flex-wrap justify-content-start m-4 fs-6" style={{ gap: "50px" }}>
@@ -71,7 +78,7 @@ const AllUsers = () => {
                   </thead>
                   <tbody>
                     {state?.length ? (
-                      state.map((el) => (
+                      state?.filter(el => el?.deleted != true)?.map((el) => (
                         <tr key={el.id}>
                           <td className="border px-4 py-2">{el.name}</td>
                           <td className="border px-4 py-2">{el.email}</td>
@@ -82,7 +89,7 @@ const AllUsers = () => {
                             <div className="d-flex gap-2 px-2">
                               <button onClick={() => handleView(el.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">View</button>
                               <button onClick={() => handleEdit(el.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">Edit</button>
-                              <button onClick={() => handleDelete(el.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-danger">Delete</button>
+                              <button onClick={() => handleDelete(el.id, el.name)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-danger">Delete</button>
                             </div>
                           </td>
                         </tr>

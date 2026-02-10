@@ -5,6 +5,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import Pagination from "@/components/pagination/pagination";
 const AllOrders = () => {
   const searchParams = useSearchParams();
   const queryStatus = searchParams.get("status");
@@ -23,6 +24,8 @@ const AllOrders = () => {
     productDetails: {},
     qtyTempValue: 0
   });
+  const [page, setPage] = useState(1);
+  const [totalPage, setTotalPage] = useState(1);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const handleStateChange = (name, value) => {
     setState(prev => {
@@ -47,6 +50,16 @@ const AllOrders = () => {
     } else {
       fetchProduct();
     }
+  }, [page])
+
+  useEffect(() => {
+    const initial = document.body.classList.contains("dark-only");
+    setIsDarkMode(initial);
+    if (queryStatus) {
+      getOrderListBasedOnStatus();
+    } else {
+      fetchProduct();
+    }
     setRefeshState(false);
   }, [refreshState])
 
@@ -59,26 +72,27 @@ const AllOrders = () => {
   }
 
   const getOrderListBasedOnStatus = async () => {
-    console.log('qry status 2', queryStatus);
-    let res = await axios.get('/api/orders?status=' + queryStatus, { withCredentials: true });
+    let res = await axios.get('/api/orders?status=' + queryStatus + "&page=" + page , { withCredentials: true });
     if (res.status == 200) {
       let filterData = res?.data?.orders;
       setOrderList(filterData);
+      setTotalPage(res?.data?.totalPages);
     }
   }
 
   const handleView = (id) => {
     route.push('/order/details/' + id);
   }
-  const handleViewOrder = async (id)=> {
-     route.push('/order/details/view/' + id);
+  const handleViewOrder = async (id) => {
+    route.push('/order/details/view/' + id);
   }
-  const handleEditOrder = async (id)=> {
+  const handleEditOrder = async (id) => {
 
   }
-  const handleDeleteOrder = async (id)=> {
+  const handleDeleteOrder = async (id) => {
 
   }
+  console.log("orders..", orders)
   return (
     <>
       {/* <div className="w-100 d-flex flex-wrap justify-content-start m-4 fs-6" style={{ gap: "50px" }}>
@@ -150,8 +164,8 @@ const AllOrders = () => {
 
       {
         queryStatus &&
-        <div style={{ maxHeight: "600px", overflowY: "auto", overflowX: "auto" }}>
-          <table className="min-w-full border border-gray-300" style={{overflow:"auto", whiteSpace:"nowrap", textAlign:"center"}} >
+        <div style={{ maxHeight: "500px", overflowY: "auto", overflowX: "auto" }}>
+          <table className="min-w-full border border-gray-300" style={{ overflow: "auto", whiteSpace: "nowrap", textAlign: "center" }} >
             <thead className="bg-gray-100">
               <tr>
                 <th className="border px-4 py-2">Order Id</th>
@@ -168,13 +182,13 @@ const AllOrders = () => {
             <tbody>
               {orderList?.length > 0 ? (
                 orderList.map((element) => {
-                // const productNameList = element?.items?.map(el=> el?.product?.name).filter(Boolean)?.join(", ");
-                 const productQty = element?.items?.reduce((sum, item)=> sum + ( item?.quantity || 0), 0);
+                  // const productNameList = element?.items?.map(el=> el?.product?.name).filter(Boolean)?.join(", ");
+                  const productQty = element?.items?.reduce((sum, item) => sum + (item?.quantity || 0), 0);
                   return (
                     <tr key={element?.id}>
                       <td className="border px-4 py-2">{element?.id}</td>
                       <td className="border px-4 py-2">{element?.status}</td>
-                      <td className="border px-4 py-2">{element?.approved ? 'YES': "NO"}</td>
+                      <td className="border px-4 py-2">{element?.approved ? 'YES' : "NO"}</td>
                       <td className="border px-4 py-2">{element?.user?.name}</td>
                       <td className="border px-4 py-2">{element?.items?.length || 0}</td>
                       <td className="border px-4 py-2">{productQty}</td>
@@ -199,6 +213,17 @@ const AllOrders = () => {
             </tbody>
           </table>
         </div>
+      }
+
+      {
+        queryStatus &&
+        <Pagination
+          currentPage={page}
+          totalPages={totalPage}
+          handlePrev={() => setPage(p => Math.max(1, p - 1))}
+          handleNext={() => setPage(p => Math.min(20, p + 1))}
+          onPageClick={(p) => setPage(p)}
+        />
       }
 
       <ShowModal
