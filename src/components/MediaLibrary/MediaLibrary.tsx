@@ -133,17 +133,17 @@ const MediaLibrary = () => {
         <TextHeading
           title="Digital Assets"
           icon="📁"
-          buttonprops={{
-            buttonText: "+ Folder",
-            title: "Add new folder",
-            content: "Here you can create a new folder in the media library.",
-            onClick: () => {
-              const folderNameInput = prompt("Enter folder name:");
-              if (folderNameInput) {
-                createFolder(folderNameInput);
-              }
-            }
-          }}
+          // buttonprops={{
+          //   buttonText: "+ Folder",
+          //   title: "Add new folder",
+          //   content: "Here you can create a new folder in the media library.",
+          //   onClick: () => {
+          //     const folderNameInput = prompt("Enter folder name:");
+          //     if (folderNameInput) {
+          //       createFolder(folderNameInput);
+          //     }
+          //   }
+          // }}
           secondbuttonprops={{
             buttonText: "+ Assets",
             title: "Add new assets",
