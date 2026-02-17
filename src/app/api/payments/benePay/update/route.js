@@ -45,7 +45,9 @@ export async function PUT(request) {
         { status: 404 }
       );
     }
-   let order = await prisma.order.update({where: {id: Number(body?.orderId)}, data: {status: body.status}});
+   if(body.status === 'SUCCESS'){
+   let order = await prisma.order.update({where: {id: Number(body?.orderId)}, data: {status: 'PAID' }});
+   }
     return NextResponse.json(
       { msg: "Payment updated successfully" },
       { status: 200 }
