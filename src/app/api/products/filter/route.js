@@ -30,6 +30,7 @@ export async function GET(request) {
             if (!tagEntity) return [];
             return prisma.product.findMany({
               where: {
+               status: true,
                 tags: {
                 contains: tagEntity.id.toString(), // For case-insensitive search
                 },
@@ -38,6 +39,7 @@ export async function GET(request) {
           } else {
             return prisma.product.findMany({
               where: {
+                status: true,
                 tags: {
                   contains:  tag ,
                 },

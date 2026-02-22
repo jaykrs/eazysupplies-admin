@@ -172,7 +172,7 @@ function normalizeIndianMobile(mobile) {
 }
 
 
-export async function sendWhatsAppUserReg(receivername: string, receiverphone: string, receiveremail: string, receivergst: string) {
+export async function sendWhatsAppUserReg(receivername: string, receiverphone: string, receiveremail: string, receivergst: string, otp : string) {
   const supportemail = process.env.MAIL_FROM;
   const _data = JSON.stringify({
     "recipient": {
@@ -193,15 +193,15 @@ export async function sendWhatsAppUserReg(receivername: string, receiverphone: s
               },
               {
                 "type": "text",
-                "text": '"' + receiveremail + '"' + '" OR "' + '"' + receivergst + '"'
+                "text": '"' + receiveremail + '"' + '" OR "' + '"' + receivergst + '"' + '" OR WhatsApp with OTP ( ' +  otp + ' ) '
               },
               {
                 "type": "text",
-                "text": '"' + receiveremail + '"'
+                "text": '"' + receiveremail + '"' 
               },
               {
                 "type": "text",
-                "text": "Earthling Consumer Products Private"
+                "text": "Earthling Consumer Products Pvt ltd."
               }
             ]
           }
