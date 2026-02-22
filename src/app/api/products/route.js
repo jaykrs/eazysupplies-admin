@@ -15,12 +15,14 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const id = Number(searchParams.get('productId'));
+    const ids = searchParams.get('ids');
     const catId = Number(searchParams.get('categoryId'));
     const barId = Number(searchParams.get('brandId'));
     let res;
     if (id) {
       const res = await prisma.product.findUnique({
         where: {
+          status : true,
           id: id
         },
         include: { category: true, brand: true }
@@ -28,10 +30,24 @@ export async function GET(request) {
       return NextResponse.json({ data: res ? res : [] }, { status: 200 });
     }
 
+    if (ids) {
+      const arr = ids.split(",").map(Number);
+      const res = await prisma.product.findMany({
+        where: {
+          status : true,
+          id: {
+            in : arr
+          }
+        },
+        include: { category: true, brand: true }
+      })
+      return NextResponse.json({ data: res ? res : [] }, { status: 200 });
+    }
+
     const products = catId ? await prisma.product.findMany({
-      include: { category: true, brand: true }, where: { categoryId: catId }
+      include: { category: true, brand: true }, where: { status: true, categoryId: catId }
     }) : barId ? await prisma.product.findMany({
-      include: { category: true, brand: true }, where: { brandId: barId }
+      include: { category: true, brand: true }, where: { status: true , brandId: barId }
     }) : await prisma.product.findMany({
       include: { category: true, brand: true }
     });
