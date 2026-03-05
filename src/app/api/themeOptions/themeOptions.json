@@ -131,34 +131,34 @@
           ],
           "useful_link": [
               {
-                  "id": 1,
-                  "name": "Home",
-                  "value": "home"
-              },
-              {
-                  "id": 2,
-                  "name": "Collections",
-                  "value": "collections"
-              },
-              {
-                  "id": 3,
-                  "name": "About Us",
-                  "value": "about-us"
-              },
-              {
-                  "id": 4,
-                  "name": "Blogs",
-                  "value": "blogs"
+                  "id": 6,
+                  "name": "CANNED VEGETABLES",
+                  "value": "canned-vegetables"
               },
               {
                   "id": 5,
-                  "name": "Offers",
-                  "value": "offers"
+                  "name": "CANNED FRUITS",
+                  "value": "canned-fruits"
               },
               {
-                  "id": 6,
-                  "name": "Search",
-                  "value": "search"
+                  "id": 8,
+                  "name": "OLIVES",
+                  "value": "olives"
+              },
+              {
+                  "id": 16,
+                  "name": "PASTA",
+                  "value": "pasta"
+              },
+              {
+                  "id": 11,
+                  "name": "SAUCES",
+                  "value": "sauces"
+              },
+              {
+                  "id": 10,
+                  "name": "OILS",
+                  "value": "oils"
               }
           ],
           "footer_about": "Discover the latest trends and enjoy seamless shopping with our exclusive collections.",
@@ -171,12 +171,36 @@
           "footer_copyright": true,
           "copyright_content": "Copyright © 2025. Earthling Consumer Products Pvt. Ltd. | Designed and Developed @ MARKSMAN",
           "footer_categories": [
-              74,
-              41,
-              98,
-              107,
-              12,
-              55
+				{
+					"id": 1,
+					"name": "BAR SYRUP & CORNFLAKES",
+					"slug": "bar-syrup-&-cornflakes"
+					},
+					{
+					"id": 2,
+					"name": "CRUSHES",
+					"slug": "crushes"
+					},
+					{
+					"id": 3,
+					"name": "FOOD ADDITIVES",
+					"slug": "food-additives"
+					},
+					{
+					"id": 4,
+					"name": "TOMATO PRODUCTS",
+					"slug": "tomato-products"
+					},
+					{
+					"id": 5,
+					"name": "CANNED FRUITS",
+					"slug": "canned-fruits"
+					},
+					{
+					"id": 6,
+					"name": "CANNED VEGETABLES",
+					"slug": "canned-vegetables"
+					}
           ],
           "social_media_enable": true,
           "payment_option_image_url": "/assets/images/theme/data/payments.png"
@@ -184,10 +208,10 @@
       "header": {
           "today_deals": [],
           "category_ids": [
-              74,
-              41,
-              98,
-              107
+              7,
+              8,
+              9,
+              10
           ],
           "header_options": "header_one",
           "support_number": "123 - 456 - 7890",
@@ -417,18 +441,7 @@
       "collection": {
           "collection_layout": "collection_category_slider",
           "collection_categories_ids": [
-              74,
-              41,
-              107,
-              12,
-              7,
-              28,
-              157,
-              136,
-              118,
-              79,
-              70,
-              64
+             4
           ],
           "collection_banner_image_url": "/assets/images/placeholder/collection_banner.png"
       },
