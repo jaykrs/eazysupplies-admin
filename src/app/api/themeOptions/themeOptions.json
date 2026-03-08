@@ -110,23 +110,55 @@
               },
               {
                   "id": 3,
-                  "name": "Track Order",
-                  "value": "order/tracking"
+                  "name": "Payment",
+                  "value": "account/payment"
               },
               {
                   "id": 4,
-                  "name": "Wishlist",
-                  "value": "wishlist"
+                  "name": "Address",
+                  "value": "account/addresses"
               },
               {
                   "id": 6,
                   "name": "FAQ's",
-                  "value": "faq"
+                  "value": "pages?name=faq"
               },
               {
                   "id": 7,
                   "name": "Contact Us",
                   "value": "contact-us"
+              }
+          ],
+		  "policy_help_center": [
+              {
+                  "id": 1,
+                  "name": "website policy",
+                  "value": "pages?name=website-policy"
+              },
+              {
+                  "id": 2,
+                  "name": "Return Policy",
+                  "value": "pages?name=website-policy"
+              },
+              {
+                  "id": 3,
+                  "name": "Replacement Policy",
+                  "value": "pages?name=website-policy"
+              },
+              {
+                  "id": 4,
+                  "name": "Refund Policy",
+                  "value": "pages?name=website-policy"
+              },
+              {
+                  "id": 6,
+                  "name": "Shipping Policy",
+                  "value": "pages?name=website-policy"
+              },
+              {
+                  "id": 7,
+                  "name": "Contact Us",
+                  "value": "pages?name=contact-us"
               }
           ],
           "useful_link": [
@@ -449,12 +481,12 @@
           "title": "Get In Touch",
           "detail_1": {
               "icon": "ri-phone-fill",
-              "text": "+91 123 - 456 - 7890",
+              "text": "+91-9818109394",
               "label": "Contact Us"
           },
           "detail_2": {
               "icon": "ri-map-pin-fill",
-              "text": "ABC Complex,Near xyz, New York",
+              "text": "Earthling Consumer Products Pvt. Ltd., 52/39, LGF, Ramjas Road, Karol Bagh, New Delhi 1100053",
               "label": "Address"
           },
           "detail_3": {
