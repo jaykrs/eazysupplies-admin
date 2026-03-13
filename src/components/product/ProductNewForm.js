@@ -22,6 +22,7 @@ import { SkuType } from "../../utils/constants/index";
 import KeywordInput from "../inputFields/KeywordInput";
 import FileImageUpload from "../inputFields/FileImageUpload";
 import {ConvertIntoIso8601} from "../../utils/constants/index";
+import EditorComponent from "../inputFields/EditorComponent";
 
 const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) => {
   const { t } = useTranslation("common");
@@ -199,8 +200,8 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
                 productImage : Object.keys(productData).length > 0 ? productData?.productImage : "",
                 selfLife: Object.keys(productData).length > 0 ? productData?.selfLife : "",
                 pkgGwt: Object.keys(productData).length > 0 ? productData?.pkgGwt : "",
-                mfDate: Object.keys(productData).length > 0 ? productData?.mfDate : "",
-                expDate: Object.keys(productData).length > 0 ? productData?.expDate : "",
+                mfDate: Object.keys(productData).length > 0 && productData?.mfDate ? new Date(productData.mfDate).toISOString().slice(0, 16) :  "",
+                expDate: Object.keys(productData).length > 0 && productData?.expDate ? new Date(productData.expDate).toISOString().slice(0, 16) : "",
               }}
               validationSchema={YupObject({
                 name: nameSchema,
@@ -231,16 +232,26 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
                           title: "Name",
                           placeholder: t("Enter Product Name"),
                           require: "true",
-                        },
-                        {
-                          name: "description",
-                          type: "textarea",
-                          rows: "20",
-                          placeholder: t("Enter Product Description"),
-                          require: "true",
-                        },
+                        }
                       ]}
                     />
+
+            {/* 3. Add the EditorComponent manually for Description */}
+                  <div className="mb-4 row align-items-center">
+                    <label className="form-label-title col-sm-3 mb-0">
+                      {t("Description")}
+                    </label>
+                    <div className="col-sm-9">
+                      <EditorComponent
+                        name="description"
+                        value={values.description}
+                        editorLoaded={true}
+                        onChange={(data) => setFieldValue("description", data)}
+                        onBlur={() => setFieldTouched("description", true)}
+                      />
+                    </div>
+                  </div>
+
                     <SimpleInputField nameList={[{ name: "price", title: "Price", placeholder: t("Enter price"), type: "number", require: "true", }]} />
                     <SimpleInputField nameList={[{ name: "mrp", title: "MRP", placeholder: t("Enter Mrp"), type: "number", require: "true", }]} />
                     <SimpleInputField nameList={[{ name: "stock", title: "Stock", placeholder: t("Enter stock available"), type: "number", require: "true", }]} />
@@ -268,8 +279,8 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
                     {/* <SimpleInputField nameList={[{ name: "pkgCnt", title: "Pkg Count", placeholder: t("Enter pkg count"), type: "number", require: "true", }]} /> */}
                     <SimpleInputField nameList={[{ name: "pkgGwt", title: "Pkg Weight", placeholder: t("Enter pkg weight"), type: "string", require: "true", }]} />
                     <SimpleInputField nameList={[{ name: "selfLife", title: "Self Life(Months)", placeholder: t("Enter self life(months)"), type: "number", require: "true", }]} />
-                    <SimpleInputField nameList={[{ name: "mfDate", title: "Manufacture Date", placeholder: t("Enter self life"), type: "datetime-local", require: "true", }]} />
-                    <SimpleInputField nameList={[{ name: "expDate", title: "Expiry Date", placeholder: t("Enter self life"), type: "datetime-local", require: "true", }]} />
+                    <SimpleInputField nameList={[{ name: "mfDate", title: "Manufacture Date", placeholder: "Manufacture Date", type: "datetime-local", require: "true", }]} />
+                    <SimpleInputField nameList={[{ name: "expDate", title: "Expiry Date", placeholder: "Expiry Date", type: "datetime-local", require: "true", }]} />
                     <CheckBoxField name="status" title="Status" />
                     <SimpleInputField nameList={[{ name: "productImage", title: "Product Image", placeholder: t("Enter Product Image"), type: "text", require: "true", }]} />
                     {false && <FileImageUpload

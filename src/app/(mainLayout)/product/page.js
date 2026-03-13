@@ -261,8 +261,6 @@ const AllUsers = () => {
                                 } else {
                                     supplierName = ""
                                 }
-
-                                console.log('........product', product);
                                 return (
                                     <tr key={product.id}>
                                         <td className="border px-4 py-2">{product.name}</td>
@@ -285,7 +283,7 @@ const AllUsers = () => {
                                         <td className="border px-4 py-2">{product.ordersCount}</td>
                                         <td>
                                             <div className="d-flex gap-2">
-                                                <button onClick={() => handleView(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">View</button>
+                                                {/* <button onClick={() => handleView(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">View</button> */}
                                                 <button onClick={() => handleEdit(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">Edit</button>
                                                 <button onClick={() => handleDelete(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-danger">Delete</button>
                                             </div>
