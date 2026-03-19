@@ -158,8 +158,8 @@
               },
               {
                   "id": 7,
-                  "name": "Contact Us",
-                  "value": "pages?name=contact-us"
+                  "name": "Career",
+                  "value": "pages?name=career"
               }
           ],
           "useful_link": [
@@ -471,13 +471,13 @@
               "sub_title": "Latest Testimonials"
           }
       },
-      "collection": {
+     "collection_hidden": {
           "collection_layout": "collection_category_slider",
           "collection_categories_ids": [
              4
           ],
           "collection_banner_image_url": "/assets/images/placeholder/collection_banner.png"
-      },
+      }, 
       "contact_us": {
           "title": "Get In Touch",
           "detail_1": {
