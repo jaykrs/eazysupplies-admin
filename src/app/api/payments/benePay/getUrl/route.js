@@ -6,6 +6,7 @@ const prisma = new PrismaClient();
 export async function POST(request) {
   try {
     const body = await request.json();
+    console.log(body);
     const payload = await authenticate(request);
     if (!payload) {
       return NextResponse.json({ error: MESSAGES.UNAUTHORIZED }, { status: 401 });
@@ -17,6 +18,7 @@ export async function POST(request) {
     params.append("client_secret", process.env.ClinetSecretId);
 
     const transactionid = await generateTransactionId();
+    console.log(transactionid);
     const userData = await prisma.user.findUnique({ where: { id: payload.userId } });
     const authResponse = await fetch(process.env.AuthUrl, {
       method: "POST",
@@ -27,7 +29,7 @@ export async function POST(request) {
     });
 
     const authData = await authResponse.json();
-
+  console.log(authResponse);
     if (!authResponse.ok) {
       return NextResponse.json(authData, { status: authResponse.status });
     }
@@ -46,7 +48,7 @@ export async function POST(request) {
       payVia: body.method,
       returnUrl: process.env.ReturnUrl
     };
-
+    console.log(pay);
     // Encrypt Request
     const payBody = {
       requestToPay: JSON.stringify(pay),
