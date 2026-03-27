@@ -139,7 +139,9 @@ export async function PUT(request) {
             payment: true,
           },
         });
+        await generateTaxDiscount(orders);
         const Products = await prisma.product.findMany();
+        let _jsonData = [];
         for (const el of orders.items) {
           const offer = await prisma.offers.findMany({
             where: {
@@ -197,14 +199,37 @@ export async function PUT(request) {
               sellingPrice: price - discountAmount
             });
           }
-
+          const _discountAmount = (price * discount) / 100;
+          let tax = await prisma.tax.findUnique({
+          where: {
+            id: el.product?.tax,
+          },});
+          let taxamt = tax.value && tax.value > 0 ? ((price - (_discountAmount ? _discountAmount : 0)) * tax.value) / 100 : 0 ;
+          const _itemjsonData = {
+            productId : el.product?.id,
+            name : el.product?.name,
+            discountPercentage: discount,
+            _discountAmount,
+            sellingPrice: price - _discountAmount,
+            taxamt : taxamt,
+            totalprice : (price - _discountAmount) + taxamt
+          };
+          _jsonData.push(_itemjsonData);
           await prisma.product.update({
             where: { id: product.id },
             data: { jsonData }
           });
         }
 
-        let result = await prisma.order.update({ where: { id }, data: { status, approved } });
+        let result = await prisma.order.update({
+           where: { id },
+           data: 
+          { 
+            status, 
+            approved,
+            jsonData : _jsonData
+           }
+         });
         const notification = await prisma.notification.create({
           data: {
             name: 'Order ' + id + ' approved',
