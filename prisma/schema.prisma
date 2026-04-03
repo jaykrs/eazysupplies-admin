@@ -175,6 +175,7 @@ model Order {
   updatedAt   DateTime?     @updatedAt @map("updated_at")
   deliveryAgent    Int?
   jsonData Json?
+  jsonOrderData Json?
   invoicepath String? 
   deliveryAgentAssets String?
 }

@@ -227,7 +227,7 @@ export async function PUT(request) {
           { 
             status, 
             approved,
-            jsonData : _jsonData
+            jsonOrderData : _jsonData
            }
          });
         const notification = await prisma.notification.create({
