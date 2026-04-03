@@ -139,7 +139,7 @@ export async function PUT(request) {
             payment: true,
           },
         });
-        await generateTaxDiscount(orders);
+ //       await generateTaxDiscount(orders);
         const Products = await prisma.product.findMany();
         let _jsonData = [];
         for (const el of orders.items) {
