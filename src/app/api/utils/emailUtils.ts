@@ -39,7 +39,7 @@ export async function sendEmail(recepient: string, subject: string, body: string
         }
       ]
     });
-    console.log(result);
+   // console.log(result);
   } catch (err) {
     console.log(err);
   }
@@ -273,7 +273,7 @@ export async function sendWhatsAppOrderCreate(receivername: string, receiverphon
       }
     }
   });
-console.log("datao",_datao);
+//console.log("datao",_datao);
   var config = {
     method: 'post',
     url: process.env.META_URL,

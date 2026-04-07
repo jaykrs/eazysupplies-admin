@@ -4,6 +4,8 @@ import { verifyAdmin, authenticate } from "../utils/jwt";
 import { MESSAGES } from "../utils/statusConstant";
 import { generateOrderSummaryHTML, generateApprovedOrderSummaryHTML, sendEmail, sendWhatsAppOrderCreate } from "../utils/emailUtils";
 import { createNotification } from "../utils/emailUtils";
+import { generateInvoicePdf } from "../utils/pdfUtils";
+import { convertDate, calcDate } from "../utils/dateUtils";
 
 const prisma = new PrismaClient();
 // 📌 GET /api/orders?page=1&limit=10&sortBy=createdAt&order=desc&status=PENDING
@@ -205,9 +207,14 @@ export async function PUT(request) {
             id: el.product?.tax,
           },});
           let taxamt = tax.value && tax.value > 0 ? ((price - (_discountAmount ? _discountAmount : 0)) * tax.value) / 100 : 0 ;
+          
+    //     console.log(el.quantity);
+    //     console.log(el.price);
           const _itemjsonData = {
             productId : el.product?.id,
             name : el.product?.name,
+            quantity : el.quantity,
+            price : Number(el.price) * Number(el.quantity),
             discountPercentage: discount,
             _discountAmount,
             sellingPrice: price - _discountAmount,
@@ -230,6 +237,7 @@ export async function PUT(request) {
             jsonOrderData : _jsonData
            }
          });
+         
         const notification = await prisma.notification.create({
           data: {
             name: 'Order ' + id + ' approved',
@@ -245,6 +253,26 @@ export async function PUT(request) {
             return `${item.product.name} X ${item.quantity}`;
           })
           .join('\n');
+          const cdt = await convertDate(orders.createdAt) ; 
+          const ddt = await calcDate(orders.createdAt,7) ; 
+          console.log(result.jsonOrderData);
+          let data = {
+              company: { name: "Earthling Consumer Products Pvt. Ltd.", address: "52/39, LGF, Ramjas Road, Karol Bagh, New Delhi 1100053", email : "contact@earthlingco.in" },
+              customer: { 
+                name: orders.user.name, 
+                phone: orders.user.phone, 
+                address: orders.shipping.address 
+              },
+              orderDate : cdt,
+              dueDate : ddt,
+              items: result.jsonOrderData,
+              bankDetails: {
+                bankName: "HDFC Bank",
+                accountNo: "987654321",
+                ifc: "GLB001"
+              }
+            };
+          await generateInvoicePdf(orders.id,data);
         const orderhtml = generateApprovedOrderSummaryHTML(orders, Number(orders.userId), orders?.user?.name);
         await sendEmail(orders?.user?.email, "Order Approved with " + result.id, orderhtml);
         await createNotification("Order Approved with " + orders.id, orders?.userId?.toString(), orderhtml);
