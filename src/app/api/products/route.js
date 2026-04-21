@@ -22,7 +22,6 @@ export async function GET(request) {
     if (id) {
       const res = await prisma.product.findUnique({
         where: {
-          status : true,
           id: id
         },
         include: { category: true, brand: true }
