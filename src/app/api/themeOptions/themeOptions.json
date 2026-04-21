@@ -164,34 +164,34 @@
           ],
           "useful_link": [
               {
-                  "id": 6,
-                  "name": "CANNED VEGETABLES",
-                  "value": "canned-vegetables"
+                  "id": 22,
+                  "name": "Canned & Bottled Item",
+                  "value": "canned-&-bottled-item"
               },
               {
-                  "id": 5,
-                  "name": "CANNED FRUITS",
-                  "value": "canned-fruits"
+                  "id": 21,
+                  "name": "Crushes & Bar Syrups",
+                  "value": "crushes-&-bar-syrups"
               },
               {
-                  "id": 8,
-                  "name": "OLIVES",
-                  "value": "olives"
+                  "id": 23,
+                  "name": "Olive Oils",
+                  "value": "olive-oils"
               },
               {
-                  "id": 16,
-                  "name": "PASTA",
-                  "value": "pasta"
+                  "id": 25,
+                  "name": "La Puglia",
+                  "value": "la-puglia"
               },
               {
-                  "id": 11,
-                  "name": "SAUCES",
-                  "value": "sauces"
+                  "id": 27,
+                  "name": "Noodle & Pasta",
+                  "value": "noodle-&-pasta"
               },
               {
-                  "id": 10,
-                  "name": "OILS",
-                  "value": "oils"
+                  "id": 28,
+                  "name": "Peppers & Olives",
+                  "value": "peppers-&-olives"
               }
           ],
           "footer_about": "Earthling offers a wide selection of canned fruits, vegetables, sauces, mayonnaise, spreads, and dressings — carefully prepared to ng rich flavour, better ingredients, and more enjoyment to everydaymeals",
@@ -205,34 +205,34 @@
           "copyright_content": "Copyright © 2025. Earthling Consumer Products Pvt. Ltd. | Designed and Developed @ MARKSMAN",
           "footer_categories": [
 				{
-					"id": 1,
-					"name": "BAR SYRUP & CORNFLAKES",
-					"slug": "bar-syrup-&-cornflakes"
+					"id": 21,
+					"name": "Crushes & Bar Syrups",
+					"slug": "crushes-&-bar-syrups"
 					},
 					{
-					"id": 2,
-					"name": "CRUSHES",
-					"slug": "crushes"
+					"id": 24,
+					"name": "LKK",
+					"slug": "lkk"
 					},
 					{
-					"id": 3,
+					"id": 29,
 					"name": "FOOD ADDITIVES",
 					"slug": "food-additives"
 					},
 					{
-					"id": 4,
-					"name": "TOMATO PRODUCTS",
-					"slug": "tomato-products"
+					"id": 28,
+					"name": "Peppers & Olives",
+					"slug": "peppers-&-olives"
 					},
 					{
-					"id": 5,
-					"name": "CANNED FRUITS",
-					"slug": "canned-fruits"
+					"id": 32,
+					"name": "Sauces & Ketchups",
+					"slug": "sauces-&-ketchups"
 					},
 					{
-					"id": 6,
-					"name": "CANNED VEGETABLES",
-					"slug": "canned-vegetables"
+					"id": 33,
+					"name": "Mayonnaise",
+					"slug": "mayonnaise"
 					}
           ],
           "social_media_enable": true,
@@ -241,10 +241,10 @@
       "header": {
           "today_deals": [],
           "category_ids": [
-              7,
-              8,
-              9,
-              10
+              21,
+              22,
+              23,
+              24
           ],
           "header_options": "header_one",
           "support_number": "+91-9818109394",
