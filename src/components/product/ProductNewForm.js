@@ -255,7 +255,7 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
                     <SimpleInputField nameList={[{ name: "price", title: "Price", placeholder: t("Enter price"), type: "number", require: "true", }]} />
                     <SimpleInputField nameList={[{ name: "mrp", title: "MRP", placeholder: t("Enter Mrp"), type: "number", require: "true", }]} />
                     <SimpleInputField nameList={[{ name: "stock", title: "Stock", placeholder: t("Enter stock available"), type: "number", require: "true", }]} />
-                    <SimpleInputField nameList={[{ name: "dimension", title: "Dimension", placeholder: t("Enter dimension"), type: "text", require: "true", }]} />
+                    <SimpleInputField nameList={[{ name: "dimension", title: "Packaging", placeholder: t("Enter Packaging"), type: "text", require: "true", }]} />
                     <SimpleInputField nameList={[{ name: "sku", title: "Sku", placeholder: t("Enter HSN / SAC"), type: "text", require: "true", }]} />
                     {/* <SimpleInputField nameList={[{ name: "skuType", title: "Sku type", placeholder: t("Enter sku type eg PACKET | BOTTLE"), type: "text", require: "true", }]} /> */}
                     <SearchableSelectInput
@@ -279,8 +279,8 @@ const CategoryNewForm = ({ setResetData, updateId, loading, type, buttonName }) 
                     {/* <SimpleInputField nameList={[{ name: "pkgCnt", title: "Pkg Count", placeholder: t("Enter pkg count"), type: "number", require: "true", }]} /> */}
                     <SimpleInputField nameList={[{ name: "pkgGwt", title: "Pkg Weight", placeholder: t("Enter pkg weight"), type: "string", require: "true", }]} />
                     <SimpleInputField nameList={[{ name: "selfLife", title: "Self Life(Months)", placeholder: t("Enter self life(months)"), type: "number", require: "true", }]} />
-                    <SimpleInputField nameList={[{ name: "mfDate", title: "Manufacture Date", placeholder: "Manufacture Date", type: "datetime-local", require: "true", }]} />
-                    <SimpleInputField nameList={[{ name: "expDate", title: "Expiry Date", placeholder: "Expiry Date", type: "datetime-local", require: "true", }]} />
+                    <SimpleInputField nameList={[{ name: "mfDate", title: "Manufacture Date", placeholder: "Manufacture Date", type: "datetime-local", require: "false", }]} />
+                    <SimpleInputField nameList={[{ name: "expDate", title: "Expiry Date", placeholder: "Expiry Date", type: "datetime-local", require: "false", }]} />
                     <CheckBoxField name="status" title="Status" />
                     <SimpleInputField nameList={[{ name: "productImage", title: "Product Image", placeholder: t("Enter Product Image"), type: "text", require: "true", }]} />
                     {false && <FileImageUpload
