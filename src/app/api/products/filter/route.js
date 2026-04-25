@@ -57,10 +57,10 @@ export async function GET(request) {
        items = await Promise.all(
         _brand.map(async (brnd) => {
           if (useSlug) {
-            const brand = await prisma.brand.findFirst({ where: { slug: brnd }, include: { products: true } });
+            const brand = await prisma.brand.findFirst({ where: { slug: brnd }, include: { products: { where: { status: true } } } });
             return brand?.products || [];
           } else {
-            const brand = await prisma.brand.findUnique({ where: { id: Number(brnd) }, include: { products: true } });
+            const brand = await prisma.brand.findUnique({ where: { id: Number(brnd) }, include: { products: { where: { status: true } } } });
             return brand?.products || [];
           }
         })
@@ -76,10 +76,10 @@ export async function GET(request) {
       items = await Promise.all(
         categories.map(async (cat) => {
           if (useSlug) {
-            const category = await prisma.category.findFirst({ where: { slug: cat }, include: { products: true } });
+            const category = await prisma.category.findFirst({ where: { slug: cat }, include: { products: { where: { status: true } } } });
             return category?.products || [];
           } else {
-            const category = await prisma.category.findUnique({ where: { id: Number(cat) }, include: { products: true } });
+            const category = await prisma.category.findUnique({ where: { id: Number(cat) }, include: { products: { where: { status: true } } } });
             return category?.products || [];
           }
         })
