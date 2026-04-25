@@ -229,6 +229,7 @@ const AllUsers = () => {
                     <thead className="bg-gray-100">
                         <tr>
                             <th className="border px-4 py-2">Name</th>
+                            <th className="border px-4 py-2">Action</th>
                             <th className="border px-4 py-2">SKU</th>
                             <th className="border px-4 py-2">Price</th>
                             <th className="border px-4 py-2">Tax</th>
@@ -246,7 +247,6 @@ const AllUsers = () => {
                             <th className="border px-4 py-2">Status</th>
                             <th className="border px-4 py-2">Supplier</th>
                             <th className="border px-4 py-2">ordersCount</th>
-                            <th className="border px-4 py-2">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -264,6 +264,13 @@ const AllUsers = () => {
                                 return (
                                     <tr key={product.id}>
                                         <td className="border px-4 py-2">{product.name}</td>
+                                         <td>
+                                            <div className="d-flex gap-2">
+                                                {/* <button onClick={() => handleView(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">View</button> */}
+                                                <button onClick={() => handleEdit(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">Edit</button>
+                                                <button onClick={() => handleDelete(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-danger">Delete</button>
+                                            </div>
+                                        </td>
                                         <td className="border px-4 py-2">{product.sku}</td>
                                         <td className="border px-4 py-2">{product.price}</td>
                                         <td className="border px-4 py-2">{tax.length > 0 ? tax[0]?.name + "-" + tax[0]?.value : 0}</td>
@@ -281,13 +288,6 @@ const AllUsers = () => {
                                         <td className="border px-4 py-2" style={{color: product?.status? "green": "grey"}}>{product?.status? "Active": "Inactive"}</td>
                                         <td className="border px-4 py-2">{supplierName}</td>
                                         <td className="border px-4 py-2">{product.ordersCount}</td>
-                                        <td>
-                                            <div className="d-flex gap-2">
-                                                {/* <button onClick={() => handleView(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">View</button> */}
-                                                <button onClick={() => handleEdit(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">Edit</button>
-                                                <button onClick={() => handleDelete(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-danger">Delete</button>
-                                            </div>
-                                        </td>
                                     </tr>
                                 )
                             }
