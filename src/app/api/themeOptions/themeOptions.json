@@ -97,7 +97,7 @@
           "linkedin": "https://in.linkedin.com/company/earthling/",
 		  "youtube": "https://www.youtube.com/@earthlingindia/",
           "sub_title": "Never Miss Anything From Store By Signing Up To Our Newsletter.",
-          "about_email": "contact@earthlingco.in",
+          "about_email": "info@earthlingco.in",
           "help_center": [
               {
                   "id": 1,
@@ -198,7 +198,7 @@
           "footer_style": "footer_three",
           "about_address": "Earthling Consumer Products Pvt. Ltd., 52/39, LGF, Ramjas Road, Karol Bagh, New Delhi 1100053",
           "app_store_url": "https://www.apple.com/in/app-store/",
-          "support_email": "contact@earthlingco.in",
+          "support_email": "info@earthlingco.in",
           "play_store_url": "https://play.google.com/store/apps",
           "support_number": "+91-9818109394",
           "footer_copyright": true,
@@ -492,13 +492,13 @@
           },
           "detail_3": {
               "icon": "ri-mail-fill",
-              "text": "contact@earthlingco.in",
+              "text": "info@earthlingco.in",
               "label": "Email"
           },
           "detail_4": {
               "icon": "ri-cellphone-fill",
-              "text": "contact@earthlingco.in",
-              "label": "Fax"
+              "text": "+91-9818109394",
+              "label": "Support"
           },
           "imageUrl": null,
           "description": "We're here to help! Reach out to us with any questions, feedback, or inquiries, and we'll get back to you as soon as possible."
