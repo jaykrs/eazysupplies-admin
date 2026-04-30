@@ -214,12 +214,12 @@ export async function PUT(request) {
             productId : el.product?.id,
             name : el.product?.name,
             quantity : el.quantity,
-            price : Number(el.price) * Number(el.quantity),
+            price : Number(el.price),
             discountPercentage: discount,
             _discountAmount,
             sellingPrice: price - _discountAmount,
             taxamt : taxamt,
-            totalprice : (price - _discountAmount) + taxamt
+            totalprice : ((price - _discountAmount) + taxamt) * Number(el.quantity)
           };
           _jsonData.push(_itemjsonData);
           await prisma.product.update({

@@ -104,6 +104,7 @@ const OrderViewWithId = ({ id }) => {
 
             if (res.status === 200) {
                 alert(`Order ${action.toUpperCase()} successfully!`);
+                let res = await axios.get('/api/invoice?orderId=' + id, { withCredentials: true });
                 handleStateChange('refreshState', true);
             }
             action == "APPROVED" ? setIsApprove(false) : setIsReject(false);
