@@ -1329,3 +1329,7 @@ curl --location --request POST 'http://localhost:3000/api/orders' \
     "note": "First test order"
   }
 }'
+
+
+For invoice pdf - http://localhost:3000/api/invoice?orderId=104
+For Invoice view  - http://localhost:3000/api/invoice/104
