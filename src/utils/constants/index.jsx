@@ -10,7 +10,8 @@ export const SkuType = [
     { id: 'TIN', name: 'TIN' },
     { id: 'TUB', name: 'TUB' },
     { id: 'TOMBO', name: 'TOMBO' },
-    { id: 'PET BOTTLE', name: 'PET BOTTLE' }
+    { id: 'PET BOTTLE', name: 'PET BOTTLE' },
+    { id: 'CASE', name: 'CASE' }
 ];
 export const ConvertIntoIso8601 = function toISO8601(input) {
     if (!input) return null;
