@@ -87,6 +87,18 @@ model Product {
   keyword      String?
   ordersCount  Int?
   tax          Int?
+  expDate      DateTime?
+  jsonData     Json?
+  mfDate       DateTime?
+  skuType      String?
+  status       Boolean      @default(false)
+  supplier     String?
+  caseRate     Float?
+  pkgGwt       String?
+  pkgUnit      String?
+  selfLife     Int?
+  unitRate     Float?
+  mrp          Int?
 }
 
 model Blog {

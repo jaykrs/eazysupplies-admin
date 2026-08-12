@@ -24,8 +24,12 @@ export async function middleware(request) {
     return NextResponse.next();
   }
   if (request.nextUrl.pathname.startsWith('/api')) {
-    const response = NextResponse.next();
-    response.headers.set('Access-Control-Allow-Origin', '*');
+    const origin = request.headers.get('origin');
+    const response = request.method === 'OPTIONS'
+      ? new NextResponse(null, { status: 204 })
+      : NextResponse.next();
+    response.headers.set('Access-Control-Allow-Origin', origin || 'http://localhost:3101');
+    response.headers.set('Vary', 'Origin');
     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     response.headers.set('Access-Control-Allow-Credentials', 'true'); // If you need to send cookies/credentials
