@@ -8,21 +8,31 @@ import { generateInvoicePdf } from "../utils/pdfUtils";
 import { convertDate, calcDate } from "../utils/dateUtils";
 
 const prisma = new PrismaClient();
+const recentRequests = new Map();
 // 📌 GET /api/orders?page=1&limit=10&sortBy=createdAt&order=desc&status=PENDING
 export async function GET(request) {
   try {
+    const payload = await authenticate(request);
+    if (!payload?.userId) {
+      return NextResponse.json({ error: MESSAGES.UNAUTHORIZED }, { status: 401 });
+    }
+    const isAdmin = await verifyAdmin(request);
     const { searchParams } = new URL(request.url);
 
-    const page = Number(searchParams.get("page")) || 1;
-    const limit = Number(searchParams.get("limit")) || 10;
+    const page = Math.max(Number(searchParams.get("page")) || 1, 1);
+    const limit = Math.min(Math.max(Number(searchParams.get("paginate") || searchParams.get("limit")) || 10, 1), 100);
     const skip = (page - 1) * limit;
 
-    const sortBy = searchParams.get("sortBy") || "createdAt";
+    const allowedSortFields = new Set(["createdAt", "updatedAt", "status", "id"]);
+    const requestedSort = searchParams.get("sortBy");
+    const sortBy = allowedSortFields.has(requestedSort) ? requestedSort : "createdAt";
     const order = searchParams.get("order") === "asc" ? "asc" : "desc";
 
     const status = searchParams.get("status");
-
-    const where = status ? { status } : {};
+    const where = {
+      ...(!isAdmin ? { userId: Number(payload.userId) } : {}),
+      ...(status ? { status } : {}),
+    };
 
     const [orders, total] = await Promise.all([
       prisma.order.findMany({
@@ -42,10 +52,14 @@ export async function GET(request) {
 
     return NextResponse.json({
       page,
+      current_page: page,
       limit,
+      per_page: limit,
       total,
       totalPages: Math.ceil(total / limit),
+      last_page: Math.ceil(total / limit),
       orders,
+      data: orders,
     });
   } catch (error) {
     console.error("GET /orders error:", error);
@@ -56,49 +70,73 @@ export async function GET(request) {
 // 📌 POST /api/orders
 export async function POST(request) {
   try {
-    const body = await request.json();
-    const { items, shipping, payment, jsonData } = body;
     const payload = await authenticate(request);
-    if (!payload) {
+    if (!payload?.userId) {
       return NextResponse.json({ error: MESSAGES.UNAUTHORIZED }, { status: 401 });
     }
-    if (!payload.userId || !items?.length) {
-      return NextResponse.json(
-        { error: "userId and at least one item are required" },
-        { status: 400 }
-      );
+
+    const idempotencyKey = request.headers.get("idempotency-key");
+    if (idempotencyKey && recentRequests.has(idempotencyKey)) {
+      return NextResponse.json(recentRequests.get(idempotencyKey), { status: 200 });
     }
 
-    // ✅ Check if user exists
-    const _user = await prisma.user.findUnique({ where: { id: payload.userId } });
-    if (!_user) {
-      return NextResponse.json(
-        { error: `Invalid user` },
-        { status: 404 }
-      );
+    const body = await request.json();
+    const { shipping, payment, jsonData } = body;
+    const requestedItems = Array.isArray(body.items) ? body.items : [];
+    if (!requestedItems.length) {
+      return NextResponse.json({ error: "Your cart is empty." }, { status: 400 });
     }
+    const productIds = [...new Set(requestedItems.map((item) => Number(item.productId)))];
 
-    const order = await prisma.order.create({
-      data: {
-        userId: payload.userId,
-        jsonData,
-        items: {
-          create: items.map((item) => ({
-            productId: item.productId,
-            quantity: item.quantity,
-            backlogquantity: item.backlogquantity || 0,
-            price: item.price,
-          })),
+    const order = await prisma.$transaction(async (tx) => {
+      const products = await tx.product.findMany({ where: { id: { in: productIds }, status: true } });
+      const productsById = new Map(products.map((product) => [product.id, product]));
+      const items = requestedItems.map((item) => {
+        const product = productsById.get(Number(item.productId));
+        const quantity = Number(item.quantity);
+        if (!product || !Number.isInteger(quantity) || quantity < 1) throw new Error("INVALID_ITEM");
+        if (quantity > product.stock) throw new Error(`OUT_OF_STOCK:${product.name}:${product.stock}`);
+        return {
+          productId: product.id,
+          quantity,
+          backlogquantity: Number(item.backlogquantity) || 0,
+          price: product.price,
+        };
+      });
+      const amount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+      const createdOrder = await tx.order.create({
+        data: {
+          userId: Number(payload.userId),
+          jsonData,
+          items: { create: items },
+          shipping: shipping ? { create: shipping } : undefined,
+          payment: payment ? {
+            create: {
+              ...payment,
+              userId: Number(payment.userId || payload.userId),
+              amount: Number(payment.amount) || amount,
+            },
+          } : undefined,
         },
-        shipping: shipping ? { create: shipping } : undefined,
-        payment: payment ? { create: payment } : undefined,
-      },
-      include: {
-        user: true,
-        items: { include: { product: true } },
-        shipping: true,
-        payment: true,
-      },
+        include: {
+          user: true,
+          items: { include: { product: true } },
+          shipping: true,
+          payment: true,
+        },
+      });
+
+      for (const item of items) {
+        const updated = await tx.product.updateMany({
+          where: { id: item.productId, stock: { gte: item.quantity } },
+          data: { stock: { decrement: item.quantity } },
+        });
+        if (updated.count !== 1) {
+          throw new Error(`OUT_OF_STOCK:${productsById.get(item.productId)?.name || "Product"}:0`);
+        }
+      }
+      return createdOrder;
     });
 
     const itemsText = order.items
@@ -112,10 +150,21 @@ export async function POST(request) {
     await sendEmail(payload.email, "Order Created with " + order.id, orderhtml);
     await sendWhatsAppOrderCreate(order?.user?.name, order?.user?.countryCode + order?.user?.phone, order.id, "Status : Created", itemsText);
     await createNotification("Order Created with " + order.id, payload.userId.toString(), orderhtml);
+    if (idempotencyKey) {
+      recentRequests.set(idempotencyKey, order);
+      setTimeout(() => recentRequests.delete(idempotencyKey), 5 * 60 * 1000);
+    }
     return NextResponse.json(order, { status: 201 });
   } catch (error) {
-    console.log("POST /orders error:", error);
-    return NextResponse.json({ error: "Failed to create order" }, { status: 500 });
+    if (error?.message?.startsWith("OUT_OF_STOCK:")) {
+      const [, name, stock] = error.message.split(":");
+      return NextResponse.json({ error: `${name} only has ${stock} item(s) available.` }, { status: 409 });
+    }
+    if (error?.message === "INVALID_ITEM") {
+      return NextResponse.json({ error: "One or more cart items are invalid." }, { status: 400 });
+    }
+    console.error("POST /orders error:", error);
+    return NextResponse.json({ error: "Unable to place the order. Please try again." }, { status: 500 });
   }
 }
 
@@ -123,7 +172,7 @@ export async function PUT(request) {
   try {
     const body = await request.json();
     const { id, status, approved = false } = body;
-    if (verifyAdmin(request)) {
+    if (await verifyAdmin(request)) {
       if (approved) {
         let filterProduct, offer, jsonData = [], jsonFound = false;
         let orders = await prisma.order.findUnique({

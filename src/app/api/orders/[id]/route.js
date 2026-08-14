@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { authenticate, verifyAdmin } from "../../utils/jwt";
 
 const prisma = new PrismaClient();
 
@@ -7,6 +8,10 @@ const prisma = new PrismaClient();
 
 export async function GET(request, { params }) {
   try {
+    const user = await authenticate(request);
+    if (!user?.userId) {
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+    }
     const id = (await params).id;
 
     const order = await prisma.order.findFirst({
@@ -21,8 +26,10 @@ export async function GET(request, { params }) {
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
-    const tax = await prisma.tax.findMany();
-    return NextResponse.json(order,tax);
+    if (order.userId !== Number(user.userId) && !(await verifyAdmin(request))) {
+      return NextResponse.json({ error: "You cannot view this order" }, { status: 403 });
+    }
+    return NextResponse.json(order);
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch order" }, { status: 500 });
   }
@@ -55,7 +62,10 @@ export async function GET(request, { params }) {
 // 📌 PUT /api/orders/[id]
 export async function PUT(request, { params }) {
   try {
-    const id = Number(params.id);
+    if (!(await verifyAdmin(request))) {
+      return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+    }
+    const id = Number((await params).id);
     const body = await request.json();
 
     const { status, approved, deliveryAgent, jsonData } = body;
@@ -84,9 +94,12 @@ export async function PUT(request, { params }) {
 }
 
 // 📌 DELETE /api/orders/[id]
-export async function DELETE(_, { params }) {
+export async function DELETE(request, { params }) {
   try {
-    const id = Number(params.id);
+    if (!(await verifyAdmin(request))) {
+      return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+    }
+    const id = Number((await params).id);
 
     // Prisma will delete order items via cascade if set up in schema,
     // else we must delete them manually before deleting the order.

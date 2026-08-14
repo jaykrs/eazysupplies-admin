@@ -91,7 +91,7 @@ if (!user) {
     };
 
     const response = NextResponse.json(
-      { message: MESSAGES.LOGIN_SUCCESS, data },
+      { message: MESSAGES.LOGIN_SUCCESS, data, access_token: token },
       { status: 200 }
     );
 

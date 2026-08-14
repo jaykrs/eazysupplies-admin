@@ -13,3 +13,17 @@ return NextResponse.json(product);
     console.log(Error);
 }
 }
+
+export async function DELETE(request, { params }) {
+  try {
+    const id = Number((await params).id);
+    await prisma.product.delete({ where: { id } });
+    return NextResponse.json({ message: "Product deleted" });
+  } catch (error) {
+    const isReferenced = error?.code === "P2003";
+    return NextResponse.json(
+      { error: isReferenced ? "This product is used by an order and cannot be deleted." : "Unable to delete product." },
+      { status: isReferenced ? 409 : 500 }
+    );
+  }
+}

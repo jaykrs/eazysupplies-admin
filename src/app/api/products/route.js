@@ -14,42 +14,48 @@ const prisma = new PrismaClient();
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const id = Number(searchParams.get('productId'));
-    const ids = searchParams.get('ids');
-    const catId = Number(searchParams.get('categoryId'));
-    const barId = Number(searchParams.get('brandId'));
-    let res;
+    const id = Number(searchParams.get("productId"));
     if (id) {
-      const res = await prisma.product.findUnique({
-        where: {
-          id: id
-        },
-        include: { category: true, brand: true }
-      })
-      return NextResponse.json({ data: res ? res : [] }, { status: 200 });
+      const product = await prisma.product.findUnique({
+        where: { id },
+        include: { category: true, brand: true },
+      });
+      return NextResponse.json({ data: product || [] }, { status: 200 });
     }
 
-    if (ids) {
-      const arr = ids.split(",").map(Number);
-      const res = await prisma.product.findMany({
-        where: {
-          status : true,
-          id: {
-            in : arr
-          }
-        },
-        include: { category: true, brand: true }
-      })
-      return NextResponse.json({ data: res ? res : [] }, { status: 200 });
-    }
+    const parseIds = (value) => value?.split(",").map(Number).filter(Number.isInteger);
+    const ids = parseIds(searchParams.get("ids"));
+    const categoryIds = parseIds(searchParams.get("category_ids")) ||
+      (Number(searchParams.get("categoryId")) ? [Number(searchParams.get("categoryId"))] : undefined);
+    const brandIds = parseIds(searchParams.get("brand_ids")) ||
+      (Number(searchParams.get("brandId")) ? [Number(searchParams.get("brandId"))] : undefined);
+    const search = searchParams.get("search")?.trim();
+    const page = Math.max(Number(searchParams.get("page")) || 1, 1);
+    const perPage = Math.min(Math.max(Number(searchParams.get("paginate")) || 25, 1), 100);
+    const storefrontKeys = ["status", "paginate", "ids", "search", "category_ids", "brand_ids", "field", "sort"];
+    const isStorefrontRequest = storefrontKeys.some((key) => searchParams.has(key));
+    const allowedSortFields = new Set(["name", "price", "stock", "createdAt", "updatedAt"]);
+    const requestedField = searchParams.get("field");
+    const sortField = allowedSortFields.has(requestedField) ? requestedField : "createdAt";
+    const sortDirection = searchParams.get("sort") === "desc" ? "desc" : "asc";
 
-    const products = catId ? await prisma.product.findMany({
-      include: { category: true, brand: true }, where: { status: true, categoryId: catId }
-    }) : barId ? await prisma.product.findMany({
-      include: { category: true, brand: true }, where: { status: true , brandId: barId }
-    }) : await prisma.product.findMany({
-      include: { category: true, brand: true }
-    });
+    const where = {
+      ...(searchParams.get("status") === "1" || ids?.length ? { status: true } : {}),
+      ...(ids?.length ? { id: { in: ids } } : {}),
+      ...(categoryIds?.length ? { categoryId: { in: categoryIds } } : {}),
+      ...(brandIds?.length ? { brandId: { in: brandIds } } : {}),
+      ...(search ? { name: { contains: search } } : {}),
+    };
+
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        include: { category: true, brand: true },
+        orderBy: { [sortField]: sortDirection },
+        ...(isStorefrontRequest ? { skip: (page - 1) * perPage, take: perPage } : {}),
+      }),
+      prisma.product.count({ where }),
+    ]);
     const tax = await prisma.tax.findMany();
 
     const allSupplierIds = products
@@ -85,7 +91,17 @@ export async function GET(request) {
       };
     });
 
-    return NextResponse.json({ data: productsWithSuppliers, tax }, { status: 200 });
+    if (!isStorefrontRequest) {
+      return NextResponse.json({ data: productsWithSuppliers, tax }, { status: 200 });
+    }
+
+    return NextResponse.json({
+      current_page: page,
+      last_page: Math.ceil(total / perPage),
+      total,
+      per_page: perPage,
+      data: productsWithSuppliers,
+    });
   } catch (err) {
     return NextResponse.json({ error: MESSAGES.SERVER_ERROR }, { status: 500 });
   }
@@ -94,7 +110,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     let payload = await authenticate(request);
-    if (verifyAdmin(request)) {
+    if (await verifyAdmin(request)) {
       const body = await request.json();
       body.createdBy = Number(payload?.userId);
       const res = await prisma.product.create({ data: body });
@@ -112,7 +128,7 @@ export async function POST(request) {
 
 export async function PUT(request) {
   try {
-    if (verifyAdmin(request)) {
+    if (await verifyAdmin(request)) {
       const body = await request.json();
       const { id, ...rest } = body;
       let prod = await prisma.product.update({ where: { id }, data: rest });

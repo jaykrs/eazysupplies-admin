@@ -17,3 +17,16 @@ return NextResponse.json(category);
 }
 }
 
+export async function DELETE(request, { params }) {
+  try {
+    const id = Number((await params).id);
+    await prisma.category.delete({ where: { id } });
+    return NextResponse.json({ message: "Category deleted" });
+  } catch (error) {
+    const isReferenced = error?.code === "P2003";
+    return NextResponse.json(
+      { error: isReferenced ? "Move or delete this category's products before deleting it." : "Unable to delete category." },
+      { status: isReferenced ? 409 : 500 }
+    );
+  }
+}
