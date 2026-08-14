@@ -19,9 +19,9 @@ const Language = () => {
   };
   const langData = [
     { LanuageName: "English", lang: "en", icon: "us" },
-    { LanuageName: "French", lang: "fr", icon: "fr" },
-    { LanuageName: "Spanish", lang: "es", icon: "es" },
-    { LanuageName: "Arabic", lang: "ar", icon: "ar" },
+  //  { LanuageName: "French", lang: "fr", icon: "fr" },
+  //  { LanuageName: "Spanish", lang: "es", icon: "es" },
+  //  { LanuageName: "Arabic", lang: "ar", icon: "ar" },
   ];
 
   return (

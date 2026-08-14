@@ -21,11 +21,11 @@ const MainDashboard = () => {
     <>
       {data?.is_read === 0 && <NoticeDashBoard data={data} refetch={refetch} />}
       <TopDashSection   />
-      <section>
+      {/* <section>
         <RevenueAndTopVendor  />
         <RecentOrderTable />
         <ProductStockReportTable  />
-      </section>
+      </section> */}
     </>
   );
 };

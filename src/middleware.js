@@ -8,11 +8,18 @@ const PUBLIC_ROUTES = [
   '/auth/register',
   '/auth/otp-verification'
 ];
+ const allowedOrigins = [
+  "http://localhost:3000",
+  "http://eazysupplies.com",
+  "https://eazysupplies.com",
+  "http://api.eazysupplies.com",
+  "https://api.eazysupplies.com"
+];
 
 export async function middleware(request) {
   const token = request.cookies.get('authToken')?.value;
   const { pathname } = request.nextUrl;
-
+  const origin = request.headers.get("origin");
   const isPublicRoute = PUBLIC_ROUTES.some((route) =>
     pathname === route || pathname.startsWith(`${route}/`)
   );
@@ -23,18 +30,37 @@ export async function middleware(request) {
     }
     return NextResponse.next();
   }
+ 
+  
   if (request.nextUrl.pathname.startsWith('/api')) {
-    const origin = request.headers.get('origin');
-    const response = request.method === 'OPTIONS'
-      ? new NextResponse(null, { status: 204 })
-      : NextResponse.next();
-    response.headers.set('Access-Control-Allow-Origin', origin || 'http://localhost:3101');
-    response.headers.set('Vary', 'Origin');
-    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    response.headers.set('Access-Control-Allow-Credentials', 'true'); // If you need to send cookies/credentials
-    return response;
+    const response = NextResponse.next();
+
+    // Allow dynamic origin if in allowlist
+    if (allowedOrigins.includes(origin)) {
+      response.headers.set("Access-Control-Allow-Origin", origin);
+    }
+
+    response.headers.set(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, DELETE, OPTIONS"
+    );
+    response.headers.set(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization"
+    );
+    response.headers.set("Access-Control-Allow-Credentials", "true");
+
+    // OPTIONS preflight handling
+    if (request.method === "OPTIONS") {
+      return new NextResponse(null, {
+        status: 204,
+        headers: response.headers,
+      });
+    }
+	  return response;
   }
+
+
   if (!token) {
     return NextResponse.redirect(new URL('/auth/login', request.url));
   }

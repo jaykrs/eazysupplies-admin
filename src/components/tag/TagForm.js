@@ -11,6 +11,7 @@ import CheckBoxField from "../inputFields/CheckBoxField";
 import SimpleInputField from "../inputFields/SimpleInputField";
 import useCustomQuery from "@/utils/hooks/useCustomQuery";
 import axios from "axios";
+import { formatString } from "../../lib/format-number";
 
 const TagForm = ({ updateId, type, buttonName }) => {
   const { t } = useTranslation("common");
@@ -18,13 +19,15 @@ const TagForm = ({ updateId, type, buttonName }) => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
-    fetchDetails();
+    if (updateId) {
+      fetchDetails();
+    }
   }, [updateId]);
 
   const fetchDetails = async () => {
     try {
       setIsLoading(true);
-      let res = await axios.get('/api/tag?tagId=' + updateId);
+      let res = await axios.get('/api/tags?tagId=' + updateId);
       if (res.status == 200) {
         console.log('........res', res);
         setData(res.data.data);
@@ -41,10 +44,8 @@ const TagForm = ({ updateId, type, buttonName }) => {
   const handleSubmit = async (values) => {
     try {
       setIsLoading(true);
-      console.log('update started...', buttonName);
       if (buttonName == "Update") {
-        console.log('update started...');
-        const res = await axios.put('/api/tag?tagId=' + updateId, {
+        const res = await axios.put('/api/tags?tagId=' + updateId, {
           "description": values.description,
         }, { withCredentials: true });
 
@@ -54,8 +55,10 @@ const TagForm = ({ updateId, type, buttonName }) => {
         }
 
       } else {
-        const res = await axios.post('/api/tag', {
+        let tags = formatString(values.name);
+        const res = await axios.post('/api/tags', {
           "name": values.name,
+          "slug" : tags,
           "description": values.description,
         }, { withCredentials: true });
 
@@ -75,8 +78,8 @@ const TagForm = ({ updateId, type, buttonName }) => {
     <Formik
       enableReinitialize
       initialValues={{
-        name: data.length > 1? data[0]?.name: "",
-        description: data.length > 1? data[0]?.description: ""
+        name: data.length > 1 ? data[0]?.name : "",
+        description: data.length > 1 ? data[0]?.description : ""
       }}
       validationSchema={YupObject({ name: nameSchema })}
       onSubmit={(values) => {

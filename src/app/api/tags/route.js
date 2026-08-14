@@ -7,6 +7,7 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const id = Number(searchParams.get('tagId'));
+    const isAllTagOfProducts = searchParams.get('isAllTagOfProducts');
     if (id) {
       const tag = await prisma.tag.findUnique({
         where: {
@@ -15,6 +16,17 @@ export async function GET(request) {
       })
       return NextResponse.json({ data: tag ? tag : [] }, { status: 200 });
     }
+    if (isAllTagOfProducts === "ALL") {
+      const tags = await prisma.tag.findMany();
+      const products = await prisma.product.findMany({include: { category: true, brand: true }});
+      const suppliers = await prisma.supplier.findMany();
+      tags.forEach((el,index)=>{
+        const filterProduct = products.filter(item=> item?.tags?.split(",")?.map(tag=> tag.trim()).includes(el.id.toString()));
+        el.product = filterProduct;
+      })
+      return NextResponse.json({ data: tags, suppliers }, { status: 200 });
+    }
+
     const res = await prisma.tag.findMany();
     return NextResponse.json({ data: res }, { status: 200 });
   } catch (err) {
@@ -42,21 +54,12 @@ export async function PUT(request) {
     const body = await request.json();
     const { searchParams } = new URL(request.url);
     const id = Number(searchParams.get('tagId'));
-    // const token = parseAuthCookie(request.headers.get('cookie'));
-    // const payload = token ? verifyJwt(token) : null;
-    // if (!payload || (await verifyRole(payload.userId)).toLowerCase() !== 'admin') {
-    //   return NextResponse.json(
-    //     { error: 'Unauthorized: Admin role required' },
-    //     { status: 403 }
-    //   );
-    // }
 
     const tag = await prisma.tag.findUnique({
       where: {
         id: id
       }
     })
-    console.log('.........', tag, id);
     if (!tag) {
       return NextResponse.json({ error: 'Tag does not exist' }, { status: 404 });
     }

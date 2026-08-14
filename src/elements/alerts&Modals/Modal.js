@@ -12,14 +12,15 @@ const ShowModal = ({ open = false, buttons, title, close = true, modalAttr, setM
     setIsOpen(open);
   }, [open]);
   return (
-    <Modal id="staticBackdrop" isOpen={isOpen} centered className={`theme-modal theme-form ${modalAttr?.className}`} toggle={(toggle) => {
-      setIsOpen(false); setModal && setModal(false);
-    }}>
+    <Modal id="staticBackdrop" isOpen={isOpen} centered className={`theme-modal theme-form  ${modalAttr?.className}`}
+      toggle={(toggle) => {
+        setIsOpen(false); setModal && setModal(false);
+      }}>
       {close && (
         <ModalHeader toggle={() => { setIsOpen(false); setModal && setModal(false); }}>
           {title && (title === "success" ? t("success") : title === "fail" ? t("Oops!") : t(title))}
           <Btn className='modal-close-btn'>
-            <RiCloseLine onClick={()=>setModal(false)}/>
+            <RiCloseLine onClick={() => setModal(false)} />
           </Btn>
         </ModalHeader>
       )}

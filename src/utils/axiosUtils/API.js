@@ -7,7 +7,7 @@ export const updatePassword = "update-password";
 export const LogoutAPI = "/logout";
 
 // self data (get)
-export const selfData = "/self";
+export const selfData = "/api/self";
 export const updateProfile = "/updateProfile";
 export const updateProfilePassword = "/updatePassword";
 
@@ -69,8 +69,8 @@ export const shipping = "/shipping";
 export const shippingRule = "/shippingRule";
 
 // setting api
-export const setting = "/settings";
-export const updateSetting = "/settings";
+export const setting = "/api/settings";
+export const updateSetting = "/api/settings";
 
 // setting api
 export const checkout = "/checkout";

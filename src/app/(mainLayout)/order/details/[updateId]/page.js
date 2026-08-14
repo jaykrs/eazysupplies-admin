@@ -1,10 +1,10 @@
 "use client";
-import OrderDetailsContain from "@/components/orders/details";
+import OrdersView from "@/components/orders/OrdersView";
 import { useParams } from "next/navigation";
 
 const OrderDetails = () => {
   const params = useParams();
-  return params?.updateId && <OrderDetailsContain updateId={params?.updateId} />;
+  return params?.updateId && <OrdersView id={params?.updateId} />;
 };
 
 export default OrderDetails;

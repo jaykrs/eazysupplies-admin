@@ -12,8 +12,9 @@ import CheckBoxField from "../inputFields/CheckBoxField";
 import FileUploadField from "../inputFields/FileUploadField";
 import SimpleInputField from "../inputFields/SimpleInputField";
 import useCustomQuery from "@/utils/hooks/useCustomQuery";
+import { formatString } from "../../lib/format-number";
 import axios from "axios";
-const BrandForm = ({ updateId, buttonName }) => {
+const BrandForm = ({ updateId, buttonName, model }) => {
   const { t } = useTranslation("common");
   const router = useRouter();
   const [data, setData] = useState({});
@@ -46,24 +47,26 @@ const BrandForm = ({ updateId, buttonName }) => {
 
         if (res.status == 200) {
           alert('Brand: ' + values.name + " updated successfully!");
-          router.push("/brand");
+         // router.push("/brand");
         }
 
       } else {
+        let slugs = formatString(values.name);
         const res = await axios.post('/api/brands', {
           "name": values.name,
+          "slug" : slugs
           // "description": values.description,
         }, { withCredentials: true });
 
         if (res.status == 201) {
           alert('Brand: ' + values.name + " added successfully!");
-          router.push("/brand");
+         // router.push("/brand");
         }
       }
       setIsLoading(false);
     } catch (err) {
       console.log('.........', err)
-      alert(err.response.data.error);
+      alert('something went wrong');
     }
   }
   return (

@@ -799,7 +799,7 @@
   "Passwordconfirmationisarequired": "Password confirmation is required",
   "Bothpasswordneedtobethesame": "Both password need to be the same",
   "TooShort!": "Too Short!",
-  "Phonemustbeatleast10characters": "Phone must be at least 10 characters",
+  "Phonemustbeatleast10characters": "Phone must be at least 10 characters & not start with 0",
   "EnterValidEmail": "Enter Valid Email",
   "TooLong!": "Too Long!",
   "Permissionisrequired": "Permission is required",

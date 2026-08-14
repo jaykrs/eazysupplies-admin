@@ -1,18 +1,12 @@
 "use client";
-import Loader from "@/components/commonComponent/Loader";
-import FormWrapper from "@/utils/hoc/FormWrapper";
-import dynamic from "next/dynamic";
+import RoleForm from "../../../../components/role/roleForm";
+import { useState } from "react";
 
-const Role = () => {
-  const PermissionForm = dynamic(() => import("@/components/role/PermissionForm").then((mod) => mod.default), {
-    loading: () => <Loader />,
-    ssr: false,
-  });
-  return (
-    <FormWrapper title="AddRole">
-      <PermissionForm buttonName="Save" />
-    </FormWrapper>
-  );
+const RoleCreate = () => {
+  const [resetData, setResetData] = useState(false);
+ 
+  // return <ProductForm values={resetKey} mutate={mutate} loading={isLoading} title={"AddProduct"} key={resetKey} buttonName="Save" />;
+  return <RoleForm  type={"product"} title="New Role" />
 };
 
-export default Role;
+export default RoleCreate;

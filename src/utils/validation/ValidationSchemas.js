@@ -18,7 +18,7 @@ export const passwordSchema = Yup.string()
 
 export const recaptchaSchema = Yup.string().required();
 export const nameSchema = Yup.string().required();
-
+export const numberSchema = Yup.number().positive().required();
 
 export const descriptionSchema = Yup.string()
   .required()
@@ -127,7 +127,10 @@ otherwise: Yup.number ().notRequired(),
 export const requiredSchema = Yup.mixed().required();
 export const StatusSchema = Yup.boolean().required();
 
-export const phoneSchema = Yup.string().min(6).max(15).required();
+export const phoneSchema = Yup.string()
+  .length(10, "Phone number must be exactly 10 digits")
+  .matches(/^[1-9][0-9]{9}$/, "Phone number must not start with 0")
+  .required("Phone number is required");
 
 export const ifIsApplyAll = Yup.array().when("is_apply_all", {
   is: (val) => !val,

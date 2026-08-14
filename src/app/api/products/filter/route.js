@@ -1,40 +1,99 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+
 const prisma = new PrismaClient();
 
-
 export async function GET(request) {
+  try {
     const { searchParams } = new URL(request.url);
-    let products;
-    try {
-    if (searchParams.get('tag')) {
-         products = await prisma.product.findMany({
-            where: {
+    const useSlug = searchParams.get("slug") === "y";
+    let items = [];
+
+    // Helper: remove duplicate products by ID
+    const removeDuplicatesById = (arr) => {
+      const seen = new Set();
+      return arr.filter((item) => {
+        if (seen.has(item.id)) return false;
+        seen.add(item.id);
+        return true;
+      });
+    };
+
+    // --- TAG FILTER ---
+    if (searchParams.get("tag")) {
+      const tags = searchParams.get("tag").split(",").map((t) => t.trim());
+
+      items = await Promise.all(
+        tags.map(async (tag) => {
+          if (useSlug) {
+            const tagEntity = await prisma.tag.findFirst({ where: { slug: tag } });
+            if (!tagEntity) return [];
+            return prisma.product.findMany({
+              where: {
+               status: true,
                 tags: {
-                    contains: searchParams.get('tag'),
-                }
-            }
-        });
-        return NextResponse.json({data: products}, {status: 200});
-    } else if (searchParams.get('brand')) {
-    const brand = await prisma.brand.findUnique({
-            where: { id: Number(searchParams.get('brand')) }, 
-            include: {
-                products: true,
-            },
-        });
-    return NextResponse.json(brand);    
-    } else if (searchParams.get('category')) {
-       const category = await prisma.category.findUnique({
-            where: { id: Number(searchParams.get('category')) }, 
-            include: {
-                products: true,
-            },
-        });
-    return NextResponse.json(category);
-    }else{
-        products = {};
+                contains: tagEntity.id.toString(), // For case-insensitive search
+                },
+              },
+            });
+          } else {
+            return prisma.product.findMany({
+              where: {
+                status: true,
+                tags: {
+                  contains:  tag ,
+                },
+              },
+            });
+          }
+        })
+      );
+      items = items.flat();
     }
-    } catch(Error) {console.log(Error);}
-   
+
+    // --- BRAND FILTER ---
+    else if (searchParams.get("brand")) {
+     const _brand = searchParams.get("brand").split(",").map((c) => c.trim());
+       items = await Promise.all(
+        _brand.map(async (brnd) => {
+          if (useSlug) {
+            const brand = await prisma.brand.findFirst({ where: { slug: brnd }, include: { products: { where: { status: true } } } });
+            return brand?.products || [];
+          } else {
+            const brand = await prisma.brand.findUnique({ where: { id: Number(brnd) }, include: { products: { where: { status: true } } } });
+            return brand?.products || [];
+          }
+        })
+      );
+
+      items = items.flat();
+    }
+
+    // --- CATEGORY FILTER ---
+    else if (searchParams.get("category")) {
+      const categories = searchParams.get("category").split(",").map((c) => c.trim());
+
+      items = await Promise.all(
+        categories.map(async (cat) => {
+          if (useSlug) {
+            const category = await prisma.category.findFirst({ where: { slug: cat }, include: { products: { where: { status: true } } } });
+            return category?.products || [];
+          } else {
+            const category = await prisma.category.findUnique({ where: { id: Number(cat) }, include: { products: { where: { status: true } } } });
+            return category?.products || [];
+          }
+        })
+      );
+
+      items = items.flat();
+    }
+
+    // Deduplicate final product list
+    const productList = removeDuplicatesById(items);
+
+    return NextResponse.json({ items: productList });
+  } catch (error) {
+    console.error("GET /products error:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
 }

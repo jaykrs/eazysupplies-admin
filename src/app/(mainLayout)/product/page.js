@@ -1,128 +1,309 @@
 "use client";
-
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
-import { RiAddLine, RiDeleteBinLine, RiEditLine, RiRefreshLine, RiSearchLine } from "react-icons/ri";
-import { Button, Card, CardBody, Input, Spinner } from "reactstrap";
+import { useEffect, useState } from "react";
+import Select from "react-select";
 
-const PAGE_SIZE_OPTIONS = [10, 25, 50];
+const AllUsers = () => {
+    const route = useRouter();
+    const [products, setProducts] = useState([]);
+    const [taxData, setTaxData] = useState([]);
+    const [supplierData, setSupplierData] = useState([]);
+    const [refreshState, setRefeshState] = useState(false);
+    const [state, setState] = useState({
+        name: "all",
+        type: "all",
+        tag: "all"
+    });
+    const [isDarkMode, setIsDarkMode] = useState(false);
 
-export default function ProductPage() {
-  const router = useRouter();
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [search, setSearch] = useState("");
-  const [categoryId, setCategoryId] = useState("");
-  const [availability, setAvailability] = useState("all");
-  const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(25);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  const loadProducts = useCallback(async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const response = await axios.get("/api/products", {
-        params: {
-          status: "all",
-          search: search.trim() || undefined,
-          category_ids: categoryId || undefined,
-          page,
-          paginate: perPage,
-          field: "createdAt",
-          sort: "desc",
-        },
-        withCredentials: true,
-      });
-      let rows = response.data?.data || [];
-      if (availability === "in-stock") rows = rows.filter((product) => product.stock > 0);
-      if (availability === "out-of-stock") rows = rows.filter((product) => product.stock <= 0);
-      setProducts(rows);
-      setTotal(response.data?.total || 0);
-    } catch (requestError) {
-      setError(requestError?.response?.data?.error || "Unable to load products.");
-    } finally {
-      setLoading(false);
+    const handleStateChange = (name, value) => {
+        setState(prev => {
+            return { ...prev, [name]: value }
+        })
     }
-  }, [search, categoryId, availability, page, perPage]);
 
-  useEffect(() => {
-    axios.get("/api/categories", { withCredentials: true })
-      .then((response) => setCategories(response.data?.data || []))
-      .catch(() => setCategories([]));
-  }, []);
+    useEffect(() => {
+        const initial = document.body.classList.contains("dark-only");
+        setIsDarkMode(initial);
+        fetchProduct();
+    }, [])
 
-  useEffect(() => { loadProducts(); }, [loadProducts]);
+    useEffect(() => {
+        const initial = document.body.classList.contains("dark-only");
+        setIsDarkMode(initial);
+        fetchProduct();
+        setRefeshState(false);
+    }, [refreshState])
 
-  const removeProduct = async (product) => {
-    if (!window.confirm(`Delete “${product.name}”?`)) return;
-    try {
-      await axios.delete(`/api/products/${product.id}`, { withCredentials: true });
-      await loadProducts();
-    } catch (requestError) {
-      setError(requestError?.response?.data?.error || "Unable to delete product.");
+    const fetchProduct = async () => {
+        let res = await axios.get('/api/products', { withCredentials: true });
+        if (res.status == 200) {
+            setProducts(res.data.data);
+            setTaxData(res.data.tax);
+
+        }
     }
-  };
 
-  const lastPage = Math.max(1, Math.ceil(total / perPage));
+    const nameOptions = [
+        { value: 'all', label: 'All' },
+        { value: 'CORN FLAKES', label: 'CORN FLAKES' },
+        { value: 'MOJITO MINT', label: 'MOJITO MINT' },
+        { value: 'BLUE CURACAO', label: 'BLUE CURACAO' },
+    ];
 
-  return (
-    <Card>
-      <CardBody>
-        <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
-          <div>
-            <h3 className="mb-1">All Products</h3>
-            <p className="text-muted mb-0">Search, filter and manage the product catalogue.</p>
-          </div>
-          <Button color="primary" onClick={() => router.push("/product/create")}><RiAddLine /> Add Product</Button>
-        </div>
+    const typeOptions = [
+        { value: 'all', label: 'All' },
+        { value: 'physical', label: 'Physical Product' },
+        { value: 'digital', label: 'Digital Product' },
+        { value: 'external', label: 'External/Affiliate Product' },
+    ];
 
-        <div className="row g-3 mb-3">
-          <div className="col-lg-5">
-            <label className="form-label" htmlFor="product-search">Search products</label>
-            <div className="input-group"><span className="input-group-text"><RiSearchLine /></span><Input id="product-search" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} placeholder="Name or keyword" /></div>
-          </div>
-          <div className="col-md-3">
-            <label className="form-label" htmlFor="product-category">Category</label>
-            <Input id="product-category" type="select" value={categoryId} onChange={(event) => { setCategoryId(event.target.value); setPage(1); }}>
-              <option value="">All categories</option>
-              {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
-            </Input>
-          </div>
-          <div className="col-md-2">
-            <label className="form-label" htmlFor="product-stock">Availability</label>
-            <Input id="product-stock" type="select" value={availability} onChange={(event) => { setAvailability(event.target.value); setPage(1); }}>
-              <option value="all">All</option><option value="in-stock">In stock</option><option value="out-of-stock">Out of stock</option>
-            </Input>
-          </div>
-          <div className="col-md-2 d-flex align-items-end">
-            <Button outline className="w-100" onClick={loadProducts}><RiRefreshLine /> Refresh</Button>
-          </div>
-        </div>
+    const tagOptions = [
+        { value: 'all', label: 'All' },
+        { value: 'BAR SYRUP & CORNFLAKES', label: 'BAR SYRUP & CORNFLAKES' },
+        { value: 'CRUSHES', label: 'CRUSHES' },
+        { value: 'TOMATO PRODUCTS', label: 'TOMATO PRODUCTS' },
+    ];
 
-        {error && <div className="alert alert-danger" role="alert">{error}</div>}
-        <div className="table-responsive" style={{ maxHeight: "65vh" }}>
-          <table className="table table-hover align-middle mb-0">
-            <thead className="table-light" style={{ position: "sticky", top: 0, zIndex: 2 }}><tr><th>Actions</th><th>Name</th><th>SKU</th><th>Price</th><th>Stock</th><th>Category</th><th>Brand</th><th>Updated</th></tr></thead>
-            <tbody>
-              {loading ? <tr><td colSpan="8" className="text-center py-5"><Spinner size="sm" /> Loading products…</td></tr> : products.length ? products.map((product) => (
-                <tr key={product.id}>
-                  <td className="text-nowrap"><Button size="sm" color="warning" aria-label={`Edit ${product.name}`} onClick={() => router.push(`/product/edit/${product.id}`)}><RiEditLine /></Button>{" "}<Button size="sm" color="danger" aria-label={`Delete ${product.name}`} onClick={() => removeProduct(product)}><RiDeleteBinLine /></Button></td>
-                  <td style={{ minWidth: 220, whiteSpace: "normal" }}>{product.name}</td><td>{product.sku || "—"}</td><td>₹{Number(product.price).toFixed(2)}</td><td>{product.stock}</td><td>{product.category?.name || "—"}</td><td>{product.brand?.name || "—"}</td><td>{product.updatedAt ? new Date(product.updatedAt).toLocaleDateString() : "—"}</td>
-                </tr>
-              )) : <tr><td colSpan="8" className="text-center py-5">No products match these filters.</td></tr>}
-            </tbody>
-          </table>
-        </div>
+    const handleView = () => {
 
-        <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mt-3">
-          <div className="d-flex align-items-center gap-2"><span>Rows</span><Input type="select" value={perPage} onChange={(event) => { setPerPage(Number(event.target.value)); setPage(1); }} style={{ width: 90 }}>{PAGE_SIZE_OPTIONS.map((size) => <option key={size}>{size}</option>)}</Input><span>{total} total</span></div>
-          <div className="d-flex align-items-center gap-2"><Button outline disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>Previous</Button><span>Page {page} of {lastPage}</span><Button outline disabled={page >= lastPage} onClick={() => setPage((value) => value + 1)}>Next</Button></div>
-        </div>
-      </CardBody>
-    </Card>
-  );
+    };
+    const handleEdit = (id) => {
+        route.push('/product/edit/' + id);
+    };
+
+    const handleDelete = () => {
+
+    };
+
+    return (
+        <>
+            <div className="w-100 d-flex flex-wrap justify-content-start m-4 fs-6" style={{ gap: "50px" }}>
+
+                <div className="d-flex" style={{ gap: "20px" }} >
+                    <label htmlFor="productType">Product Type</label>
+
+                    <Select
+                        id="productType"
+                        options={typeOptions}
+                        onChange={(e) => handleStateChange('type', e.value)}
+                        defaultValue={typeOptions[0]}
+                        isSearchable={true}
+                        styles={{
+                            control: (base) => ({
+                                ...base,
+                                paddingLeft: "1rem",
+                                paddingRight: "1rem",
+                                backgroundColor: isDarkMode ? "#1e1e1e" : "#fff",
+                                color: isDarkMode ? "#f1f1f1" : "#000",
+                            }),
+                            menu: (base) => ({
+                                ...base,
+                                backgroundColor: isDarkMode ? "#2c2c2c" : "#fff",
+                                color: isDarkMode ? "#f1f1f1" : "#000",
+                            }),
+                            option: (base, state) => ({
+                                ...base,
+                                backgroundColor: state.isFocused
+                                    ? isDarkMode ? "#3a3a3a" : "#f0f0f0"
+                                    : isDarkMode ? "#2c2c2c" : "#fff",
+                                color: isDarkMode ? "#fff" : "#000",
+                            }),
+                            singleValue: (base) => ({
+                                ...base,
+                                color: isDarkMode ? "#fff" : "#000",
+                            }),
+                        }}
+                    />
+                </div>
+                <div className="d-flex" style={{ gap: "20px" }}>
+                    <label htmlFor="productName">Product Name</label>
+                    {/* <select id="productName" style={{ padding: "0 1rem" }}>
+                        <option value={'all'}>All</option>
+                    </select> */}
+                    <Select
+                        id="productName"
+                        options={nameOptions}
+                        onChange={(e) => handleStateChange("name", e.value)}
+                        defaultValue={nameOptions[0]}
+                        isSearchable={true}
+                        styles={{
+                            control: (base) => ({
+                                ...base,
+                                paddingLeft: "1rem",
+                                paddingRight: "1rem",
+                                backgroundColor: isDarkMode ? "#6B6565" : "#fff",
+                                color: isDarkMode ? "#f1f1f1" : "#000",
+                                borderColor: isDarkMode ? "#444" : base.borderColor,
+                            }),
+                            menu: (base) => ({
+                                ...base,
+                                backgroundColor: isDarkMode ? "#6B6565" : "#fff",
+                                color: isDarkMode ? "#f1f1f1" : "#000",
+                            }),
+                            option: (base, state) => ({
+                                ...base,
+                                backgroundColor: state.isFocused
+                                    ? isDarkMode
+                                        ? "#6B6565"
+                                        : "#f0f0f0"
+                                    : isDarkMode
+                                        ? "#6B6565"
+                                        : "#fff",
+                                color: isDarkMode ? "#fff" : "#000",
+                            }),
+                            singleValue: (base) => ({
+                                ...base,
+                                color: isDarkMode ? "#fff" : "#000",
+                            }),
+                            input: (base) => ({
+                                ...base,
+                                color: isDarkMode ? "#fff" : "#000",
+                            }),
+                            placeholder: (base) => ({
+                                ...base,
+                                color: isDarkMode ? "#aaa" : "#888",
+                            }),
+                        }}
+                    />
+                </div>
+
+                <div className="d-flex" style={{ gap: "20px" }} >
+                    <label htmlFor="tag">Tag</label>
+                    <Select
+                        id="tag"
+                        options={tagOptions}
+                        onChange={(e) => handleStateChange("tag", e.value)}
+                        defaultValue={tagOptions[0]}
+                        isSearchable={true}
+                        styles={{
+                            control: (base) => ({
+                                ...base,
+                                paddingLeft: "1rem",
+                                paddingRight: "1rem",
+                                backgroundColor: isDarkMode ? "#6B6565" : "#fff",
+                                color: isDarkMode ? "#f1f1f1" : "#000",
+                                borderColor: isDarkMode ? "#555" : base.borderColor,
+                            }),
+                            menu: (base) => ({
+                                ...base,
+                                backgroundColor: isDarkMode ? "#6B6565" : "#fff",
+                                color: isDarkMode ? "#f1f1f1" : "#000",
+                            }),
+                            option: (base, state) => ({
+                                ...base,
+                                backgroundColor: state.isFocused
+                                    ? isDarkMode ? "#6B6565" : "#f0f0f0"
+                                    : isDarkMode ? "#6B6565" : "#fff",
+                                color: isDarkMode ? "#fff" : "#000",
+                            }),
+                            singleValue: (base) => ({
+                                ...base,
+                                color: isDarkMode ? "#fff" : "#000",
+                            }),
+                            input: (base) => ({
+                                ...base,
+                                color: isDarkMode ? "#fff" : "#000",
+                            }),
+                            placeholder: (base) => ({
+                                ...base,
+                                color: isDarkMode ? "#aaa" : "#888",
+                            }),
+                        }}
+                    />
+                </div>
+            </div>
+            <div className="w-100 d-flex justify-content-end fs-5">
+                <div className="w-50 d-flex justify-content-end gap-4">
+                    <button className="px-2 py-1 btn btn-primary fs-4" onClick={() => setRefeshState(true)}>Search</button>
+                    <button className="px-2 py-1 btn btn-primary fs-4" onClick={() => route.push('/product/create')}>Add</button>
+                </div>
+            </div>
+
+            <div>
+                Product list
+            </div>
+            <div style={{ maxHeight: "400px", overflowY: "auto", overflowX: "auto" }}>
+                <table className="min-w-full border border-gray-300">
+                    <thead className="bg-gray-100">
+                        <tr>
+                            <th className="border px-4 py-2">Name</th>
+                            <th className="border px-4 py-2">Action</th>
+                            <th className="border px-4 py-2">SKU</th>
+                            <th className="border px-4 py-2">Price</th>
+                            <th className="border px-4 py-2">Tax</th>
+                            <th className="border px-4 py-2">Stock</th>
+                            <th className="border px-4 py-2">dimension</th>
+                            <th className="border px-4 py-2">Category</th>
+                            <th className="border px-4 py-2">Brand</th>
+                            <th className="border px-4 py-2">SKU</th>
+                            <th className="border px-4 py-2">SKUType</th>
+                            <th className="border px-4 py-2">SelfLife(Months)</th>
+                            <th className="border px-4 py-2">pkgUnit</th>
+                            {/* <th className="border px-4 py-2">pkgCnt</th> */}
+                            <th className="border px-4 py-2">caseRate</th>
+                            <th className="border px-4 py-2">unitRate</th>
+                            <th className="border px-4 py-2">Status</th>
+                            <th className="border px-4 py-2">Supplier</th>
+                            <th className="border px-4 py-2">ordersCount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {products?.length ? (
+                            products.map((product) => {
+                                const tax = taxData.filter(el => el.id = Number(product.tax));
+                                let supplierName;
+                                if (product?.suppliers.length == 1) {
+                                    supplierName = product?.suppliers[0].name
+                                } else if (product?.suppliers.length > 1) {
+                                    supplierName = product?.suppliers.reduce((a, b) => a.name + ", " + b.name);
+                                } else {
+                                    supplierName = ""
+                                }
+                                return (
+                                    <tr key={product.id}>
+                                        <td className="border px-4 py-2">{product.name}</td>
+                                         <td>
+                                            <div className="d-flex gap-2">
+                                                {/* <button onClick={() => handleView(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">View</button> */}
+                                                <button onClick={() => handleEdit(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-warning">Edit</button>
+                                                <button onClick={() => handleDelete(product.id)} style={{ padding: "4px 6px", fontSize: "12px" }} className="btn btn-danger">Delete</button>
+                                            </div>
+                                        </td>
+                                        <td className="border px-4 py-2">{product.sku}</td>
+                                        <td className="border px-4 py-2">{product.price}</td>
+                                        <td className="border px-4 py-2">{tax.length > 0 ? tax[0]?.name + "-" + tax[0]?.value : 0}</td>
+                                        <td className="border px-4 py-2">{product.stock}</td>
+                                        <td className="border px-4 py-2">{product.dimension}</td>
+                                        <td className="border px-4 py-2">{product.category?.name}</td>
+                                        <td className="border px-4 py-2">{product.brand?.name}</td>
+                                        <th className="border px-4 py-2">{product?.sku}</th>
+                                        <td className="border px-4 py-2">{product?.skuType}</td>
+                                        <td className="border px-4 py-2">{product?.selfLife}</td>
+                                        <td className="border px-4 py-2">{product?.pkgUnit}</td>
+                                        {/* <td className="border px-4 py-2">{product?.pkgCnt}</td> */}
+                                        <td className="border px-4 py-2">{product?.caseRate}</td>
+                                        <td className="border px-4 py-2">{product?.unitRate}</td>
+                                        <td className="border px-4 py-2" style={{color: product?.status? "green": "grey"}}>{product?.status? "Active": "Inactive"}</td>
+                                        <td className="border px-4 py-2">{supplierName}</td>
+                                        <td className="border px-4 py-2">{product.ordersCount}</td>
+                                    </tr>
+                                )
+                            }
+                            )
+                        ) : (
+                            <tr>
+                                <td colSpan="6" className="text-center py-4">
+                                    No products found.
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
+        </>
+    )
 }
+
+export default AllUsers;

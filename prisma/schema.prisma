@@ -23,7 +23,7 @@ model User {
   profileImagepath String?
   lastLoginDt    DateTime?
   countryCode String    @default("+91")
-  phone     String
+  phone     String    @unique
   role      Role      @relation(fields: [roleId], references: [id])
   orders    Order[]
   cart      Cart?
@@ -33,7 +33,10 @@ model User {
   updatedAt DateTime?  @updatedAt @map("updated_at")
   createdBy Int?  
   wishlist       String?
-  favorite       String?     
+  favorite       String?
+  gstn           String @unique
+  bankDetails  String?
+  deleted    Boolean   @default(false)     
 }
 
 model Role {
@@ -58,6 +61,19 @@ model Point {
   balance    Int  @default(0)
 }
 
+model Supplier {
+  id         Int  @id @default(autoincrement())
+  name String
+  description String? @db.Text
+  productList String?
+  gstIn String?
+  address String?
+  pinCode String?
+  city    String?
+  phone   String?
+  remarks String? @db.Text
+}
+
 model Tax {
   id         Int  @id @default(autoincrement())
   name String?
@@ -67,7 +83,7 @@ model Tax {
 model Product {
   id          Int          @id @default(autoincrement())
   name        String
-  description String?
+  description String? @db.Text
   price       Float
   stock       Int          @default(0)
   categoryId  Int
@@ -76,6 +92,10 @@ model Product {
   brand       Brand        @relation(fields: [brandId], references: [id])
   tags        String?
   sku         String?
+  skuType         String?
+  selfLife   Int?
+  mfDate      DateTime?
+  expDate     DateTime?
   orderItems  OrderItem[]
   cartItems   CartItem[]
   createdAt   DateTime     @default(now()) @map("created_at")
@@ -87,32 +107,29 @@ model Product {
   keyword      String?
   ordersCount  Int?
   tax          Int?
-  expDate      DateTime?
-  jsonData     Json?
-  mfDate       DateTime?
-  skuType      String?
-  status       Boolean      @default(false)
-  supplier     String?
-  caseRate     Float?
-  pkgGwt       String?
-  pkgUnit      String?
-  selfLife     Int?
-  unitRate     Float?
-  mrp          Int?
+  pkgGwt    String?
+  pkgUnit   String?
+  mrp    Int?
+  caseRate  Float?
+  unitRate  Float?
+  supplier String?
+  status   Boolean   @default(false)
+  jsonData Json?
 }
 
 model Blog {
   id                 Int       @id @default(autoincrement())
   title              String
   slug               String    @unique
-  description        String?
+  description        String? @db.Text
   image               String?
   url                 String?
-  content            String?
+  content            String?  @db.Text
   meta_title         String?
   meta_description   String?
   keyword             String?
-   createdAt DateTime  @default(now()) @map("created_at")
+  status              Boolean   @default(false)
+  createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime?  @updatedAt @map("updated_at")
   createdBy Int? 
 } 
@@ -120,6 +137,7 @@ model Blog {
 model Category {
   id       Int       @id @default(autoincrement())
   name     String    @unique
+  slug     String?
   products Product[]
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime?     @updatedAt @map("updated_at")
@@ -128,6 +146,7 @@ model Category {
 model Brand {
   id       Int       @id @default(autoincrement())
   name     String    @unique
+  slug     String?
   products Product[]
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime?     @updatedAt @map("updated_at")
@@ -136,18 +155,12 @@ model Brand {
 model Tag {
   id        Int          @id @default(autoincrement())
   name      String       @unique
+  slug     String?
   description String?
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime?     @updatedAt @map("updated_at")
 }
 
-//model ProductTag {
-//  productId Int
-//  tagId     Int
-//  product   Product @relation(fields: [productId], references: [id])
-//  tag       Tag     @relation(fields: [tagId], references: [id])
-//  @@id([productId, tagId])
-// }
 
 model Order {
   id         Int         @id @default(autoincrement())
@@ -156,9 +169,15 @@ model Order {
   items      OrderItem[]
   shipping   Shipping?
   payment    Payment?
+  approved   Boolean   @default(false)
   status     String      @default("PENDING") // PENDING, PAID, SHIPPED, COMPLETED, CANCELLED
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime?     @updatedAt @map("updated_at")
+  deliveryAgent    Int?
+  jsonData Json?
+  jsonOrderData Json?
+  invoicepath String? 
+  deliveryAgentAssets String?
 }
 
 model OrderItem {
@@ -166,6 +185,7 @@ model OrderItem {
   orderId   Int
   productId Int
   quantity  Int
+  backlogquantity  Int?
   price     Float
   order     Order    @relation(fields: [orderId], references: [id])
   product   Product  @relation(fields: [productId], references: [id])
@@ -201,10 +221,12 @@ model Shipping {
   state     String
   postalCode String
   country   String
-  status    String   @default("PENDING") // PENDING, SHIPPED, DELIVERED
+  deliveryAgent Int?
+  status    String   @default("PENDING") // PENDING, SHIPPED, DELIVERED, CANCELLED
   order     Order   @relation(fields: [orderId], references: [id])
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime?     @updatedAt @map("updated_at")
+  assets String?
 }
 
 model Payment {
@@ -212,12 +234,14 @@ model Payment {
   userId    Int
   orderId   Int     @unique
   amount    Float
+  transectionid String?
   method    String  // CARD, UPI, PAYPAL, COD
   status    String  @default("PENDING") // PENDING, SUCCESS, FAILED
   user      User    @relation(fields: [userId], references: [id])
   order     Order   @relation(fields: [orderId], references: [id])
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime?     @updatedAt @map("updated_at")
+  file  String?
 }
 
 model template {
@@ -228,4 +252,79 @@ model template {
   htmlData  String?   @db.Text // Use @db.Text for potentially large HTML content in SQL databases
   createdAt DateTime @default(now())
   updatedAt   DateTime     @updatedAt @map("updated_at")
+}
+
+
+model Address {
+  id        Int        @id @default(autoincrement())
+  userId    Int        
+  name      String
+  zipcode   String
+  city      String
+  address   String
+  state      String? @default("NA")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime?     @updatedAt @map("updated_at")
+}
+
+
+model deliveryAgent {
+  id         Int  @id @default(autoincrement())
+  name String
+  description String? @db.Text
+  gstIn String?
+  address String?
+  pinCode String?
+  city    String?
+  phone   String?
+  email   String?
+  remarks String? @db.Text
+}
+
+model notification {
+  id         Int  @id @default(autoincrement())
+  name String
+  type String?
+  data Json?
+  attachment String?
+  recepient String?
+  readStatus Boolean  @default(false)
+  sentStatus Boolean  @default(false)
+  remarks String? @db.Text
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime?     @updatedAt @map("updated_at")
+}
+
+model assets {
+  id         Int  @id @default(autoincrement())
+  name String
+  type String?
+  data Json?
+  path String?
+  author String?
+  tag String?
+  remarks String? @db.Text
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime?     @updatedAt @map("updated_at")
+}
+
+model offers {
+  id         Int  @id @default(autoincrement())
+  name String
+  discount Int?
+  userId String?
+  categoryId String?
+  data Json?
+  author String?
+  tag String?
+  remarks String? @db.Text
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime?     @updatedAt @map("updated_at")
+}
+
+model payment_txn_counter {
+  id         BigInt   @id @default(autoincrement())
+  created_at DateTime @default(now())
+
+  @@map("payment_txn_counter")
 }

@@ -7,7 +7,7 @@
           "meta_title": "Online Marketplace, Vendor Collaboration, E-commerce Platform",
           "og_image_id": 107,
           "og_description": "Experience a unique shopping journey at Earthling Marketplace, where vendors collaborate to provide a vast array of products. Explore, shop, and connection in one convenient destination.",
-          "meta_description": "Discover Earthling Marketplace – a vibrant online platform where vendors unite to showcase their products, creating a diverse shopping experience. Explore a wide range of offerings and connect with sellers on a single platform.",
+          "meta_description": "Earthling offers a wide selection of canned fruits, vegetables, sauces, mayonnaise, spreads, and dressings — carefully prepared to bring rich flavour, better ingredients, and more enjoyment to everyday meals",
           "og_image": {
               "id": 107,
               "name": "fashion_two_1",
@@ -92,11 +92,12 @@
           "twitter": "https://twitter.com/",
           "bg_color": "#212121",
           "bg_image": "/assets/images/footer/christmas.jpg",
-          "facebook": "https://facebook.com/",
-          "instagram": "https://instagram.com/",
-          "pinterest": "https://pinterest.com/",
+          "facebook": "https://www.facebook.com/officialearthling/",
+          "instagram": "https://www.instagram.com/earthlingindia/",
+          "linkedin": "https://in.linkedin.com/company/earthling/",
+		  "youtube": "https://www.youtube.com/@earthlingindia/",
           "sub_title": "Never Miss Anything From Store By Signing Up To Our Newsletter.",
-          "about_email": "Support@Earthling.com",
+          "about_email": "info@earthlingco.in",
           "help_center": [
               {
                   "id": 1,
@@ -110,18 +111,18 @@
               },
               {
                   "id": 3,
-                  "name": "Track Order",
-                  "value": "order/tracking"
+                  "name": "Payment",
+                  "value": "account/payment"
               },
               {
                   "id": 4,
-                  "name": "Wishlist",
-                  "value": "wishlist"
+                  "name": "Address",
+                  "value": "account/addresses"
               },
               {
                   "id": 6,
-                  "name": "FAQ's",
-                  "value": "faq"
+                  "name": "cart",
+                  "value": "cart"
               },
               {
                   "id": 7,
@@ -129,54 +130,110 @@
                   "value": "contact-us"
               }
           ],
-          "useful_link": [
+		  "policy_help_center": [
               {
                   "id": 1,
-                  "name": "Home",
-                  "value": "home"
+                  "name": "website policy",
+                  "value": "pages?name=website-policy"
               },
               {
                   "id": 2,
-                  "name": "Collections",
-                  "value": "collections"
+                  "name": "Return Policy",
+                  "value": "pages?name=website-policy"
               },
               {
                   "id": 3,
-                  "name": "About Us",
-                  "value": "about-us"
+                  "name": "Replacement Policy",
+                  "value": "pages?name=website-policy"
               },
               {
                   "id": 4,
-                  "name": "Blogs",
-                  "value": "blogs"
-              },
-              {
-                  "id": 5,
-                  "name": "Offers",
-                  "value": "offers"
+                  "name": "Refund Policy",
+                  "value": "pages?name=website-policy"
               },
               {
                   "id": 6,
-                  "name": "Search",
-                  "value": "search"
+                  "name": "Shipping Policy",
+                  "value": "pages?name=website-policy"
+              },
+              {
+                  "id": 7,
+                  "name": "Career",
+                  "value": "pages?name=career"
               }
           ],
-          "footer_about": "Discover the latest trends and enjoy seamless shopping with our exclusive collections.",
+          "useful_link": [
+              {
+                  "id": 22,
+                  "name": "Canned & Bottled Item",
+                  "value": "canned-&-bottled-item"
+              },
+              {
+                  "id": 21,
+                  "name": "Crushes & Bar Syrups",
+                  "value": "crushes-&-bar-syrups"
+              },
+              {
+                  "id": 23,
+                  "name": "Olive Oils",
+                  "value": "olive-oils"
+              },
+              {
+                  "id": 25,
+                  "name": "La Puglia",
+                  "value": "la-puglia"
+              },
+              {
+                  "id": 27,
+                  "name": "Noodle & Pasta",
+                  "value": "noodle-&-pasta"
+              },
+              {
+                  "id": 28,
+                  "name": "Peppers & Olives",
+                  "value": "peppers-&-olives"
+              }
+          ],
+          "footer_about": "Earthling offers a wide selection of canned fruits, vegetables, sauces, mayonnaise, spreads, and dressings — carefully prepared to ng rich flavour, better ingredients, and more enjoyment to everydaymeals",
           "footer_style": "footer_three",
-          "about_address": "Earthling Demo Store, Demo Store India 345-659",
+          "about_address": "Earthling Consumer Products Pvt. Ltd., 52/39, LGF, Ramjas Road, Karol Bagh, New Delhi 1100053",
           "app_store_url": "https://www.apple.com/in/app-store/",
-          "support_email": "support@gmail.com",
+          "support_email": "info@earthlingco.in",
           "play_store_url": "https://play.google.com/store/apps",
-          "support_number": "123-456-7898",
+          "support_number": "+91-9818109394",
           "footer_copyright": true,
-          "copyright_content": "2023-24 themeforest powered by pixelstrap",
+          "copyright_content": "Copyright © 2025. Earthling Consumer Products Pvt. Ltd. | Designed and Developed @ MARKSMAN",
           "footer_categories": [
-              74,
-              41,
-              98,
-              107,
-              12,
-              55
+				{
+					"id": 21,
+					"name": "Crushes & Bar Syrups",
+					"slug": "crushes-&-bar-syrups"
+					},
+					{
+					"id": 24,
+					"name": "LKK",
+					"slug": "lkk"
+					},
+					{
+					"id": 29,
+					"name": "FOOD ADDITIVES",
+					"slug": "food-additives"
+					},
+					{
+					"id": 28,
+					"name": "Peppers & Olives",
+					"slug": "peppers-&-olives"
+					},
+					{
+					"id": 32,
+					"name": "Sauces & Ketchups",
+					"slug": "sauces-&-ketchups"
+					},
+					{
+					"id": 33,
+					"name": "Mayonnaise",
+					"slug": "mayonnaise"
+					}
           ],
           "social_media_enable": true,
           "payment_option_image_url": "/assets/images/theme/data/payments.png"
@@ -184,13 +241,13 @@
       "header": {
           "today_deals": [],
           "category_ids": [
-              74,
-              41,
-              98,
-              107
+              21,
+              22,
+              23,
+              24
           ],
           "header_options": "header_one",
-          "support_number": "123 - 456 - 7890",
+          "support_number": "+91-9818109394",
           "top_bar_content": [
               {
                   "content": "<i class=\"ri-truck-line\"></i>Free Shipping on Orders $100+"
@@ -210,7 +267,7 @@
               "title": "Start Your Business With Earthling & Reach Customers Across The World...",
               "status": true,
               "image_url": "/assets/images/placeholder/seller/seller_banner.png",
-              "description": "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium,\n\nOn the other hand, we denounce with righteous indignation and dislike men who are so beguiled and demoralized by the charms of pleasure of the moment, so blinded by desire, that they cannot foresee the pain and trouble that are bound to ensue; and equal blame belongs to those who fail in their duty through weakness of will, which is the same as saying through shrinking from toil and pain. These cases are perfectly simple and easy to distinguish. In a free hour, when our power of choice is untrammelled and when nothing prevents our being able to do what we like best, every pleasure is to be welcomed and every pain avoided. But in certain circumstances and owing to the claims of duty or the obligations of business it will frequently occur that pleasures have to be repudiated and annoyances accepted. The wise man therefore always holds in these matters to this principle of selection: he rejects pleasures to secure other greater pleasures, or else he endures pains to avoid worse pains."
+              "description": "Earthling offers a wide selection of canned fruits, vegetables, sauces, mayonnaise, spreads, and dressings — carefully prepared to bring rich flavour, better ingredients, and more enjoyment to everyday meals."
           },
           "steps": {
               "title": "Doing Business On Earthling Is Really Easy",
@@ -270,10 +327,10 @@
           "primary_color": "#ec8951",
           "secondary_color": null,
           "back_to_top_enable": true,
-          "celebration_effect": true,
+          "celebration_effect": false,
           "language_direction": "ltr",
           "exit_tagline_enable": true,
-          "seller_register_url": "https://Earthling-frontend-next-json.vercel.app"
+          "seller_register_url": "https://eazysupplies.com/"
       },
       "product": {
           "services": {
@@ -414,45 +471,34 @@
               "sub_title": "Latest Testimonials"
           }
       },
-      "collection": {
+     "collection_hidden": {
           "collection_layout": "collection_category_slider",
           "collection_categories_ids": [
-              74,
-              41,
-              107,
-              12,
-              7,
-              28,
-              157,
-              136,
-              118,
-              79,
-              70,
-              64
+             4
           ],
           "collection_banner_image_url": "/assets/images/placeholder/collection_banner.png"
-      },
+      }, 
       "contact_us": {
           "title": "Get In Touch",
           "detail_1": {
               "icon": "ri-phone-fill",
-              "text": "+91 123 - 456 - 7890",
+              "text": "+91-9818109394",
               "label": "Contact Us"
           },
           "detail_2": {
               "icon": "ri-map-pin-fill",
-              "text": "ABC Complex,Near xyz, New York",
+              "text": "Earthling Consumer Products Pvt. Ltd., 52/39, LGF, Ramjas Road, Karol Bagh, New Delhi 1100053",
               "label": "Address"
           },
           "detail_3": {
               "icon": "ri-mail-fill",
-              "text": "support@Earthling.com",
+              "text": "info@earthlingco.in",
               "label": "Email"
           },
           "detail_4": {
               "icon": "ri-cellphone-fill",
-              "text": "support@Earthling.com",
-              "label": "Fax"
+              "text": "+91-9818109394",
+              "label": "Support"
           },
           "imageUrl": null,
           "description": "We're here to help! Reach out to us with any questions, feedback, or inquiries, and we'll get back to you as soon as possible."

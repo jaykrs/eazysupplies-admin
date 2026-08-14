@@ -12,6 +12,7 @@ import CheckBoxField from "../inputFields/CheckBoxField";
 import FileUploadField from "../inputFields/FileUploadField";
 import SimpleInputField from "../inputFields/SimpleInputField";
 import useCustomQuery from "@/utils/hooks/useCustomQuery";
+import { formatString } from "../../lib/format-number";
 import axios from "axios";
 const CategoryNewForm = ({ updateId, buttonName }) => {
   const { t } = useTranslation("common");
@@ -50,8 +51,10 @@ const CategoryNewForm = ({ updateId, buttonName }) => {
         }
 
       } else {
+        let cats = formatString(values.name);
         const res = await axios.post('/api/categories', {
           "name": values.name,
+          "slug" : cats
           // "description": values.description,
         }, { withCredentials: true });
 

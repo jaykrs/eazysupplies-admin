@@ -13,3 +13,17 @@ export function standardFormat(value: number) {
     maximumFractionDigits: 2,
   });
 }
+
+export function formatString(str) {
+  // Convert the entire string to lowercase
+  let lowercasedStr = str.toLowerCase();
+
+  // Replace all whitespace characters with a single hyphen
+  // The /\s+/g regular expression matches one or more whitespace characters globally
+  let hyphenatedStr = lowercasedStr.replace(/\s+/g, '-');
+
+  // Remove any leading or trailing hyphens that might result from initial whitespace
+  let finalStr = hyphenatedStr.replace(/^-+|-+$/g, '');
+
+  return finalStr;
+}
