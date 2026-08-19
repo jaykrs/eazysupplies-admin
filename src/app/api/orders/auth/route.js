@@ -39,10 +39,11 @@ export async function GET(request) {
 
 export async function PUT(request) {
     try {
-        if (verifyAdmin(request)) {
+        if (await verifyAdmin(request)) {
             const body = await request.json();
             const { id, ...rest } = body;
             const orderItemDetails = await prisma.orderItem.findUnique({where : {id}});
+            if (!orderItemDetails) return NextResponse.json({ error: "Order item not found" }, { status: 404 });
             let prod = await prisma.orderItem.update({ where: { id }, data: {backlogquantity: orderItemDetails.quantity, ...rest} });
             return NextResponse.json(prod);
         }

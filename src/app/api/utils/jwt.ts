@@ -396,14 +396,40 @@ const INVOICE_TEMPLATE = `
     }
 };
 
-const products = safeParse(productString);
+const snapshots = safeParse(productString);
+const taxRows = await prisma.tax.findMany();
+const taxById = new Map(taxRows.map((tax) => [tax.id, Number(tax.value || 0)]));
+const snapshotByProduct = new Map((Array.isArray(snapshots) ? snapshots : []).map((item) => [Number(item.productId), item]));
+const products = (orderData?.items || []).map((orderItem) => {
+  const snapshot = snapshotByProduct.get(Number(orderItem.productId)) || {};
+  const quantity = Number(orderItem.quantity || snapshot.quantity || 0);
+  const price = Number(orderItem.price ?? orderItem.product?.price ?? snapshot.price ?? 0);
+  const discountPercentage = Number(snapshot.discountPercentage || 0);
+  const discountAmount = Number(snapshot.discountAmount ?? snapshot._discountAmount ?? (price * discountPercentage / 100));
+  const sellingPrice = Number(snapshot.sellingPrice ?? price - discountAmount);
+  const taxPercentage = Number(snapshot.taxPercentage ?? taxById.get(Number(orderItem.product?.tax)) ?? 0);
+  const taxAmount = Number(snapshot.taxAmount ?? snapshot.taxamt ?? (sellingPrice * taxPercentage / 100));
+  const totalPrice = Number(snapshot.totalPrice ?? snapshot.totalprice ?? ((sellingPrice + taxAmount) * quantity));
+  return {
+    productId: orderItem.productId,
+    name: orderItem.product?.name || snapshot.name || "Product",
+    quantity,
+    price,
+    discountPercentage,
+    discountAmount,
+    sellingPrice,
+    taxPercentage,
+    taxAmount,
+    totalPrice,
+  };
+});
 
   const totals = products.reduce((acc, item) => {
   return {
     grossTotal: acc.grossTotal + (item.price * item.quantity),
-    totalDiscount: acc.totalDiscount + (item._discountAmount * item.quantity),
-    totalTax: acc.totalTax + (item.taxamt * item.quantity),
-    grandTotal: acc.grandTotal + (item.totalprice * item.quantity)
+    totalDiscount: acc.totalDiscount + (item.discountAmount * item.quantity),
+    totalTax: acc.totalTax + (item.taxAmount * item.quantity),
+    grandTotal: acc.grandTotal + item.totalPrice
   };
 }, { grossTotal: 0, totalDiscount: 0, totalTax: 0, grandTotal: 0 });
 
@@ -421,10 +447,10 @@ const items_html = products.map((item) => {
     // Basic calculations based on your JSON structure
     const unitPrice = Number(item.price).toFixed(2);
     const discPercent = Number(item.discountPercentage).toFixed(2);
-    const discAmt = Number(item._discountAmount).toFixed(2);
+    const discAmt = Number(item.discountAmount).toFixed(2);
     const sellingPrice = Number(item.sellingPrice).toFixed(2);
-    const taxAmt = Number(item.taxamt).toFixed(2);
-    const totalPrice = Number(item.totalprice).toFixed(2);
+    const taxAmt = Number(item.taxAmount).toFixed(2);
+    const totalPrice = Number(item.totalPrice).toFixed(2);
 
     return `
     <tr>

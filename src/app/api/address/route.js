@@ -24,11 +24,11 @@ export async function GET(request) {
 
     let addresses;
     if (id) {
-      addresses = await prisma.address.findUnique({ where: { id } });
+      addresses = await prisma.address.findFirst({ where: { id, ...(await verifyAdmin(request) ? {} : { userId: Number((await authenticate(request)).userId) }) } });
     } else if (userId) {
       addresses = await prisma.address.findMany({ where: { userId } });
     } else {
-      if(verifyAdmin(request))
+      if(await verifyAdmin(request))
       addresses = await prisma.address.findMany();
     }
 
@@ -65,8 +65,11 @@ export async function PUT(request) {
       return NextResponse.json({ error: "Missing address id" }, { status: 400 });
     }
 
+    const user = await authenticate(request);
+    const existing = await prisma.address.findFirst({ where: { id, ...(await verifyAdmin(request) ? {} : { userId: Number(user.userId) }) } });
+    if (!existing) return NextResponse.json({ error: "Address not found" }, { status: 404 });
     const updated = await prisma.address.update({
-      where: { id },
+      where: { id: existing.id },
       data: rest,
     });
 
@@ -79,7 +82,8 @@ export async function PUT(request) {
 // 🔴 DELETE — delete address by id
 export async function DELETE(request) {
   try {
-    if (!authenticate(request)) return unauthorized();
+    const user = await authenticate(request);
+    if (!user) return unauthorized();
 
     const { searchParams } = new URL(request.url);
     const id = Number(searchParams.get("id"));
@@ -87,7 +91,9 @@ export async function DELETE(request) {
       return NextResponse.json({ error: "Missing address id" }, { status: 400 });
     }
 
-    await prisma.address.delete({ where: { id } });
+    const existing = await prisma.address.findFirst({ where: { id, ...(await verifyAdmin(request) ? {} : { userId: Number(user.userId) }) } });
+    if (!existing) return NextResponse.json({ error: "Address not found" }, { status: 404 });
+    await prisma.address.delete({ where: { id: existing.id } });
     return NextResponse.json({ message: "Address deleted" }, { status: 200 });
   } catch (err) {
     return handleError(err);

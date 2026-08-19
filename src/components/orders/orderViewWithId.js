@@ -22,7 +22,6 @@ const OrderViewWithId = ({ id }) => {
         editOrderItem: {},
         orderItemQty: 0,
         orderItemPrice: 0,
-        refreshState: false,
         shippingModel: false,
         shippingDetails: {},
         shippingProductModel: false,
@@ -48,14 +47,7 @@ const OrderViewWithId = ({ id }) => {
         const initial = document.body.classList.contains("dark-only");
         setIsDarkMode(initial);
         fetchProduct();
-    }, [])
-
-    useEffect(() => {
-        const initial = document.body.classList.contains("dark-only");
-        setIsDarkMode(initial);
-        fetchProduct();
-        handleStateChange('refreshState', false);
-    }, [state.refreshState])
+    }, [id])
 
     const handleView = (el) => {
         handleStateChange('productItemDetails', el);
@@ -80,8 +72,10 @@ const OrderViewWithId = ({ id }) => {
             }, { withCredentials: true });
             if (res.status == 200) {
                 alert("Order item updated successfully!");
-                // window.location.reload();
-                handleStateChange('refreshState', true);
+                handleStateChange('editOrderItem', {});
+                handleStateChange('orderItemQty', 0);
+                handleStateChange('orderItemPrice', 0);
+                await fetchProduct();
             }
         } catch (err) {
             console.log('error', err);
@@ -104,8 +98,7 @@ const OrderViewWithId = ({ id }) => {
 
             if (res.status === 200) {
                 alert(`Order ${action.toUpperCase()} successfully!`);
-                let res = await axios.get('/api/invoice?orderId=' + id, { withCredentials: true });
-                handleStateChange('refreshState', true);
+                await fetchProduct();
             }
             action == "APPROVED" ? setIsApprove(false) : setIsReject(false);
         } catch (err) {
@@ -120,7 +113,7 @@ const OrderViewWithId = ({ id }) => {
             _dd = [{ discountPercentage: 0, discountAmount: 0, taxId: 0, taxAmount: 0, taxpercent: 0, totalPrice: 0 }];
             let _taxId = Number(product?.tax);
             let _taxpercent = taxData.filter((elm) => Number(elm.id) == _taxId);
-            _taxpercent = _taxpercent[0].value;
+            _taxpercent = Number(_taxpercent[0]?.value || 0);
             let _taxAmt = Number(product?.price) * Number(_taxpercent) / 100;
             _dd[0].taxAmount = _taxAmt;
             _dd[0].taxpercent = _taxpercent;
@@ -132,7 +125,7 @@ const OrderViewWithId = ({ id }) => {
             if (_dd.length > 0) {
                 let _taxId = Number(product?.tax);
                 let _taxpercent = taxData.filter((elm) => Number(elm.id) == _taxId);
-                _taxpercent = _taxpercent[0].value;
+                _taxpercent = Number(_taxpercent[0]?.value || 0);
                 let _taxAmt = Number(_dd[0].sellingPrice) * Number(_taxpercent) / 100;
                 _dd[0].taxAmount = _taxAmt;
                 _dd[0].taxpercent = _taxpercent;
@@ -149,7 +142,7 @@ const OrderViewWithId = ({ id }) => {
             if (!jsonData) {
                 let _taxId = Number(data.product?.tax);
                 let _taxpercent = taxData.filter((elm) => Number(elm.id) == _taxId);
-                _taxpercent = _taxpercent[0].value;
+                _taxpercent = Number(_taxpercent[0]?.value || 0);
                 let _taxAmt = Number(data.product?.price) * Number(_taxpercent) / 100;
                 total += (Number(data.product?.price) + _taxAmt) * data.quantity;
             }
@@ -158,7 +151,7 @@ const OrderViewWithId = ({ id }) => {
                 if (_dd.length > 0) {
                     let _taxId = Number(data.product?.tax);
                     let _taxpercent = taxData.filter((elm) => Number(elm.id) == _taxId);
-                    _taxpercent = _taxpercent[0].value;
+                    _taxpercent = Number(_taxpercent[0]?.value || 0);
                     let _taxAmt = Number(_dd[0].sellingPrice) * Number(_taxpercent) / 100;
                     total += (Number(_dd[0].sellingPrice) + _taxAmt) * data.quantity;
                 }

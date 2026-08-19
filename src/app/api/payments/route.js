@@ -14,7 +14,7 @@ const unauthorized = () =>
   NextResponse.json({ error: MESSAGES.UNAUTHORIZED }, { status: 400 });
 
 export async function GET(request) {
-  const isUser = authenticate(request);
+  const isUser = await authenticate(request);
   if (!isUser) return unauthorized();
 
   try {
@@ -62,7 +62,7 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    if (!verifyAdmin(request)) return unauthorized();
+    if (!(await verifyAdmin(request))) return unauthorized();
     const body = await request.json();
     const created = await prisma.payment.create({ data: body });
     return NextResponse.json({ data: created }, { status: 201 });
@@ -95,7 +95,7 @@ export async function PUT(request) {
     }
 
     // admin update via request body
-    if (verifyAdmin(request)) {
+    if (await verifyAdmin(request)) {
       console.log("file",body.file);
       const updated = await prisma.payment.update({
         where: { id: Number(id) },

@@ -44,7 +44,16 @@ export async function GET(request) {
       ...(ids?.length ? { id: { in: ids } } : {}),
       ...(categoryIds?.length ? { categoryId: { in: categoryIds } } : {}),
       ...(brandIds?.length ? { brandId: { in: brandIds } } : {}),
-      ...(search ? { name: { contains: search } } : {}),
+      ...(search ? {
+        OR: [
+          { name: { contains: search } },
+          { description: { contains: search } },
+          { sku: { contains: search } },
+          { keyword: { contains: search } },
+          { category: { name: { contains: search } } },
+          { brand: { name: { contains: search } } },
+        ],
+      } : {}),
     };
 
     const [products, total] = await Promise.all([

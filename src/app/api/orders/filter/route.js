@@ -77,7 +77,7 @@ export async function PUT(request) {
     const id = Number(searchParams.get("id"));
     const { status, deliveryAgentAssets, delivered } = await request.json();
     try {
-        if (verifyAdmin()) {
+        if (await verifyAdmin(request)) {
             if (deliveryAgentAssets && delivered) {
                 let orderUpdate = await prisma.order.update({ where: { id: id }, data: { status: status, deliveryAgentAssets: deliveryAgentAssets } })
                 return NextResponse.json({ msg: "Order: " + id + " " + status + " successfully!" }, { status: 200 });

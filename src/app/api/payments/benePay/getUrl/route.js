@@ -11,6 +11,12 @@ export async function POST(request) {
     if (!payload) {
       return NextResponse.json({ error: MESSAGES.UNAUTHORIZED }, { status: 401 });
     }
+    const orderId = Number(body.orderId);
+    const amount = Number(body.amount);
+    const method = Array.isArray(body.method) ? body.method[0] : body.method;
+    if (!Number.isInteger(orderId) || !Number.isFinite(amount) || amount <= 0 || !method) {
+      return NextResponse.json({ error: "Invalid payment request" }, { status: 400 });
+    }
     //OAuth Token
     const params = new URLSearchParams();
     params.append("grant_type", "client_credentials");
@@ -26,6 +32,7 @@ export async function POST(request) {
         "Content-Type": "application/x-www-form-urlencoded",
       },
       body: params.toString(),
+      signal: AbortSignal.timeout(15000),
     });
 
     const authData = await authResponse.json();
@@ -39,13 +46,13 @@ export async function POST(request) {
       debtorEmailId: userData.email,
       debtorMobileNumber: "+91-" + userData.phone.slice(0, 10),
       debtorWhatsAppNumber: userData.phone ? "+91-" + userData.phone.slice(0, 10) : "",
-      collectionReferenceNumber: body.orderId,
+      collectionReferenceNumber: orderId,
       reasonForCollection: body.reasonForCollection || '',
-      initialDueAmount: body.amount,
+      initialDueAmount: amount,
       initialDueDate: body.initialDueDate || "",
-      finalDueAmount: body.amount,
+      finalDueAmount: amount,
       collectionAmountCurrency: "INR",
-      payVia: body.method,
+      payVia: [method],
       returnUrl: process.env.ReturnUrl
     };
     console.log(pay);
@@ -62,7 +69,8 @@ export async function POST(request) {
         "Accept": "application/json",
         "x-api-key": process.env.X_apiKey
       },
-      body: JSON.stringify(payBody)
+      body: JSON.stringify(payBody),
+      signal: AbortSignal.timeout(15000),
     });
 
     const encryptedData = await encryptResponse.text();
@@ -85,33 +93,31 @@ export async function POST(request) {
       },
       body: JSON.stringify({
         "encryptedData": encryptedData
-      })
+      }),
+      signal: AbortSignal.timeout(20000),
     });
 
     const realTimePaymentData = await realTimePaymentResponse.json();
-
-    // if (!realTimePaymentData.ok) {
-    //   return NextResponse.json(realTimePaymentData, {
-    //     status: realTimePaymentData.status
-    //   });
-    // }
+    if (!realTimePaymentResponse.ok) {
+      return NextResponse.json({ error: realTimePaymentData?.message || "Payment gateway request failed" }, { status: realTimePaymentResponse.status });
+    }
     let payment = await prisma.payment.findUnique({ where: { orderId: Number(body.orderId) } });
     if (!payment) {
       payment = await prisma.payment.create({
         data: {
-          method: body.method[0],
+          method,
           transectionid: transactionid.toString(),
-          amount: body.amount,
-          orderId: body.orderId,
+          amount,
+          orderId,
           userId: payload.userId
         }
       });
     } else {
       payment = await prisma.payment.update({
         data: {
-          method: body.method[0],
+          method,
           transectionid: transactionid.toString(),
-          amount: body.amount,
+          amount,
         }, where:{id: payment.id}
       });
     }
@@ -124,4 +130,3 @@ export async function POST(request) {
     );
   }
 }
-

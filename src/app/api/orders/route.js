@@ -86,6 +86,10 @@ export async function POST(request) {
     if (!requestedItems.length) {
       return NextResponse.json({ error: "Your cart is empty." }, { status: 400 });
     }
+    const requiredAddressFields = ["address", "city", "postalCode", "country"];
+    if (!shipping || requiredAddressFields.some((field) => !String(shipping[field] || "").trim())) {
+      return NextResponse.json({ error: "A complete shipping address is required." }, { status: 400 });
+    }
     const productIds = [...new Set(requestedItems.map((item) => Number(item.productId)))];
 
     const order = await prisma.$transaction(async (tx) => {
@@ -115,7 +119,7 @@ export async function POST(request) {
             create: {
               ...payment,
               userId: Number(payment.userId || payload.userId),
-              amount: Number(payment.amount) || amount,
+              amount,
             },
           } : undefined,
         },
@@ -201,8 +205,6 @@ export async function PUT(request) {
             }
           });
 
-          if (offer.length === 0) continue; // skip if no offer
-
           const filterProduct = Products.filter(
             (p) => Number(el.product?.id) === p.id
           );
@@ -210,7 +212,7 @@ export async function PUT(request) {
           if (filterProduct.length === 0) continue;
           let product = filterProduct[0];
           let price = Number(product.price);
-          let discount = offer[0]?.discount || 0;
+          let discount = Number(offer[0]?.discount || 0);
 
           // always start with an array
           let jsonData = Array.isArray(product.jsonData)
@@ -251,11 +253,11 @@ export async function PUT(request) {
             });
           }
           const _discountAmount = (price * discount) / 100;
-          let tax = await prisma.tax.findUnique({
-          where: {
-            id: el.product?.tax,
-          },});
-          let taxamt = tax.value && tax.value > 0 ? ((price - (_discountAmount ? _discountAmount : 0)) * tax.value) / 100 : 0 ;
+          let tax = el.product?.tax ? await prisma.tax.findUnique({
+            where: { id: Number(el.product.tax) },
+          }) : null;
+          const taxPercent = Number(tax?.value || 0);
+          let taxamt = taxPercent > 0 ? ((price - _discountAmount) * taxPercent) / 100 : 0;
           
     //     console.log(el.quantity);
     //     console.log(el.price);
@@ -265,10 +267,11 @@ export async function PUT(request) {
             quantity : el.quantity,
             price : Number(el.price),
             discountPercentage: discount,
-            _discountAmount,
+            discountAmount: _discountAmount,
             sellingPrice: price - _discountAmount,
-            taxamt : taxamt,
-            totalprice : ((price - _discountAmount) + taxamt) * Number(el.quantity)
+            taxPercentage: taxPercent,
+            taxAmount: taxamt,
+            totalPrice: ((price - _discountAmount) + taxamt) * Number(el.quantity)
           };
           _jsonData.push(_itemjsonData);
           await prisma.product.update({
@@ -321,13 +324,17 @@ export async function PUT(request) {
                 ifc: "GLB001"
               }
             };
-          await generateInvoicePdf(orders.id,data);
         const orderhtml = generateApprovedOrderSummaryHTML(orders, Number(orders.userId), orders?.user?.name);
-        await sendEmail(orders?.user?.email, "Order Approved with " + result.id, orderhtml);
-        await createNotification("Order Approved with " + orders.id, orders?.userId?.toString(), orderhtml);
-        await sendWhatsAppOrderCreate(orders?.user?.name, orders?.user?.countryCode + orders?.user?.phone, orders.id, "Status : Approved", itemsTextapproved);
+        void Promise.allSettled([
+          generateInvoicePdf(orders.id, data),
+          sendEmail(orders?.user?.email, "Order Approved with " + result.id, orderhtml),
+          createNotification("Order Approved with " + orders.id, orders?.userId?.toString(), orderhtml),
+          sendWhatsAppOrderCreate(orders?.user?.name, orders?.user?.countryCode + orders?.user?.phone, orders.id, "Status : Approved", itemsTextapproved),
+        ]).then((sideEffects) => {
+          sideEffects.forEach((effect) => effect.status === "rejected" && console.error("Order approval side effect failed", effect.reason));
+        });
 
-        return NextResponse.json("approved");
+        return NextResponse.json({ message: "Order approved", order: result });
       } else if (status == "REJECTED") {
         const order = await prisma.order.findUnique({ where: { id: id } });
         if (!order) {
