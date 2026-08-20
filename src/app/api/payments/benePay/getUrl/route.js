@@ -14,8 +14,44 @@ export async function POST(request) {
     const orderId = Number(body.orderId);
     const amount = Number(body.amount);
     const method = Array.isArray(body.method) ? body.method[0] : body.method;
-    if (!Number.isInteger(orderId) || !Number.isFinite(amount) || amount <= 0 || !method) {
+    if (!Number.isInteger(orderId) || !Number.isFinite(amount) || amount <= 0 || !["NB", "OFF"].includes(method)) {
       return NextResponse.json({ error: "Invalid payment request" }, { status: 400 });
+    }
+    const order = await prisma.order.findFirst({
+      where: { id: orderId, userId: Number(payload.userId) },
+      include: { items: true },
+    });
+    if (!order) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+    const approvedTotal = Array.isArray(order.jsonOrderData)
+      ? order.jsonOrderData.reduce((sum, item) => sum + Number(item?.totalPrice || 0), 0)
+      : 0;
+    const orderAmount = approvedTotal > 0
+      ? approvedTotal
+      : order.items.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity), 0);
+    if (!Number.isFinite(orderAmount) || orderAmount <= 0 || Math.abs(amount - orderAmount) > 0.01) {
+      return NextResponse.json({ error: "Payment amount does not match the order total" }, { status: 400 });
+    }
+    if (method === "OFF") {
+      const payment = await prisma.payment.upsert({
+        where: { orderId },
+        create: {
+          method,
+          transectionid: `offline-${orderId}`,
+          amount: orderAmount,
+          orderId,
+          userId: Number(payload.userId),
+          status: "PENDING",
+        },
+        update: {
+          method,
+          transectionid: `offline-${orderId}`,
+          amount: orderAmount,
+          status: "PENDING",
+        },
+      });
+      return NextResponse.json({ offline: true, payment, realTimePaymentData: { message: "" } });
     }
     //OAuth Token
     const params = new URLSearchParams();
@@ -44,13 +80,13 @@ export async function POST(request) {
       requestorTransactionId: transactionid,
       debtorName: userData.name,
       debtorEmailId: userData.email,
-      debtorMobileNumber: "+91-" + userData.phone.slice(0, 10),
+      debtorMobileNumber: userData.phone ? "+91-" + userData.phone.slice(0, 10) : "",
       debtorWhatsAppNumber: userData.phone ? "+91-" + userData.phone.slice(0, 10) : "",
       collectionReferenceNumber: orderId,
       reasonForCollection: body.reasonForCollection || '',
-      initialDueAmount: amount,
+      initialDueAmount: orderAmount,
       initialDueDate: body.initialDueDate || "",
-      finalDueAmount: amount,
+      finalDueAmount: orderAmount,
       collectionAmountCurrency: "INR",
       payVia: [method],
       returnUrl: process.env.ReturnUrl
@@ -107,7 +143,7 @@ export async function POST(request) {
         data: {
           method,
           transectionid: transactionid.toString(),
-          amount,
+          amount: orderAmount,
           orderId,
           userId: payload.userId
         }
@@ -117,7 +153,7 @@ export async function POST(request) {
         data: {
           method,
           transectionid: transactionid.toString(),
-          amount,
+          amount: orderAmount,
         }, where:{id: payment.id}
       });
     }

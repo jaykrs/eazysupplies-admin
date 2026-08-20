@@ -9,6 +9,15 @@ import { convertDate, calcDate } from "../utils/dateUtils";
 
 const prisma = new PrismaClient();
 const recentRequests = new Map();
+const safeUserSelect = {
+  id: true,
+  name: true,
+  email: true,
+  phone: true,
+  countryCode: true,
+  gstn: true,
+  status: true,
+};
 // 📌 GET /api/orders?page=1&limit=10&sortBy=createdAt&order=desc&status=PENDING
 export async function GET(request) {
   try {
@@ -41,7 +50,7 @@ export async function GET(request) {
         take: limit,
         orderBy: { [sortBy]: order },
         include: {
-          user: true,
+          user: { select: safeUserSelect },
           items: { include: { product: true } },
           shipping: true,
           payment: true,
@@ -124,7 +133,7 @@ export async function POST(request) {
           } : undefined,
         },
         include: {
-          user: true,
+          user: { select: safeUserSelect },
           items: { include: { product: true } },
           shipping: true,
           payment: true,
@@ -176,6 +185,9 @@ export async function PUT(request) {
   try {
     const body = await request.json();
     const { id, status, approved = false } = body;
+    if (!Number.isInteger(Number(id)) || Number(id) < 1) {
+      return NextResponse.json({ error: "A valid order ID is required" }, { status: 400 });
+    }
     if (await verifyAdmin(request)) {
       if (approved) {
         let filterProduct, offer, jsonData = [], jsonFound = false;
@@ -194,6 +206,9 @@ export async function PUT(request) {
             payment: true,
           },
         });
+        if (!orders) {
+          return NextResponse.json({ error: "Order not found" }, { status: 404 });
+        }
  //       await generateTaxDiscount(orders);
         const Products = await prisma.product.findMany();
         let _jsonData = [];
@@ -343,9 +358,10 @@ export async function PUT(request) {
         let update = await prisma.order.update({ where: { id: id }, data:{ status : status} });
         return NextResponse.json({msg: "Rejected"}, { status: 200 });
       } else {
-       return NextResponse.json({ msg: "Invalid method!" });
+       return NextResponse.json({ error: "Unsupported order status update" }, { status: 400 });
       }
     }
+    return NextResponse.json({ error: "Admin access required" }, { status: 403 });
   } catch (Error) {
     console.log(Error);
     return NextResponse.json(

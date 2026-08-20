@@ -16,7 +16,9 @@ const unauthorized = () =>
 // 🟢 GET — get all or by userId or id
 export async function GET(request) {
   try {
-    if (! await authenticate(request)) return unauthorized();
+    const user = await authenticate(request);
+    if (!user) return unauthorized();
+    const isAdmin = await verifyAdmin(request);
 
     const { searchParams } = new URL(request.url);
     const id = Number(searchParams.get("id"));
@@ -24,12 +26,12 @@ export async function GET(request) {
 
     let addresses;
     if (id) {
-      addresses = await prisma.address.findFirst({ where: { id, ...(await verifyAdmin(request) ? {} : { userId: Number((await authenticate(request)).userId) }) } });
+      addresses = await prisma.address.findFirst({ where: { id, ...(isAdmin ? {} : { userId: Number(user.userId) }) } });
     } else if (userId) {
+      if (!isAdmin && userId !== Number(user.userId)) return unauthorized();
       addresses = await prisma.address.findMany({ where: { userId } });
     } else {
-      if(await verifyAdmin(request))
-      addresses = await prisma.address.findMany();
+      addresses = await prisma.address.findMany({ where: isAdmin ? {} : { userId: Number(user.userId) } });
     }
 
     return NextResponse.json({ data: addresses || [] }, { status: 200 });

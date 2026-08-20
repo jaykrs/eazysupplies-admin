@@ -2,10 +2,17 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { authenticate, verifyAdmin } from "../../utils/jwt";
 import { MESSAGES } from "../../utils/statusConstant";
-import { error } from "console";
-import { unauthorized } from "next/navigation";
 
 const prisma = new PrismaClient();
+const safeUserSelect = {
+    id: true,
+    name: true,
+    email: true,
+    phone: true,
+    countryCode: true,
+    gstn: true,
+    status: true,
+};
 
 // 📌 GET /api/orders?page=1&limit=10&sortBy=createdAt&order=desc&status=PENDING
 export async function GET(request) {
@@ -14,17 +21,20 @@ export async function GET(request) {
         if (!payload) {
             return NextResponse.json({ error: MESSAGES.UNAUTHORIZED }, { status: 401 });
         }
+        const isAdmin = await verifyAdmin(request);
+        const authenticatedUserId = Number(payload.userId);
         const { searchParams } = new URL(request.url);
         const email = searchParams.get('email');
         const id = Number(searchParams.get('userId'));
         const orderId = Number(searchParams.get('orderId'));
         if (orderId) {
-            const orders = await prisma.order.findUnique({
+            const orders = await prisma.order.findFirst({
                 where: {
                     id: Number(orderId),
+                    ...(!isAdmin ? { userId: authenticatedUserId } : {}),
                 },
                 include: {
-                    user: true,
+                    user: { select: safeUserSelect },
                     items: {
                         include: {
                             product: true, // 👈 this includes product details inside each item
@@ -34,24 +44,38 @@ export async function GET(request) {
                     payment: true,
                 },
             });
+            if (!orders) {
+                return NextResponse.json({ error: "Order not found" }, { status: 404 });
+            }
             const tax = await prisma.tax.findMany();
-            const deliveryAgent = await prisma.deliveryAgent.findMany();
+            const deliveryAgent = isAdmin ? await prisma.deliveryAgent.findMany() : [];
             return NextResponse.json({ data: orders, tax, deliveryAgent }, { status: 200 });
         }
 
-        if (!email && !id) {
-            return NextResponse.json({ error: "userID or email is missing!" }, { status: 401 });
-        }
-        let userDetails;
-        if (email) {
-            userDetails = await prisma.user.findUnique({ where: { email: email } });
+        let requestedUserId = authenticatedUserId;
+        if (isAdmin) {
+            if (!email && !id) {
+                return NextResponse.json({ error: "userID or email is missing!" }, { status: 400 });
+            }
+            if (email) {
+                const userDetails = await prisma.user.findUnique({
+                    where: { email },
+                    select: { id: true },
+                });
+                if (!userDetails) {
+                    return NextResponse.json({ error: "User not found" }, { status: 404 });
+                }
+                requestedUserId = userDetails.id;
+            } else {
+                requestedUserId = id;
+            }
         }
         const orders = await prisma.order.findMany({
             where: {
-                userId: id ? Number(id) : userDetails.id,
+                userId: requestedUserId,
             },
             include: {
-                user: true,
+                user: { select: safeUserSelect },
                 items: {
                     include: {
                         product: true, // 👈 this includes product details inside each item
@@ -65,9 +89,10 @@ export async function GET(request) {
             },
         });
         const tax = await prisma.tax.findMany();
-        const deliveryAgent = await prisma.deliveryAgent.findMany();
+        const deliveryAgent = isAdmin ? await prisma.deliveryAgent.findMany() : [];
         return NextResponse.json({ data: orders, tax, deliveryAgent }, { status: 200 });
     } catch (err) {
+        console.error("GET /orders/filter error:", err);
         return NextResponse.json({ error: MESSAGES.SERVER_ERROR }, { status: 500 });
     }
 }
@@ -85,7 +110,7 @@ export async function PUT(request) {
             let orderUpdate = await prisma.order.update({ where: { id: id }, data: { status: status } })
             return NextResponse.json({ msg: "Order status: " + status + " updated successfully!" }, { status: 200 });
         }
-        return unauthorized();
+        return NextResponse.json({ error: MESSAGES.UNAUTHORIZED }, { status: 403 });
     } catch (err) {
         console.log('...........err', err);
         return NextResponse.json({ error: MESSAGES.SERVER_ERROR }, { status: 500 });

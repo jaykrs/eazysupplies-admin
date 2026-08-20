@@ -3,6 +3,15 @@ import { PrismaClient } from "@prisma/client";
 import { authenticate, verifyAdmin } from "../../utils/jwt";
 
 const prisma = new PrismaClient();
+const safeUserSelect = {
+  id: true,
+  name: true,
+  email: true,
+  phone: true,
+  countryCode: true,
+  gstn: true,
+  status: true,
+};
 
 // 📌 GET /api/orders/[id]
 
@@ -17,7 +26,7 @@ export async function GET(request, { params }) {
     const order = await prisma.order.findFirst({
       where: { id: Number(id) },
       include: {
-        user: true,
+        user: { select: safeUserSelect },
         items: { include: { product: true } },
         shipping: true,
         payment: true,
@@ -79,7 +88,7 @@ export async function PUT(request, { params }) {
         jsonData,
       },
       include: {
-        user: true,
+        user: { select: safeUserSelect },
         items: { include: { product: true } },
         shipping: true,
         payment: true,

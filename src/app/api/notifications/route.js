@@ -26,7 +26,7 @@
  */
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import { authenticate } from "../utils/jwt";
+import { authenticate, verifyAdmin } from "../utils/jwt";
 import { MESSAGES } from "../utils/statusConstant";
 
 const prisma = new PrismaClient();
@@ -47,6 +47,7 @@ export async function GET(request) {
   try {
     const payload = await authenticate(request);
     if (!payload) return unauthorized();
+    const isAdmin = await verifyAdmin(request);
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
@@ -70,8 +71,9 @@ export async function GET(request) {
     const notifications = await prisma.notification.findMany({
       where: {
         OR: [
-          { recepient: { contains: payload.userId?.toString() || "" } },
-          { recepient: "all" }
+          { recepient: payload.userId?.toString() || "" },
+          { recepient: "all" },
+          ...(isAdmin ? [{ recepient: "admin" }] : [])
         ]
       },
       orderBy: { createdAt: "desc" },

@@ -102,62 +102,36 @@ const OrderViewWithId = ({ id }) => {
             }
             action == "APPROVED" ? setIsApprove(false) : setIsReject(false);
         } catch (err) {
-            console.error('error', "Something went wrong, please try again!");
+            console.error('error', err);
+            alert(err?.response?.data?.error || err?.response?.data?.msg || "Something went wrong, please try again!");
             action == "APPROVED" ? setIsApprove(false) : setIsReject(false);
         }
     };
     function generateProductDiscount(product, ordId) {
-        let jsonData = product.jsonData;
-        let _dd = [];
-        if (!jsonData) {
-            _dd = [{ discountPercentage: 0, discountAmount: 0, taxId: 0, taxAmount: 0, taxpercent: 0, totalPrice: 0 }];
-            let _taxId = Number(product?.tax);
-            let _taxpercent = taxData.filter((elm) => Number(elm.id) == _taxId);
-            _taxpercent = Number(_taxpercent[0]?.value || 0);
-            let _taxAmt = Number(product?.price) * Number(_taxpercent) / 100;
-            _dd[0].taxAmount = _taxAmt;
-            _dd[0].taxpercent = _taxpercent;
-            _dd[0].totalPrice = Number(product?.price) + _taxAmt;
-            return _dd[0];
-        }
-        else {
-            _dd = jsonData.filter(el => el.orderId == ordId);
-            if (_dd.length > 0) {
-                let _taxId = Number(product?.tax);
-                let _taxpercent = taxData.filter((elm) => Number(elm.id) == _taxId);
-                _taxpercent = Number(_taxpercent[0]?.value || 0);
-                let _taxAmt = Number(_dd[0].sellingPrice) * Number(_taxpercent) / 100;
-                _dd[0].taxAmount = _taxAmt;
-                _dd[0].taxpercent = _taxpercent;
-                _dd[0].totalPrice = Number(_dd[0].sellingPrice) + _taxAmt;
-                return _dd[0];
-            }
-        }
+        const price = Number(product?.price || 0);
+        const snapshot = (Array.isArray(product?.jsonData) ? product.jsonData : [])
+            .find((entry) => Number(entry?.orderId) === Number(ordId)) || {};
+        const discountPercentage = Number(snapshot.discountPercentage || 0);
+        const discountAmount = Number(snapshot.discountAmount ?? (price * discountPercentage / 100));
+        const sellingPrice = Number(snapshot.sellingPrice ?? (price - discountAmount));
+        const taxpercent = Number((taxData || []).find((tax) => Number(tax.id) === Number(product?.tax))?.value || 0);
+        const taxAmount = Number(snapshot.taxAmount ?? (sellingPrice * taxpercent / 100));
+        return {
+            ...snapshot,
+            discountPercentage,
+            discountAmount,
+            sellingPrice,
+            taxpercent,
+            taxAmount,
+            totalPrice: Number(snapshot.totalPrice ?? (sellingPrice + taxAmount)),
+        };
     }
 
     function generateProductTotalPrice(order) {
-        let total = 0;
-        for (let data of order.items) {
-            let jsonData = data.product.jsonData;
-            if (!jsonData) {
-                let _taxId = Number(data.product?.tax);
-                let _taxpercent = taxData.filter((elm) => Number(elm.id) == _taxId);
-                _taxpercent = Number(_taxpercent[0]?.value || 0);
-                let _taxAmt = Number(data.product?.price) * Number(_taxpercent) / 100;
-                total += (Number(data.product?.price) + _taxAmt) * data.quantity;
-            }
-            else {
-                let _dd = jsonData.filter(el => el.orderId == order.id);
-                if (_dd.length > 0) {
-                    let _taxId = Number(data.product?.tax);
-                    let _taxpercent = taxData.filter((elm) => Number(elm.id) == _taxId);
-                    _taxpercent = Number(_taxpercent[0]?.value || 0);
-                    let _taxAmt = Number(_dd[0].sellingPrice) * Number(_taxpercent) / 100;
-                    total += (Number(_dd[0].sellingPrice) + _taxAmt) * data.quantity;
-                }
-            }
-        }
-        return total;
+        return (order?.items || []).reduce((total, item) => {
+            const pricing = generateProductDiscount(item.product, order.id);
+            return total + Number(pricing.totalPrice || 0) * Number(item.quantity || 0);
+        }, 0);
     }
 
     const handleHtmlToPdf1 = async (id) => {

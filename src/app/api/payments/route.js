@@ -14,43 +14,52 @@ const unauthorized = () =>
   NextResponse.json({ error: MESSAGES.UNAUTHORIZED }, { status: 400 });
 
 export async function GET(request) {
-  const isUser = await authenticate(request);
-  if (!isUser) return unauthorized();
+  const user = await authenticate(request);
+  if (!user) return unauthorized();
 
   try {
+    const isAdmin = await verifyAdmin(request);
+    const authenticatedUserId = Number(user.userId);
     const { searchParams } = new URL(request.url);
     const id = Number(searchParams.get("paymentId"));
     const userId = Number(searchParams.get("userId"));
     const orderId = Number(searchParams.get("orderId"));
     const withCookies = searchParams.get('withCookies');
+    const include = {
+      user: { select: { id: true, name: true, email: true } },
+      order: true,
+    };
 
     let result;
 
     if (id) {
-      result = await prisma.payment.findUnique({
-        where: { id },
-        include: { user: true, order: true },
+      result = await prisma.payment.findFirst({
+        where: { id, ...(isAdmin ? {} : { userId: authenticatedUserId }) },
+        include,
       });
     } else if (userId) {
+      if (!isAdmin && userId !== authenticatedUserId) return unauthorized();
       result = await prisma.payment.findMany({
         where: { userId },
-        include: { user: true, order: true },
+        include,
         orderBy: {id: "desc"}
       });
     } else if (orderId) {
-      result = await prisma.payment.findUnique({
-        where: { orderId },
-        include: { user: true, order: true }
+      result = await prisma.payment.findFirst({
+        where: { orderId, ...(isAdmin ? {} : { userId: authenticatedUserId }) },
+        include,
       });
     } else if (withCookies) {
       result = await prisma.payment.findMany({
-        where: { userId: isUser.userId },
-        include: { user: true, order: true },
+        where: { userId: authenticatedUserId },
+        include,
         orderBy: {id: "desc"}
       });
     } else {
       result = await prisma.payment.findMany({
-        include: { user: true, order: true }, orderBy: {id: "desc"}
+        where: isAdmin ? {} : { userId: authenticatedUserId },
+        include,
+        orderBy: {id: "desc"}
       });
     }
 

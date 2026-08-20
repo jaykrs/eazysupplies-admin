@@ -67,7 +67,7 @@ export async function generateInvoicePdf(orderId, data) {
   </body></html>`;
 
   const filename = `performa-invoice${Number(orderId)}.pdf`;
-  const folderPath = path.join(process.env.FILE_PATH, "invoice");
+  const folderPath = path.join(process.env.FILE_PATH || path.join(process.cwd(), "public"), "invoice");
   const filePath = path.join(folderPath, filename);
   fs.mkdirSync(folderPath, { recursive: true });
   const browser = await puppeteer.launch({ headless: "new", args: ["--no-sandbox", "--disable-setuid-sandbox"] });

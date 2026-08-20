@@ -3,162 +3,77 @@ import fs from "fs";
 import path from "path";
 import { writeFile } from "fs/promises";
 import { PrismaClient } from "@prisma/client";
-import { authenticate, verifyAdmin, getUserId } from "../../utils/jwt"; // adjust import path if needed
-import { MESSAGES } from "../../utils/statusConstant";       // adjust import path if needed
+import { authenticate, verifyAdmin, getUserId } from "../../utils/jwt";
+
 const prisma = new PrismaClient();
 
-const handleError = (error) => {
-    console.error(error);
-    return NextResponse.json({ error: MESSAGES.SERVER_ERROR }, { status: 500 });
-};
-
-const unauthorized = () =>
-    NextResponse.json({ error: MESSAGES.UNAUTHORIZED }, { status: 400 });
-
-const baseDir = path.join(process.env.FILE_PATH, "/uploads");
-const privateDir = path.join(process.env.FILE_PATH, "/private");
-const invoiceDir = path.join(process.env.FILE_PATH, "/invoice");
-// Recursively collect file info
-function getFiles(dir, base = "") {
-    const entries = fs.readdirSync(dir, { withFileTypes: true });
-    let files = [];
-
-    for (const entry of entries) {
-        const relativePath = path.join(base, entry.name);
-        const fullPath = path.join(dir, entry.name);
-
-        if (entry.isDirectory()) {
-            files = files.concat(getFiles(fullPath, relativePath));
-        } else {
-            files.push({
-                name: entry.name,
-                publicPath: `/uploads/${relativePath.replace(/\\/g, "/")}`,
-                absolutePath: fullPath,
-            });
-        }
-    }
-
-    return files;
-}
-
-export async function GET(request) {
-    try {
-        const { searchParams } = new URL(request.url);
-        const fileName = searchParams.get("file");
-        const userId = searchParams.get("userId");
-        // If ?file= is passed → return that file's absolute path
-        if (fileName) {
-            let files = getFiles(baseDir);
-            let file = files.find(f => f.name === fileName);
-            if (!file) {
-                if (authenticate(request)) {
-                    files = getFiles(privateDir);
-                    file = files.find(f => f.name === fileName);
-                    if (!file) {
-                        files = getFiles(invoiceDir);
-                        file = files.find(f => f.name === fileName);
-                    }
-                    else
-                        return NextResponse.json(
-                            { success: false, message: "File not found" },
-                            { status: 404 }
-                        );
-                } if (userId) {
-                    files = getFiles(invoiceDir);
-                    file = files.find(f => f.name === fileName);
-                    if (!file)
-                        return NextResponse.json(
-                            { success: false, message: "File not found" },
-                            { status: 404 }
-                        );
-                }
-            }
-            const mime = fileName.endsWith(".png")
-                ? "image/png"
-                : fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")
-                    ? "image/jpeg"
-                    : fileName.endsWith(".pdf")
-                        ? "application/pdf"
-                        : fileName.endsWith(".json")
-                            ? "application/json"
-                            : "application/octet-stream";
-            const fileBuffer = fs.readFileSync(file.absolutePath);
-            return new NextResponse(fileBuffer, {
-                status: 200,
-                headers: {
-                    "Content-Type": mime,
-                    "Content-Disposition": `inline; filename="${fileName}"`,
-                },
-            });
-        }
-        if (userId && authenticate(request)) {
-            let assets = await prisma.assets.findMany({ where: { author: userId } });
-            return NextResponse.json({ success: true, assets });
-        }
-        // Otherwise, return all files
-        const files = getFiles(baseDir);
-        return NextResponse.json({ success: true, files });
-    } catch (error) {
-        console.log(error);
-        return NextResponse.json(
-            { success: false, error: error.message },
-            { status: 500 }
-        );
-    }
-}
-
 export async function POST(request) {
-    if (!authenticate(request)) return unauthorized();
+  try {
+    const payload = await authenticate(request);
+    if (!payload?.userId) {
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+    }
+    if (!(await verifyAdmin(request))) {
+      return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+    }
+
     const { searchParams } = new URL(request.url);
     const type = Number(searchParams.get("type"));
-    const fileNameWith = searchParams.get("namePath");
-     const orderId = searchParams.get("orderId");
-    const userId = await getUserId(request);
-    if (!userId || ! orderId) {
-        return NextResponse.json({ error: "Invalid parameters" }, { status: 400 });
+    const documentType = searchParams.get("namePath");
+    const orderId = Number(searchParams.get("orderId"));
+    if (![1, 2, 3].includes(type) || !Number.isInteger(orderId) || orderId < 1) {
+      return NextResponse.json({ error: "Invalid upload parameters" }, { status: 400 });
     }
-    if (verifyAdmin(request) && type)
-        try {
-            // Parse multipart form data
-            const formData = await request.formData();
-            const file = formData.get("file");
-            if (!file || typeof file === "string") {
-                return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
-            }
+    const order = await prisma.order.findUnique({ where: { id: orderId }, select: { id: true } });
+    if (!order) return NextResponse.json({ error: "Order not found" }, { status: 404 });
 
-            const dir = type === 1 ? path.join(process.env.FILE_PATH, "/uploads") : type === 2 ? path.join(process.env.FILE_PATH, "/invoice") : path.join(process.env.FILE_PATH, "/private");
-            // Create unique filename
-            const bytes = await file.arrayBuffer();
-            const buffer = Buffer.from(bytes);
-            let fname = file.name;
-            fname = fname.replace(/\s+/g, '');
-            let fileName = `${Date.now()}-${fname}`;
-            const extension = fname.substring(fname.lastIndexOf('.'));
-            fileName = fileNameWith == "transport" ? `performa-transportReport${orderId}` + extension : fileNameWith == "delivery" ? `performa-delivery${orderId}` + extension : 'performa-' + fileName;
-            const filePath = path.join(dir, fileName);
-            // Save file
-            await writeFile(filePath, buffer);
-            let asset;
+    const formData = await request.formData();
+    const file = formData.get("file");
+    if (!file || typeof file === "string") {
+      return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      return NextResponse.json({ error: "File must be smaller than 10 MB" }, { status: 413 });
+    }
 
-            // Public URL (relative to /public)
-            const publicPath = type == 1 ? `/` + "uploads" + `/${fileName}` : type == 2 ? "invoice" + `/${fileName}` : `/` + "private" + `/${fileName}`;
-            asset = await prisma.assets.create({
-                data: {
-                    name: fileName,
-                    type: type == 1 ? "public" : "private",
-                    path: publicPath,
-                    author: userId.toString(),
-                    tag: fileName
-                },
-            });
-            return NextResponse.json({
-                message: "File uploaded successfully",
-                path: publicPath,
-                assetId: asset ? asset.id : "",
-                url:"https://api.eazysupplies.com/api/file?userId=" + userId + "&file=" + fileName
-            });
-        } catch (error) {
-            console.log("File upload error:", error);
-            return NextResponse.json({ error: "Upload failed" }, { status: 500 });
-        }
+    const root = process.env.FILE_PATH || path.join(process.cwd(), "public");
+    const folder = type === 1 ? "uploads" : "private";
+    const dir = path.join(root, folder);
+    fs.mkdirSync(dir, { recursive: true });
+
+    const originalName = path.basename(file.name).replace(/[^a-zA-Z0-9._-]/g, "");
+    const extension = path.extname(originalName).toLowerCase();
+    const allowedExtensions = new Set([".pdf", ".png", ".jpg", ".jpeg", ".webp"]);
+    if (!allowedExtensions.has(extension)) {
+      return NextResponse.json({ error: "Unsupported file format" }, { status: 400 });
+    }
+    const prefix = documentType === "transport"
+      ? "performa-transportReport"
+      : documentType === "delivery"
+        ? "performa-delivery"
+        : `performa-order-${orderId}-${Date.now()}`;
+    const fileName = documentType === "transport" || documentType === "delivery"
+      ? `${prefix}${orderId}${extension}`
+      : `${prefix}${extension}`;
+    await writeFile(path.join(dir, fileName), Buffer.from(await file.arrayBuffer()));
+
+    const userId = await getUserId(request);
+    const publicPath = `/${folder}/${fileName}`;
+    const existing = await prisma.assets.findFirst({ where: { name: fileName } });
+    const asset = existing
+      ? await prisma.assets.update({ where: { id: existing.id }, data: { path: publicPath, author: String(userId), type: "private" } })
+      : await prisma.assets.create({
+          data: { name: fileName, type: "private", path: publicPath, author: String(userId), tag: fileName },
+        });
+
+    return NextResponse.json({
+      message: "File uploaded successfully",
+      path: publicPath,
+      assetId: asset.id,
+      url: `https://api.eazysupplies.com/api/file?file=${encodeURIComponent(fileName)}`,
+    });
+  } catch (error) {
+    console.error("File upload error:", error);
+    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+  }
 }
