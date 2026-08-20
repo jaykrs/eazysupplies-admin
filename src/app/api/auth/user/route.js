@@ -111,9 +111,23 @@ export async function POST(request) {
     if (gstn) existingUser1 = await prisma.user.findFirst({ where: { gstn } });
     if (phone) existingUser2 = await prisma.user.findFirst({ where: { phone } });
 
-    if (existingUser || existingUser1 || existingUser2) {
+    const conflicts = [];
+    if (existingUser) conflicts.push("email address");
+    if (existingUser1) conflicts.push("GST number");
+    if (existingUser2) conflicts.push("phone number");
+
+    if (conflicts.length) {
+      const lastConflict = conflicts.pop();
+      const conflictLabel = conflicts.length
+        ? `${conflicts.join(", ")} and ${lastConflict}`
+        : lastConflict;
+
       return NextResponse.json(
-        { message: existingUser ? MESSAGES.USER_EXISTS_EMAIL : existingUser1 ? MESSAGES.USER_EXISTS_GSTN : existingUser2 ? MESSAGES.USER_EXISTS_PHONE : NULL},
+        {
+          error: "Account details already registered",
+          message: `An account already exists with this ${conflictLabel}. Please use different details or log in.`,
+          conflicts: [...conflicts, lastConflict],
+        },
         { status: 409 }
       );
     }
