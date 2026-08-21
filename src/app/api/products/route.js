@@ -56,15 +56,47 @@ export async function GET(request) {
       } : {}),
     };
 
-    const [products, total] = await Promise.all([
-      prisma.product.findMany({
+    let products;
+    let total;
+
+    if (isStorefrontRequest) {
+      // Product imports can contain multiple database rows for the same SKU.
+      // Build the storefront page from the globally de-duplicated, sorted ID
+      // list so a duplicate cannot reappear on a later page and pagination
+      // totals describe what shoppers can actually see.
+      const productKeys = await prisma.product.findMany({
+        where,
+        select: { id: true, sku: true },
+        orderBy: { [sortField]: sortDirection },
+      });
+      const seenProductKeys = new Set();
+      const uniqueProductIds = productKeys.reduce((ids, product) => {
+        const normalizedSku = product.sku?.trim()?.toLowerCase();
+        const key = normalizedSku || `id:${product.id}`;
+        if (!seenProductKeys.has(key)) {
+          seenProductKeys.add(key);
+          ids.push(product.id);
+        }
+        return ids;
+      }, []);
+      const pageIds = uniqueProductIds.slice((page - 1) * perPage, page * perPage);
+      const pageProducts = pageIds.length
+        ? await prisma.product.findMany({
+            where: { id: { in: pageIds } },
+            include: { category: true, brand: true },
+          })
+        : [];
+      const productById = new Map(pageProducts.map((product) => [product.id, product]));
+      products = pageIds.map((id) => productById.get(id)).filter(Boolean);
+      total = uniqueProductIds.length;
+    } else {
+      products = await prisma.product.findMany({
         where,
         include: { category: true, brand: true },
         orderBy: { [sortField]: sortDirection },
-        ...(isStorefrontRequest ? { skip: (page - 1) * perPage, take: perPage } : {}),
-      }),
-      prisma.product.count({ where }),
-    ]);
+      });
+      total = products.length;
+    }
     const tax = await prisma.tax.findMany();
 
     const allSupplierIds = products
