@@ -7,9 +7,8 @@ const prisma = new PrismaClient();
 
 export async function GET(request) {
     try {
-        // Authenticate user
         const payload = await authenticate(request);
-        if (!payload) {
+        if (!payload || !(await verifyAdmin(request))) {
             return NextResponse.json({ error: MESSAGES.UNAUTHORIZED }, { status: 401 });
         }
 

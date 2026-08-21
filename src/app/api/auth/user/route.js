@@ -69,7 +69,6 @@ export async function GET(request) {
     role: true, // will include related Role object
     orders: true, // will include related Orders
     cart: true,
-    otp: true,
     payments: true,
     createdAt: true,
     updatedAt: true,
