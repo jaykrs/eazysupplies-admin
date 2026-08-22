@@ -23,36 +23,37 @@ const Login = () => {
   const router = useRouter();
 
   const handleLogin = async (email, password) => {
+    setShowBoxMessage();
     try {
       if (email === "" || password === "") {
-        return alert("email or password is missing!");
+        setShowBoxMessage("Email and password are required.");
+        return;
       }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        return alert('enter valid email');
+        setShowBoxMessage("Enter a valid email address.");
+        return;
       }
       const res = await axios.post('/api/auth/login_auth', {
         email: email,
         password: password
       }, { withCredentials: true });
       if (res.status == 200) {
-        alert('login success!');
         router.push('/dashboard');
       } else {
-        alert("login failed!");
+        setShowBoxMessage("Login failed. Please check your credentials and try again.");
       }
     } catch (err) {
-      console.log(err);
-      if (err.status == 401 && err.response.data.error == "User is not active") {
-        alert("your account is inactive, please verify to proceed!");
+      const status = err?.response?.status;
+      const serverMessage = err?.response?.data?.error || err?.response?.data?.message;
+      if (status === 401 && serverMessage === "User is not active") {
+        setShowBoxMessage("Your account is inactive. Complete verification to continue.");
         localStorage.setItem('email', email);
         router.push(`/auth/otp-verification`);
-      } else if (err.status == 401) {
-        alert(err.response.data.error);
+      } else if (status === 401) {
+        setShowBoxMessage(serverMessage || "The email or password is incorrect.");
+      } else {
+        setShowBoxMessage(serverMessage || "The server could not complete the login. Please try again.");
       }
-      else {
-        alert(err);
-      }
-
     }
   }
 
