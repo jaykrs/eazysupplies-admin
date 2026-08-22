@@ -12,6 +12,8 @@ const PUBLIC_ROUTES = [
   "http://localhost:3000",
   "http://eazysupplies.com",
   "https://eazysupplies.com",
+  "http://www.eazysupplies.com",
+  "https://www.eazysupplies.com",
   "http://api.eazysupplies.com",
   "https://api.eazysupplies.com"
 ];
