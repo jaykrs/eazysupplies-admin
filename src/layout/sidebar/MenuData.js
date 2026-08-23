@@ -9,6 +9,13 @@ const MENUITEMS = [
     type: "link",
   },
   {
+    title: "Earthling Homepage",
+    displayTitle: "Earthling Homepage",
+    icon: <RiWindowLine />,
+    path: "/earthling-home",
+    type: "link",
+  },
+  {
     title: "Users",
     displayTitle: "Users",
     icon: <RiContactsLine />,
